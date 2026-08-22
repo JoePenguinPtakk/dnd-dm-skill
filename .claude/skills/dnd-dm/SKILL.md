@@ -60,7 +60,7 @@ When boot completes, before the opening scene, emit one compact block:
 ```
 BOOT · <campaign name>
 TIER/BUILD: v5-<X> <build stamp, copied from the header you actually read>
-DRIFT: <pinned build vs current HEAD, or "not checked, engine repo not present">
+SOURCE: engine HEAD · <stale campaign copy overwritten: <filename> | no stale copy found>
 LAYERS: master=<filename> · charter=<filename|absent> · mechanics=<filename|absent> · save=<filename|absent>
 ENGINE: <path to roll.py> · test → <verbatim output of one real roll>
 ```
@@ -78,7 +78,7 @@ never holds live campaign state.
 
 | Campaign | Local path | Shape |
 |---|---|---|
-| Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Documents/GitHub/Fallen-Titans-Campaign` | flat: layers and saves at the repo root, carries its own pinned master prompt |
+| Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Documents/GitHub/Fallen-Titans-Campaign` | flat: layers and saves at the repo root, carries a stale master-prompt copy (overwrite it, §2) |
 | Waterdeep: Dragon Heist (Rhogast / Oliver / Roy / Moss) | `~/Documents/GitHub/WaterDeepCamapaign` | foldered: `saves/`, `tables/`, plus its own play material |
 
 **Layouts differ between campaigns, and that is expected.** Do not assume one
@@ -102,7 +102,7 @@ Filenames vary; roles do not. Resolve each layer by what it *does*:
 
 | # | Role | Where to look | Known names |
 |---|---|---|---|
-| 1 | **Master prompt** (the engine: rules of play, no story, no state) | campaign repo root first, then engine repo `docs/` | `master-prompt-v5-*.md`, `MASTER_PROMPT_v5-*_HEAD.md` |
+| 1 | **Master prompt** (the engine: rules of play, no story, no state) | engine repo `docs/`, always | `MASTER_PROMPT_v5-*_HEAD.md` |
 | 2 | **Charter** (tone + quest-model lens; no mechanics, no state) | campaign repo | `*CHARTER*.md` |
 | 3 | **Mechanics reference / house rules** (durable campaign dice rulings) | campaign repo | `*MECHANICS*.md`, `HOUSE_RULES.md` |
 | 4 | **Save state** (all current state) | campaign repo, newest file | `*save*.md`, `saves/SAVE_S<n>_*.md` |
@@ -113,23 +113,78 @@ loading it. A different family targets a different runtime and its boot
 contract is not the one written here, so booting it from these instructions
 would be guessing at a machine you have not read.
 
-**The campaign's own copy always wins.** If a campaign repo carries its own
-master prompt, that is the build the campaign is running, deliberately: it
-pins the rules so an engine-side edit cannot silently change a live game
-mid-campaign. Load the campaign's copy, not the engine HEAD.
+### Tier menu (offer it only when the tier is unknown, or when asked)
 
-**But check drift, and report it.** Compare the campaign's pinned build stamp
-against the engine repo's HEAD stamp and put both on the boot receipt.
-Migrating is the user's decision and never yours (§11 treats a tier/build
-change as a deliberate migration), but an undetected old pin means you are
-enforcing rules that were fixed weeks ago, and a stale pinned copy can even
-contradict itself where a later build resolved that conflict. Report the two
-stamps, name the delta if you can see it, and let the user decide.
+Tier is normally not a choice: a campaign records which tier letter it runs,
+and you load the engine HEAD for that letter. Present the menu in exactly two
+cases, and in no others:
 
-Do **not** record any specific campaign's drift in this file. This is the
+1. The campaign's tier is not recorded anywhere you can read (a new campaign,
+   or one whose README never named it).
+2. The user explicitly asks to pick, switch, or compare tiers.
+
+When it applies, list the engine repo HEADs and stop for an answer. Do not
+pick for the user, and do not start a session off a tier you selected
+yourself. The four HEADs live in the engine repo's `docs/`:
+
+| Pick | File | Runs best on | What differs |
+|---|---|---|---|
+| 1 | `MASTER_PROMPT_v5-O_HEAD.md` | Opus tier | Lightest enforcement surface. Assumes the runtime holds long instructions without reminders. |
+| 2 | `MASTER_PROMPT_v5-S_HEAD.md` | Sonnet tier | The canonical middle build, and the default answer when the user has no preference. |
+| 3 | `MASTER_PROMPT_v5-H_HEAD.md` | Haiku tier and smaller | Heaviest enforcement. Full 15-point self-check every send, Five Laws restated at boot. Redundancy is the feature. |
+| 4 | `MASTER_PROMPT_v5-U_HEAD.md` | Any runtime with no code execution | Inverts Law 4: the DM rolls nothing, the players roll every die. Not a downgrade, see §3. |
+
+Two constraints on what you are allowed to offer:
+
+- **The mechanics are identical across all four.** §0 to §10 are byte-identical;
+  only the header, the §10-bis self-check, and the §11 boot sequence differ.
+  Never describe a tier as having more or fewer rules, better combat, or a
+  richer world. It is an enforcement-weight choice, nothing else.
+- **Capability overrides preference.** If `roll.py` cannot execute here, pick 4
+  is the only valid answer regardless of which model is running, and you say so
+  rather than offering the other three. Conversely, do not push a user onto
+  v5-U just because they are on a small model; that is what v5-H is for.
+
+Once the user picks, record the **tier letter** in that campaign's `README.md`,
+not a copy of the file, so the next boot loads that tier's engine HEAD and never
+sees this menu again. A tier change on an existing campaign is a migration, not
+a menu (§11).
+
+**The engine HEAD always wins. A campaign-local copy has no authority.** If a
+campaign repo carries its own master prompt, that copy is stale by definition:
+it is a photograph of the engine on some past day, and every fix, every patched
+vulnerability and every resolved self-contradiction landed after it was taken
+is missing from it. Load `docs/MASTER_PROMPT_v5-<tier>_HEAD.md` from the engine
+repo, always, and never boot a session off a campaign-local copy.
+
+**Overwrite the stale copy, do not preserve it.** When you find a campaign-local
+master prompt, replace it with the current engine HEAD for that campaign's tier
+and say so on the boot receipt. It is a cache, not a pin, and a cache that
+disagrees with the engine is simply wrong. Do not maintain it as an alternate
+build, do not offer to keep it, and do not ask which of the two to trust: the
+engine HEAD is the answer.
+
+What a campaign repo legitimately owns is its **tier letter**, its charter, its
+house rules and its saves. Those are campaign state. The rules of play are not,
+and a campaign does not get a private fork of the engine by leaving an old file
+lying around.
+
+**There is no fallback to the stale copy, ever.** The engine repo sits on the
+same machine as this skill: if you can read these instructions you can read
+`docs/`, so "the HEAD was not available" is not a real state. If the HEAD is
+genuinely missing, something is broken on disk. Say that and stop. Do not boot
+a session off the local copy to keep the night moving.
+
+**This skill overrides any master prompt that does not match it.** A file on
+disk that disagrees with the engine HEAD is not a second opinion and not a
+variant build. It loses. Replace it with a copy of the HEAD for that campaign's
+tier, byte for byte, and leave nothing of the old one behind: no `.bak`, no
+`_old`, no `__dup2` sibling, no commented-out remnant. If the tier is not
+recorded anywhere, the menu above decides it before you copy, not the dead file.
+
+Do **not** record any specific campaign's build state in this file. This is the
 universal layer; a dated finding here is state, it is wrong the moment either
-side moves, and a stale warning about staleness is worse than none. The
-finding belongs in that campaign's own README and in `CHANGELOG.md`.
+side moves. That belongs in the campaign's own `README.md` and in `CHANGELOG.md`.
 
 **Layer precedence, always:** master prompt → charter → mechanics reference →
 save. A charter's tone never overrides the dice. A house ruling never
