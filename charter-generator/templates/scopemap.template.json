@@ -1,0 +1,29 @@
+{
+  "__template__": "Hand-authored judgment layer (the overseer's piece). The generic generator joins this to the module's section-index JSON to emit the manifest. Getting scope wrong is the expensive error, so this is authored, not inferred. Replace every <angle-bracket> and delete the __*__ notes. See ../SPEC_module-charter-generator.md.",
+  "module": "<Module name>",
+  "system": "D&D 5E",
+  "authored": "<date, author>",
+
+  "__location_groups__": "One entry per location-group key PREFIX in the module's section index (e.g. all keys G1..G19 share prefix 'G'). scope_tag is one of: core (all playthroughs) | branch:<id> (one fork of a pick-one branch) | villain:<id> (a specific main-villain compound) | toolbox (dip-in reference, always available).",
+  "location_groups": {
+    "<PREFIX>": {"name": "<Location name>", "chapter": "<n>", "scope_tag": "core", "role": "<one-line what this place is>"}
+  },
+
+  "__scope_rules__": "The module's own pick-one exclusivity rules. Each rule assigns which tagged content is in scope for a given campaign choice. villain_choice and ch1_branch are examples; name them to fit the module.",
+  "scope_rules": {
+    "villain_choice": {
+      "source": "<book page / rule that states the pick-one villain design>",
+      "pick": 1,
+      "options": {
+        "<villain-id>": {"season": "<optional season binding>", "in_scope_tag": "villain:<villain-id>"}
+      }
+    }
+  },
+
+  "always_in_scope_tags": ["core", "toolbox"],
+
+  "__npcs__": "The module's named cast. scope mirrors a scope_tag. audit_footprint is optional (true/false/null) and only matters when validating against a prior run. location_group is optional.",
+  "npcs": [
+    {"name": "<NPC name>", "scope": "core", "audit_footprint": null, "location_group": "<PREFIX or omit>"}
+  ]
+}

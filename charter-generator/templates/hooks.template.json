@@ -1,0 +1,13 @@
+{
+  "__template__": "Content hooks: natural entry paths per keyed area. Raw material for the DM, never a script. Author the high-value and easily-skipped areas first (the rooms a party resolves the objective without ever seeing); the rest fill in incrementally. Trigger types: proximity, npc_mention, faction_move, downtime, rumor, sensory. Replace every <angle-bracket> and delete the __*__ notes. See ../SPEC_module-charter-generator.md.",
+  "module": "<Module name>",
+  "authored": "<date, author>",
+
+  "__by_area__": "Keyed by the module's area key (e.g. 'G11'). One or two hooks each. A hook is a situation with an implication that lets the DM surface this area without railroading.",
+  "by_area": {
+    "<AREA_KEY>": [
+      {"trigger": "proximity", "hook": "<a situation with an implication that pulls the party into this area naturally>"},
+      {"trigger": "npc_mention", "hook": "<an alternate entry path, e.g. an NPC references this place>"}
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "__template__": "The main-quest spine: the module's authored throughline as ordered, gated stages. Exactly one stage is live at a time; the story advances only when a stage's exit_condition resolves. This is a directed sandbox, not a rail. Replace every <angle-bracket>, add as many stages as the module's arc needs, and delete the __*__ notes. See ../SPEC_module-charter-generator.md.",
+  "module": "<Module name>",
+  "authored": "<date, author>",
+
+  "__stages__": "live_content lists location-group PREFIXES from the scopemap that become surfaceable while this stage is live. The literal token 'villain' resolves to whichever villain-tagged groups the campaign chose. spine_hooks pull toward the NEXT beat (distinct from content hooks, which flesh out the current one). In npcs, the literal '__chosen_villain__' resolves to the chosen villain's name.",
+  "stages": [
+    {
+      "id": "<s0-short-slug>",
+      "order": 0,
+      "title": "<Stage title>",
+      "chapter": "<n>",
+      "objective": "<the dramatic goal that defines this stage>",
+      "entry_gate": "<what makes this stage become live; 'campaign start' for stage 0>",
+      "exit_condition": "<what resolves this stage and opens the next>",
+      "live_content": ["<PREFIX>"],
+      "spine_hooks": [
+        "<a hook that pulls the party toward the next beat>"
+      ],
+      "npcs": ["<NPC name>"]
+    },
+    {
+      "id": "<s1-short-slug>",
+      "order": 1,
+      "title": "<Stage title>",
+      "chapter": "<n>",
+      "objective": "<...>",
+      "entry_gate": "<prior stage resolved + trigger>",
+      "exit_condition": "<...>",
+      "live_content": ["<PREFIX>", "villain"],
+      "spine_hooks": ["<...>"],
+      "npcs": ["__chosen_villain__"]
+    }
+  ]
+}
