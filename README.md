@@ -10,6 +10,13 @@ every project. Either way, keep `docs/MASTER_PROMPT_v5-*_HEAD.md` (and the
 charter/mechanics-reference files, if you want the bundled example) at the
 same relative path alongside it — `SKILL.md` reads them by relative path.
 
+**First run / new campaign:** start at
+`.claude/skills/dnd-dm/GETTING_STARTED.md`. It is the setup interview an LLM
+runs the first time — deciding what to play (a published module or an emergent
+campaign), building or picking a charter, setting house rules, choosing a tier,
+and creating the campaign — before `SKILL.md` boots the master prompt and play
+begins. To build a charter from a published module, see `charter-generator/`.
+
 **This repo is a mirror, not the source of truth.** Design lineage, the
 CHANGELOG, the full engineering history, and all in-progress work happen in
 [JoePenguinPtakk/Building-a-Better-Prompt](https://github.com/JoePenguinPtakk/Building-a-Better-Prompt).

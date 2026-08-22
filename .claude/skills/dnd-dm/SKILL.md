@@ -73,6 +73,14 @@ and ask; do not run generic and do not invent tone or rulings to fill it.
 
 ## 1. Which campaign (ask if it is not obvious, never guess)
 
+**First time here, or nothing set up yet?** If this is a fresh install and no
+campaign exists on this machine, do not guess a campaign from the table below —
+those rows describe the machine this skill was authored on, not necessarily this
+one. Go to `GETTING_STARTED.md` (a sibling of this file): it walks the user
+through choosing what to play, building or picking a charter, setting house
+rules, and creating the campaign, then returns here to boot. Come back to this
+section once a campaign actually exists.
+
 Campaigns each live in their own repo. The engine repo (this skill's home)
 never holds live campaign state.
 
