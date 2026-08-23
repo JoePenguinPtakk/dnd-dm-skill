@@ -289,7 +289,7 @@ This section exists because these are your characteristic failure modes. Apply i
 - **Established scope is fixed (the symmetry rule, §0).** A fact the dice, the save, or an authorized campaign layer established is held at its established scope — neither doubted and walked back under anti-invention scruple, nor inflated past its established size for weight. Running authorized canon faithfully is not fabrication; shrinking real canon and swelling a local fact into a setting-level one are equal and opposite failures.
 - **Consequences are witnessed, never ambient (no scold).** A consequence needs a traceable in-fiction cause — a specific person who saw or suffered something, a stated mechanism — exactly as a continuity fact needs a roll. "The world turns cold toward you," a stranger's unearned disapproval, an NPC dropping their own nature to deliver a lecture, a sudden grim turn keyed to the party's morality: these are ambient moral payback with no witnessed cause, and they are fabrication in the same family as inventing furniture (§0 scold reflex). Affinity and faction standing move only on what was actually witnessed or evidenced, 1:1 — never because the party "deserved" it.
 - **Timeline integrity.** Before introducing any NPC/force at a location, verify they could plausibly *be* there given established travel times and directions. A force fleeing north cannot intercept the party to the south without an established mechanism.
-- **Roll chains are batched into ONE call.** A generative chain — disturbance d20 → content d100 → quest-link d6 → intersection d20 — is resolved as a **single batched resolution returning all four labeled values** — **(O/S/H — code engine):** one code-engine invocation; **(Universal — no engine):** one `REQUIRED ROLLS` request listing all four dice together, resolved when the player reports them, printed as one line: `CHAIN: disturbance d20=14 · content d100=37 · quest-link d6=2(ambient) · intersection d20=15`. The name-generation five-roll sequence (§17) is likewise one call, all five rolls labeled. A model cannot echo a number it has not yet generated, so batching makes the echo-fabrication fingerprint (one roll matching its chain-mate) structurally impossible; a chain printed as separate hand-narrated numbers, or missing the `CHAIN:`/name-roll line, is **malformed**. Read each value against its own table (a quest-link 3 at 0–1 active quests is *ambient*, not quest-linked — read the row, do not route to plot by preference).
+- **Roll chains are batched into ONE call.** A generative chain — nature d6 → content d100 → environment d12 → intersection d20 — is resolved as a **single batched resolution returning all four labeled values** — **(O/S/H — code engine):** one code-engine invocation; **(Universal — no engine):** one `REQUIRED ROLLS` request listing all four dice together, resolved when the player reports them, printed as one line: `CHAIN: nature d6=2(ambient) · content d100=37 · environment d12=8 · intersection d20=15`. The name-generation five-roll sequence (§17) is likewise one call, all five rolls labeled. A model cannot echo a number it has not yet generated, so batching makes the echo-fabrication fingerprint (one roll matching its chain-mate) structurally impossible; a chain printed as separate hand-narrated numbers, or missing the `CHAIN:`/name-roll line, is **malformed**. Read each value against its own table (a quest-link 3 at 0–1 active quests is *ambient*, not quest-linked — read the row, do not route to plot by preference).
 
 ---
 
@@ -528,7 +528,7 @@ VITALS — HP: M27/27 S25/25 | Rations: 5 | Ammo: 22 arrows | Light: daylight | 
 ```
 (Adapt fields to the party. Always include: per-PC HP, rations, ammo/charges in use, light source/state, in-game day+time.)
 
-**Collapsed block** (below the VITALS strip, out of combat) shows: location/terrain (with Disturbance DC), active quest + stage, NPCs present with Affinity, PENDING ROLLS, and the `DM ROLLS THIS RESPONSE` log. Full party sheets are *not* re-rendered out of combat — but any value that changed this turn is shown inline.
+**Collapsed block** (below the VITALS strip, out of combat) shows: location/terrain (with environment tag), active quest + stage, NPCs present with Affinity, PENDING ROLLS, and the `DM ROLLS THIS RESPONSE` log. Full party sheets are *not* re-rendered out of combat — but any value that changed this turn is shown inline.
 
 **Why the strip exists:** Many models track only what re-renders in front of them. The cadence (§5) is the *decrement clock*; the VITALS strip is the *visibility rail*. Without the strip, resources are invisible between cadence beats and get improvised when the beat finally tries to decrement them. The strip is the minimum surface that keeps the decrement engine from being blind.
 
@@ -846,36 +846,36 @@ header (whose turn) → fiction → mechanics → consequence → COMBAT STATE �
 
 ## 5. THE DAY: THREE PHASES + UPKEEP AUDIT (frame, not checklist)
 
-The day is three **phases** — Morning, Afternoon, Evening/Night — each an **open block of player-driven time**, not a scene to be discharged. Within a phase the player acts freely (explore, pursue their own goals, talk to NPCs, investigate) for as long as they want. The DM rolls **one disturbance check per phase**, and that check determines only *whether* the world intrudes on the block — not that a scene must happen.
+The day is three **phases** — Morning, Afternoon, Evening — each an **open block of player-driven time**, not a scene to be discharged. Two real-hours of play ≈ one in-game day. A day targets **6–8 encounters total, with content rolls supplying half or more and the rest generated by the party's own choices, roleplay, and exploration.** This is a texture target read in hindsight, never a quota chased in the moment — padding toward it with extra forced rolls, or rushing organic scenes to clear room for the next one, is the exact failure the rule below exists to stop. Night is a separate system — §5-bis.
 
-**THE ANTI-RUSH RULE (read literally — this is the load-bearing instruction):** The disturbance check is a single die that decides whether the current phase is interrupted. It is **not** a scene you must play. Do **not** chain the three phase-checks into three back-to-back scenes. Do **not** advance the day to clear pending checks. A phase with no triggered disturbance is still a full phase of player time — narrate the passage of those hours and let the player fill them. The day is not a slave to the dice.
+**THE ANTI-RUSH RULE (read literally — this is still the load-bearing instruction):** content now fires on a fixed schedule (below), not a probability gate — but that changes only *when* a roll happens, never what it obligates. A firing is a roll, not a mandatory scene: a low-key band result (§6) is texture, not a summons to stop and perform something. Do **not** chain phase firings into three back-to-back forced scenes. Do **not** rush a player's own at-will time to clear room for the next firing. The day is not a slave to the dice, and there is no rush to close it and open the next one — 6–8 encounters across a full day of real-time play is the intended pace, not a grind to clear.
 
-**How a phase ends:** when the player signals they're done with the block ("let's move on," "end the morning"), **or** when play lulls and the DM asks: "Ready to move to the afternoon, or is there more you want to do?" The player always gets the last word on whether the block is finished. **The day advances only after the night phase AND the player has taken their evening** — never the instant the night die is rolled.
+**How a phase ends:** when the player signals they're done with the block ("let's move on," "end the morning"), **or** when play lulls and the DM asks: "Ready to move to the afternoon, or is there more you want to do?" The player always gets the last word on whether the block is finished. **The day advances only after the evening phase AND the player has taken their evening** — never the instant a roll lands.
 
 **At each phase, in this order:**
-1. **Disturbance check** — player rolls d20 vs terrain Disturbance DC. Below DC → disturbance triggers. At or above → no intrusion; the phase is quiet player time.
-2. **If triggered, decide its nature (quest-linked vs. ambient)** — roll d6, threshold sliding by number of active quests (major + minor):
+1. **Content firing — automatic, not gated.** One firing at the open of each phase, guaranteed. **No roll decides whether it happens** — that question (the old d20-vs-terrain-DC disturbance check) is retired. What's rolled is only *what kind* (§6), never *whether*. **A phase with more than 1 in-game hour of travel fires a second time.**
+2. **Nature roll (d6)** — quest-linked vs. ambient, threshold sliding by number of active quests (major + minor):
    - 0–1 active quests: 1–5 ambient / 6 quest-linked
    - 2–3 active quests: 1–3 ambient / 4–6 quest-linked
    - 4–5 active quests: 1–2 ambient / 3–6 quest-linked
    - 6+ active quests: 1 ambient / 2–6 quest-linked
 
-   **Quest-linked** → route into an active quest's Stage beat (feeds milestone XP, §6). **Ambient** → run the normal content→intersection chain (§6) for world-texture, no quest obligation. (So a day yields a mix: quest beats, ambient color, and quiet phases — the three-way day.)
+   **Quest-linked** → route into an active quest's Stage beat (feeds milestone XP, §6). **Ambient** → run the content→environment→intersection chain (§6) for world-texture, no quest obligation.
 
-**Don't let calm decay into a menu treadmill.** When several consecutive exchanges have been pure navigation — the player picking options with no roll-driven consequence landing — the world has gone too quiet. On the next phase boundary, run the disturbance check live (do not soft-skip it); if it fires, let the content→intersection chain hand the player something to *react* to, not merely choose between. The loop's fun lives in the reaction beat — something goes sideways and the player responds — not in the menu itself. A menu with no live world behind it is a form; a menu with a disturbance clock ticking behind it is a game. Bias toward keeping that clock turning during lulls.
-3. **UPKEEP AUDIT (always, triggered or not — this stays bolted to the phases):**
-   - **Rations:** 1/day per person — decrement by party size at the **night** phase (e.g. −2 for a 2-PC party). NPC-provided meals do not draw from the pool. If rations hit 0 → the **starvation clock** runs, and it is a real number, not a gesture: a creature goes **1 + its Constitution modifier days** (minimum 1) without food before starving, then gains **1 level of Exhaustion per further day**, and that Exhaustion does not clear until it eats a full day's food. Water is harsher — a day on half water is a **DC 15 Constitution save** or 1 Exhaustion; a day on none is automatic. Run the clock; never improvise the consequence.
+**A low-key result is not a blank, and it isn't an obligation either.** Two of the four content bands (§6) already read as ambient/low-stakes — a firing that lands there is how "not much happened, keep exploring" survives now that the old quiet-phase blank is gone. Narrate it as texture the player can pick up or let pass, never as a scene that must be played out in full.
+3. **UPKEEP AUDIT (always, every firing — this stays bolted to the phases):**
+   - **Rations:** 1/day per person — decrement by party size at the **evening** phase (e.g. −2 for a 2-PC party). NPC-provided meals do not draw from the pool. If rations hit 0 → the **starvation clock** runs, and it is a real number, not a gesture: a creature goes **1 + its Constitution modifier days** (minimum 1) without food before starving, then gains **1 level of Exhaustion per further day**, and that Exhaustion does not clear until it eats a full day's food. Water is harsher — a day on half water is a **DC 15 Constitution save** or 1 Exhaustion; a day on none is automatic. Run the clock; never improvise the consequence.
    - **Ammo:** reconcile arrows/bolts spent this phase against the VITALS strip.
    - **Charges/slots:** tick any time-based recharge (short/long rest schedules).
    - **Light:** decrement torch/lantern duration; flag if light will fail before next phase.
-   - **Time:** advance time-of-day; if night phase (and the player has taken their evening), advance the calendar day.
+   - **Time:** advance time-of-day; if evening phase (and the player has taken their evening), advance the calendar day and hand off to §5-bis for the night.
    - **Reconcile:** the VITALS strip must match the audit. If they disagree, the audit wins and you correct the strip — note the correction in `DM ROLLS THIS RESPONSE`.
 
-**Ration tracking is non-negotiable.** It was the resource that rotted hardest because nothing forced it. It is bolted to the night phase. Do not skip it — the upkeep audit runs at every phase even when the phase is quiet player time.
+**Ration tracking is non-negotiable.** It was the resource that rotted hardest because nothing forced it. It is bolted to the evening phase. Do not skip it — the upkeep audit runs at every phase.
 
 ---
 
-## 5-bis. SECURE REST (long rest is earned, not automatic — three gates)
+## 5-bis. SECURE REST & NIGHT WATCH (long rest is earned, not automatic)
 
 A long rest is not a free 8-hour reset. The party must establish a **Secure Rest**, which passes three gates in order. A short rest (1 hour, safe spot) is always available and is unaffected by this system.
 
@@ -898,11 +898,47 @@ Fail Gate 1 → short rests only; exhaustion accrues per RAW. This is correct an
 Concealment and Held ground are **always available to anyone who passes Gate 1** — they are the always-reachable floor; they answer to no faction. Sanctuary is the only route that standing can close, and it closes **only against a concretely wronged party with reach here** — not against a vague "bad" party. **At session start, reconcile each relevant faction/NPC's standing to what the party actually did** (razed a town last session → that town and its allies now refuse them; a settlement that never heard of them is unaffected). Standing is specific and 1:1 — it is not a meter.
 
 **GATE 3 — Cost (clean vs. risky + watch fatigue).** If a route is open:
-- **Sanctuary** → **clean** rest: full recovery, no roll.
-- **Concealment / Held ground** → recovery **under risk**: roll the night disturbance check (§5) **once** and reuse that single result as the interruption roll. **This is ONE roll, not two.** A secured night fires exactly one night-disturbance d20 against the location DC; its result is both the §5 night-content check and the §5-bis interruption test. Never roll a second independent d20 for "the rest" after the night-content roll — that double-roll is a known bug (it once ruled the same moors night both clear and interrupted). Triggered → rest interrupted (partial recovery, or a fight mid-rest); clear → clean recovery for this route's tier.
+- **Sanctuary** → **clean** rest: full recovery, no roll. Nothing below this gate runs — Sanctuary is a free pass.
+- **Concealment / Held ground** → recovery **under risk**, resolved by the **Night Watch system** below — a dedicated per-watch table, not a reused day roll.
 - **Thematic** → recovers per the campaign's HOUSE RULINGS definition.
 
-**WATCH FATIGUE (applies to Concealment / Held ground).** An 8-hour rest = 4 watch slots (~2 hr each). Count **watcher-equivalents**: each true party member = 1.0; each contingent-retinue NPC = 0.5. Need **≥ 2 watcher-equivalents** to cover the night on a clean rotation (everyone still gets ~6 hr sleep → full benefit). **Below 2** → someone stands a long watch → **reduced rest**: HP and Hit Dice recover, but exhaustion is **not** cleared and spell slots return at **half (round down, minimum 1 if any were spent)**. (A solo PC always rests reduced; a well-crewed ship at anchor — e.g. 1 party NPC + 2 retinue = 2.0 — rests clean. Loyal crew materially improves rest.)
+**WATCH FATIGUE (applies to Concealment / Held ground).** An 8-hour rest = 4 watch slots (~2 hr each). Count **watcher-equivalents**: each true party member = 1.0; each contingent-retinue NPC = 0.5. Need **≥ 2 watcher-equivalents** to cover the night on a clean rotation (everyone still gets ~6 hr sleep → full benefit). **Below 2** → someone stands a long watch → **reduced rest**: HP and Hit Dice recover, but exhaustion is **not** cleared and spell slots return at **half (round down, minimum 1 if any were spent)**. (A solo PC always rests reduced; a well-crewed ship at anchor — e.g. 1 party NPC + 2 retinue = 2.0 — rests clean. Loyal crew materially improves rest.) This number feeds the Night Watch system's escalation rule directly — one cause, two visible effects, not two unrelated rules.
+
+**NIGHT WATCH (deliberately not the day system).**
+
+**Scope — only where there's something to interrupt.** This system never runs for a Sanctuary rest (clean, no roll, above). It runs only for **Concealment** and **Held Ground.**
+
+**Structure — per watch, not per phase.** Roll fresh for each of the up to 4 watches the party actually keeps (Watch Fatigue's existing slots). Different die, different axis, different table from the day system on purpose — night is content *variety*, not a severity ladder that only escalates toward combat.
+
+**Night Watch Content (d20, roll once per watch):**
+
+| d20 | Result | Cost |
+|---|---|---|
+| 1–5 | **Quiet watch.** Nothing. | None |
+| 6 | **Strange dream.** Vivid, unsettling, possibly an omen — draws on an active quest thread if one fits, otherwise pure atmosphere. Whoever's asleep this watch gets it, not the whole party at once. | None |
+| 7 | **Weather or omen shift.** Fog rolls in, stars vanish, animals go silent, a chill with no source. Mood only. | None |
+| 8 | **Distant signal.** Smoke or fire on the horizon, a bell, a light where there shouldn't be one. A hook — the party may investigate (opens a normal scene) or let it pass. Not resolved by this roll alone. | None unless pursued |
+| 9 | **A cry for help, far off.** Same shape as Distant signal — off-camera, the party's choice whether to respond. | None unless pursued |
+| 10 | **Companion friction.** Requires 2+ present companions/NPCs — an argument or old tension surfaces between them. No qualifying companions present → reroll on this table. Pure roleplay, no threat. | None |
+| 11 | **Quiet personal beat.** A private character moment for a PC or companion — grief, memory, doubt — same precedent as the wild-card companion-moment rule (§6), given its own dedicated slot here. | None |
+| 12 | **Visited, not hostile.** Someone or something approaches the watch directly and it isn't a fight — a traveler asking to share the fire, a strange but harmless creature, a message-bearer. Gets a rolled identity (§6-bis naming, or a named RAW block if a creature) — same "never invent it" discipline as a threat, without the stat-block-and-tier requirement since it isn't combat. | None |
+| 13 | **Something missing, or something new.** Morning reveals a small mystery — an item gone, an object left behind, a footprint that shouldn't be there. Seeds the next day; no scene required tonight. | None |
+| 14–16 | **Close call.** The watcher is tested — one Perception/Stealth/Survival check. Success: nothing more. Failure: escalates to Breach, contained. | None on success |
+| 17–18 | **Breach, contained.** This watch's sleepers lose that watch's sleep-benefit; the camp doesn't fully wake. Cause is still rolled, not invented — one environment cast roll (§6-nonies) names it even though it doesn't escalate to a full encounter. | Reduced rest, this watch only |
+| 19 | **Breach, real.** Full interruption. Runs the **forced-specificity chain** below — never DM-narrated freehand. | Full interruption |
+| 20 | **Wild card.** Reroll on the campaign's existing wildcard intersection table — reused, not a new one. | Varies |
+
+**Escalation.** Below 2 watcher-equivalents (Watch Fatigue's own threshold, above), every watch this night rolls at **−3**.
+
+**Recovery mapping.** Only Breach-contained and Breach-real cost anything — everything else (dreams, hooks, social beats, mysteries, a harmless visitor, a resolved close call) is free. A night can produce a vivid dream, an overheard argument, and a distant fire on the horizon and still cost the party nothing mechanically — that's the design, not a loophole. Breach-contained applies Watch Fatigue's reduced-rest text (HP/Hit Dice recover, exhaustion not cleared, slots at half), scoped to who was actually asleep that watch. Breach, real is a full interruption — partial recovery, or a fight mid-rest, read on the fiction.
+
+**Breach, real — the forced-specificity chain (no hand-waving).** A threat that shows up at night gets the same discipline any named threat gets anywhere else in this engine (Law 3; §2's "if it wasn't generated by a roll or established prior fiction, it is an invention"; §7-bis's "you never make up HP, you pick a named RAW block") — every step below is a roll, none are DM discretion, and the DM does not narrate until all four are resolved:
+1. **Nature roll (d6)** — same table and thresholds as the day system (§5 step 2). Quest-linked or ambient is decided here, not felt out later.
+2. **Environment cast roll (d12, §6-nonies)** — names the *category*, reusing whichever terrain table is currently active. No separate night-only cast table.
+3. **Route by the nature roll:** **Quest-linked** → the active quest's next Stage beat (§6 Quests) — the threat *is* the quest's own material. **Ambient** → roll the intersection table the category implies (Antagonist Motivation, for anything combat-shaped, §6) — forces a *why*.
+4. **Identity roll — mandatory.** A name (§6-bis) or named RAW stat block, plus a tier (§7-bis/§8-bis), exactly as any new named threat requires. **A Breach, real result narrated with no stat block and no tier behind it is malformed** — the same standing as an unrolled consequence anywhere else in this engine.
+
+Per the §2 batching requirement, steps 1–4 resolve as **one batched call** — **(O/S/H — code engine):** a single code-engine invocation covering all four dice; **(Universal — no engine):** one `REQUIRED ROLLS` request listing all four together, resolved when the player reports them, printed as one line: `NIGHT CHAIN: watch d20=19(breach) · nature d6=4(ambient) · environment d12=8 · intersection d20=11`. Only after that line resolves does the DM narrate, and the narration must trace back to it.
 
 ---
 
@@ -917,11 +953,43 @@ Fast travel skips the disturbance engine — the very thing that generates the p
 
 If a live thread runs along the route, fast travel is off the menu — the road has content the party would be skipping. When all three hold, state it plainly: "Ten days of open country, nothing you know of between here and there — play it out, or fast-travel?"
 
-**Compression roll (one per leg):** roll for the number of **significant events** across the whole journey — **1d4 safe route / 1d6 normal / 1d8 hostile** — and state the die openly. For each event, run the **full content→intersection chain** (flat d100 → band → intersection roll) exactly as normal, but resolve it in **compressed narration**: a paragraph and at most one choice point, then move on. A surfaced **combat is a real encounter** — full XP and loot, and the party may choose to drop out of compression and play that fight in full detail. A surfaced event may be a **mind-incursion** (§8) — if so, fire the protocol fiction-first: the entity reaches into a PC on a rough watch, the player declares their anchor, the player rolls the save.
+**Event count (one calculation per leg) — scales with duration, capped:**
+
+> **Events = 3 per week of travel (round up, minimum 1), adjusted by route
+> danger** — safe route: −1 per 2 weeks (floor 1); hostile route: +1 per
+> week — **capped at 8.** A 3-day hop: 1 event. A 1-week trip on a normal
+> road: 3 events. A 2-week hostile trip: caps at 8. A multi-week trip to a
+> major new setting — rare by design, and already a long haul — caps at 8
+> regardless of road danger; past that point the leg needs breaking into
+> multiple fast-travel decisions, not more events crammed into one.
+
+State the calculation openly. **Route segmentation:** name the environment
+tags the route crosses before rolling ("4 days Suburban, 12 days Rural, 3
+days Forest, 2 days Urban approach") — each event's environment cast roll
+(§6-nonies) uses whichever tag applies to where that event falls in the
+day-count, so the journey visibly crosses real, varied territory rather than
+a featureless gap with a few random encounters bolted on.
+
+**Each event runs the full modern chain, nothing skipped for being
+compressed:** content roll (§6, flat d100 → band) → environment cast roll
+(d12, §6-nonies) → intersection roll (d20) → the forced-specificity chain
+(§5-bis) if it resolves as a real threat. Compression shortens the
+*narration* — a paragraph and at most one choice point, then move on — it
+never shortens the *dice*. A surfaced **combat is a real encounter** — full
+XP and loot, and the party may choose to drop out of compression and play it
+in full detail. A surfaced event may be a **mind-incursion** (§8) — if so,
+fire the protocol fiction-first: the entity reaches into a PC on a rough
+watch, the player declares their anchor, the player rolls the save.
+
+**Nights within the leg:** one compressed **Night Watch Content** roll
+(§5-bis) per elapsed night, at the worst applicable odds (the escalation
+penalty applies if watcher-equivalents are thin) — not four separate watch
+rolls. Secure Rest still governs recovery; a party fast-traveling through
+country with no safe rest still accrues exhaustion per the gates. You cannot
+fast-travel out of the rest economy.
 
 **Costs keep ticking — fast travel does not pause the world:**
 - **Rations:** decrement for the whole journey at once (days × party size). **This replaces the §5 per-night decrement for every day inside the leg — never charge both.** Ammo/light/charges per any surfaced combat.
-- **Secure Rest still governs nightly recovery (§5-bis).** A party fast-traveling through country with no safe rest **accrues exhaustion** per the gates — you cannot fast-travel out of the rest economy.
 - **Faction clock advances every elapsed day** (batched faction rolls). The antagonist's threads move while the party isn't watching; the party may arrive to a changed world.
 - **Calendar and time-sensitive threads** progress fully (deadlines, a dying NPC, a completing ritual).
 
@@ -951,18 +1019,18 @@ Feeds the §5 ration economy where water and time allow. **Trigger:** the party 
 
 **KARMA IS RETIRED.** There is no cosmic morality meter, no tier, no content-roll modifier. Morality is purely **relational** — Affinity per NPC and Ship Reputation per faction, measured 1:1 between the party and those they wrong or help. The content roll is a **flat d100** with a fixed distribution. The distribution *is* the design; nothing skews it. Never apply a Karma modifier to a content roll, and if a loaded save carries a stale Karma value, read it as a dead number, announce it once, and drop it (§11 boot).
 
-**Content roll table (flat d100 — no modifier, ever):**
+**Content roll table (interleaved d100 — no modifier, ever).** Bands alternate number by number across the full range instead of sitting in four contiguous blocks, so adjacent results almost never share an outcome. Read it by remainder: divide the roll by 4 (00 reads as 100).
 
-| d100 | Band | Outcome |
+| Remainder | Band | Outcome |
 |---|---|---|
-| 01–25 | **Nonviolent-confrontational** | A confrontation with no blades drawn — a demand, an accusation, a blocked path, a rival's claim, a tense negotiation. The pressure is social or situational, not martial. |
-| 26–50 | **Nonviolent-protective** | Something or someone needs aid or safeguarding — a discovery, a person in need, a cache to secure, an opportunity to help, a thread to pull. The beat rewards engagement, not violence. |
-| 51–90 | **A fight, in some fashion** | Combat surfaces — ambush, hostile patrol, predator, standoff that breaks, hard or medium threat. Resolve through the combat suite (§4). Fleeing may be honorable; the fight is real. |
-| 91–00 | **Wild card** | Anything off-pattern — a strange omen, an absurd encounter, a reversal, a coincidence the dice (not the DM) produced. Roll the wild-card intersection table; let it be genuinely unexpected. |
+| 1 | **Nonviolent-confrontational** | A confrontation with no blades drawn — a demand, an accusation, a blocked path, a rival's claim, a tense negotiation. The pressure is social or situational, not martial. |
+| 2 | **Nonviolent-protective** | Something or someone needs aid or safeguarding — a discovery, a person in need, a cache to secure, an opportunity to help, a thread to pull. The beat rewards engagement, not violence. |
+| 3 | **A fight, in some fashion** | Combat surfaces — ambush, hostile patrol, predator, standoff that breaks, hard or medium threat. Resolve through the combat suite (§4). Fleeing may be honorable; the fight is real. |
+| 0 | **A fight** on every multiple of four *except* the ten below, which are **Wild card** instead: `04 12 24 32 44 52 64 72 84 92`. | A fight: as above. Wild card: anything off-pattern — a strange omen, an absurd encounter, a reversal, a coincidence the dice (not the DM) produced. |
 
-Verified split: 25 / 25 / 40 / 10, full 1–100 coverage, zero gaps or overlaps. The bands remap to their d20 intersection tables below.
+Verified: 100 results, no gaps, no overlaps, 25 / 25 / 40 / 10 split. Wild cards land 8 or 12 apart and never adjacent. The bands remap to their d20 intersection tables below.
 
-**Chain on a triggered disturbance:** disturbance → content roll (**flat d100** → band) → intersection roll (d20 on the table the band maps to). All three are **player rolls in every tier**, per Law 3 — §4.5's dice-ownership sentence governs combat dice and does not reach this chain. All three are logged. Tone emerges from the *combination* — do not pick tone independently.
+**Chain on a content firing:** nature roll (§5) → content roll (**interleaved d100** → band) → **environment cast roll (d12, §6-nonies — the *who/what*, keyed to the current environment tag)** → intersection roll (d20 on the table the band maps to — the *why*). This is **world dice** — Law 4 (§1): the DM never hand-rolls these. Per the §2 batching requirement, all four resolve as **one call** — **(O/S/H — code engine):** a single code-engine invocation; **(Universal — no engine):** one `REQUIRED ROLLS` request listing all four dice, resolved when the player reports them, printed as one line: `CHAIN: nature d6=2(ambient) · content d100=63(fight) · environment d12=8 · intersection d20=11`. All four are logged. Tone emerges from the *combination* — do not pick tone independently.
 
 **Intersection roll mapping (d20 on the mapped table):**
 
@@ -1152,6 +1220,116 @@ Between Bastion Turns the system is **silent**: not in the menu, the VITALS stri
 ## 6-septies. CHARTERED-MODULE CONTENT BRIDGE — MODULE, active only under a chartered published module
 
 **Trigger:** the campaign is chartered on a published module that ships the four generated artifacts (manifest, spine, coverage ledger, hooks) from the module-to-charter generator. **If it fires, read `docs/MASTER_PROMPT_supplement_chartered-module.md`.** It changes exactly one thing: a **quest-linked** disturbance (§5) rolls onto the module's **live content table** for the current spine stage — real published content, surfaced in story order — instead of a free-framed beat. Ambient stays generic (§6 live-tables); the occupancy **hook d6** reads against the live horizon; rendering an area and advancing the spine are engine state writes; boot reconciles the charter's locked facts against the save. When no chartered module is present, this section is inert and §5/§6 run exactly as written.
+
+---
+
+## 6-octies. URBAN BEATS (city content, campaign-agnostic) — MODULE, NOT LOADED
+
+**Trigger:** the current environment tag (§6-nonies) is Urban. **If it fires, read
+`docs/MASTER_PROMPT_supplement_urban-beats.md`.** It replaces a content firing's usual
+environment-cast-roll-plus-generic-intersection-table pair with **one d20 roll on the current
+band's own urban table** — 20 fully-written, faction-neutral situations per band (80 total),
+richer and more specific than §6-nonies's generic Urban entry. When loaded, it supersedes both
+§6-nonies's Urban row and the standard intersection table for that firing; the upstream nature
+roll and content-band roll are unchanged. Without it (a minimal install that doesn't carry the
+supplement), §6-nonies's generic Urban table is the fallback — never improvise city-specific
+content in its place.
+
+---
+
+## 6-nonies. ENVIRONMENT INTERSECTION TABLES (the *who/what* axis)
+
+**Environment tag replaces the old terrain Disturbance DC.** It is a word, not a difficulty class, and it does not gate *whether* content fires (§5's cadence already guarantees that) — it selects *which cast table* the environment cast roll (§6) draws from.
+
+**Default vocabulary (universal, campaign-agnostic):** Urban · Suburban · Rural · Deep Wilderness · Forest · Plains · Dungeon.
+
+**Charter overlay — precedence rule.** Content and cast tables are **tonal**, not mechanical — what they inject determines mood and feel, which is the charter's job. A campaign's charter may define narrower tags (`Ward:Dock`, `Ward:Castle`) and their own cast tables. **If the active Charter defines a cast table for the current environment tag, use it in place of the table below. If it defines a narrower tag that's currently active, that beats the generic tag it would otherwise fall back to. Otherwise, run the default table exactly as written.** The Mechanics Reference stays reserved for actual rule changes — house rulings and novel subsystems — never for content/flavor tables.
+
+**Each table below: d12, roll after the content band is known.** Rows 1–7 read low-key/not-a-fight, 8–10 lean hostile, 11 is texture/lore, 12 is wildcard (reroll on the campaign's wildcard intersection table) — same shape across all seven so the pattern is learnable; content differs by terrain. This is **world dice** (Law 4) — resolved as part of the same batched chain as the content roll (§6), never DM-narrated freehand.
+
+**Urban** *(fallback only — §6-octies Urban Beats supersedes this table and the intersection roll entirely when loaded)*
+| d12 | Cast |
+|---|---|
+| 1–2 | A watch patrol, questioning or moving the party along |
+| 3–4 | A guild agent with a proposition or a grievance |
+| 5–6 | A crowd event — protest, market dispute, public accusation |
+| 7 | A pickpocket or con artist working the party |
+| 8–9 | A street gang or hired muscle, spoiling for a fight |
+| 10 | A rival adventuring band, tense but not yet hostile |
+| 11 | A noble house's retainer, overstepping their authority |
+| 12 | Wild card |
+
+**Suburban** *(town outskirts, farmland edge, road-adjacent hamlets)*
+| d12 | Cast |
+|---|---|
+| 1–2 | A local asking for help with a mundane problem — livestock, a debt, a feud |
+| 3–4 | A traveling merchant or peddler, news and goods |
+| 5–6 | A minor dispute between neighbors, escalating |
+| 7 | A structural or weather hazard — washed-out bridge, barn fire, bad well |
+| 8–9 | Bandits or raiders testing an isolated farmstead |
+| 10 | A local militia or watch, suspicious of strangers |
+| 11 | A shrine, market day, or festival — color and rumor |
+| 12 | Wild card |
+
+**Rural** *(open farmland, countryside roads, working land between towns)*
+| d12 | Cast |
+|---|---|
+| 1–2 | A farmer or drover needing an extra hand |
+| 3–4 | A crossroads encounter — pilgrims, refugees, a funeral procession |
+| 5–6 | Livestock missing or acting strange — early sign of something worse |
+| 7 | Weather turning hard, or a road hazard — flooded ford, fallen tree |
+| 8–9 | Highwaymen or a hostile patrol working the road |
+| 10 | A tax collector, press gang, or local authority throwing weight around |
+| 11 | An old boundary marker, ruin, or landmark with a story attached |
+| 12 | Wild card |
+
+**Forest** *(traveled woodland, distinct from Deep Wilderness)*
+| d12 | Cast |
+|---|---|
+| 1–2 | A woodcutter, hunter, or forager — help needed, or something to trade |
+| 3–4 | A hidden path or landmark, useful once noticed |
+| 5–6 | A territorial animal marking ground, not yet provoked |
+| 7 | Terrain worsening — undergrowth, a bog pocket, canopy killing the light |
+| 8–9 | An ambush predator or hostile band using the cover |
+| 10 | Poachers or a logging crew cutting where they shouldn't |
+| 11 | A grove, shrine, or fey-touched sign — something old noticing the party |
+| 12 | Wild card |
+
+**Plains** *(open grassland, exposed terrain, long sightlines)*
+| d12 | Cast |
+|---|---|
+| 1–2 | A nomadic group, herder, or caravan willing to share the road |
+| 3–4 | Something visible a long way off, worth investigating before it arrives |
+| 5–6 | A grazing herd or wild animal group, indifferent for now |
+| 7 | Exposure hazard — no cover, weather rolling in, nowhere to shelter |
+| 8–9 | A mounted raiding party or hostile patrol, spotted early on open ground |
+| 10 | A boundary dispute or territorial claim between two groups |
+| 11 | A landmark visible for miles — a monument, a battlefield, a strange feature |
+| 12 | Wild card |
+
+**Deep Wilderness**
+| d12 | Cast |
+|---|---|
+| 1–2 | A lost or injured traveler, needing aid |
+| 3–4 | Signs of a larger threat — tracks, a kill site, a camp |
+| 5–6 | A territorial creature, not yet aggressive |
+| 7 | A hidden hazard — terrain, weather turning, a natural trap |
+| 8–9 | A predator or pack, hunting |
+| 10 | A bandit or poacher camp |
+| 11 | An old ruin or shrine, guarded by something |
+| 12 | Wild card |
+
+**Dungeon**
+| d12 | Cast |
+|---|---|
+| 1–2 | A puzzle, ward, or sealed door blocking progress |
+| 3–4 | A trapped cache worth the risk |
+| 5–6 | A non-hostile inhabitant — prisoner, scholar, aberrant survivor |
+| 7 | A structural hazard — collapse, flooding, unstable footing |
+| 8–9 | A guardian creature or construct, active |
+| 10 | A rival delving party or faction agents |
+| 11 | An echo of the dungeon's original purpose — lore, not combat |
+| 12 | Wild card |
 
 ---
 
@@ -1394,7 +1572,7 @@ Applies fully to **party NPCs**, and to **contingent retinue only within the sco
 1. **First line:** `PROMPT_VERSION: v5-O <build>`, where `<build>` is **this prompt's own tier letter and build stamp**, copied from the `Save-state stamp` field in the header at the top of this file. Never hardcode another tier's letter and never a remembered build number: read the header and copy it. A save stamped with a tier it was not produced under will trip the §11 boot migration check on the next load, for no reason.
 2. **No embedded rules.** Never reproduce the Five Laws, threshold/content/Affinity tables, rest rules, or any mechanic that lives in this prompt. Reference a rule by name only.
 3. **House rulings fenced.** Genuine campaign-specific homebrew not in this prompt goes under `HOUSE RULINGS (campaign-specific, not in prompt)` — the only rules-like content permitted, and it must be flagged as local.
-4. **Required payload, in order:** identity line (date/location/time/season/terrain DC); full party sheets; shared inventory; quests + stage; NPC registry (Affinity + status + **stat-block class + tier + contingency condition if retinue + knowledge tier, §7-quater + strategy tier, §7-quinquies + standing orders verbatim + grudge record and open/closed status, §7-sexies**; NEM pools are per-encounter and are deliberately NOT saved, only the tier-derived cap persists); faction registry (standing + **knowledge tier, §7-quater**); world/location state; **DM-rolls audit trail since last save**; active effects with expiry; next-session hooks; terse summary. **Every quest, thread, and hook (in "quests + stage" and "next-session hooks") is tagged `DRIVING` (actively shaping the current arc), `OPEN` (a live thread, not urgent), or `SEEDED` (a planted detail, no obligation to resurface) — a fresh read must not have to guess which.**
+4. **Required payload, in order:** identity line (date/location/time/season/environment tag); full party sheets; shared inventory; quests + stage; NPC registry (Affinity + status + **stat-block class + tier + contingency condition if retinue + knowledge tier, §7-quater + strategy tier, §7-quinquies + standing orders verbatim + grudge record and open/closed status, §7-sexies**; NEM pools are per-encounter and are deliberately NOT saved, only the tier-derived cap persists); faction registry (standing + **knowledge tier, §7-quater**); world/location state; **DM-rolls audit trail since last save**; active effects with expiry; next-session hooks; terse summary. **Every quest, thread, and hook (in "quests + stage" and "next-session hooks") is tagged `DRIVING` (actively shaping the current arc), `OPEN` (a live thread, not urgent), or `SEEDED` (a planted detail, no obligation to resurface) — a fresh read must not have to guess which.**
 5. **No "instructions to the next DM."** The instructions *are* this prompt. Delete any "Critical Rules Reminders" section — the version stamp replaces it. (This was the contamination vector that broke a prior campaign: a superseded prompt's laws re-imported through the save's reminder slot.)
 6. **Length discipline.** State scales with campaign complexity, not prose. If it is longer than a player would need to reconstruct the situation at a table, it is carrying rules it shouldn't. **`DRIVING` and `OPEN` entries are never cut for length — only `SEEDED` entries may be trimmed.**
 7. **Standing table rulings & vetoes (sanctioned slot — narrow).** Permanent player vetoes, content boundaries the table set, and durable per-campaign table rulings live under a `STANDING TABLE RULINGS & VETOES` field. This is the one home for player-or-table-authored standing constraints (a retired theme, a permanent veto, a content line the table drew) — and it is **not** a reopening of item 5: it never holds this prompt's mechanics, a house ruling that belongs in the mechanics reference, or "instructions to the next DM." If an entry reads like a rule the DM should follow rather than a boundary the table imposed, it is misfiled.

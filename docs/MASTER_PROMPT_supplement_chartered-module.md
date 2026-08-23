@@ -9,18 +9,19 @@ are absent, this supplement is inert and the §5/§6 content engine runs exactly
 
 ## 0. WHAT THIS IS, AND WHAT IT DOES NOT CHANGE
 
-The §5/§6 content engine already decides **whether** the world intrudes (the per-phase
-disturbance check) and **what kind** of beat it is (flat d100 → band → intersection). This
-supplement changes **one thing**: where the **quest-linked** result draws its content from.
+The §5/§6 content engine already decides **when** content fires (automatic per-phase cadence,
+§5 — no gate roll, guaranteed) and **what kind** of beat it is (interleaved d100 → band →
+environment cast → intersection). This supplement changes **one thing**: where the
+**quest-linked** result draws its content from.
 
-Without a chartered module, a quest-linked disturbance routes into "an active quest's Stage
+Without a chartered module, a quest-linked firing routes into "an active quest's Stage
 beat" (§5) that the DM frames. That works, but it surfaces nothing from a published module's
 unplayed content on its own; a hand-built campaign table can only hold what has already been
-played. This bridge makes a quest-linked disturbance roll onto the module's **live** content,
+played. This bridge makes a quest-linked firing roll onto the module's **live** content,
 in story order, so playing the ordinary phase cadence introduces the module itself.
 
-Everything else is untouched. The disturbance check, the ambient branch, the flat-d100 bands,
-Law 3 dice ownership, the intersection tables, the loop gates: all as written.
+Everything else is untouched. The content cadence, the ambient branch, the interleaved-d100
+bands, Law 3 dice ownership, the intersection tables, the loop gates: all as written.
 
 ---
 
@@ -44,8 +45,8 @@ not reached.
 
 ## 2. THE BRIDGE (three fire points)
 
-**A. Quest-linked disturbance (§5).** When the disturbance check triggers and the quest-link
-d6 reads **quest-linked**, roll the **live content table** for the current stage instead of
+**A. Quest-linked content firing (§5).** When a content firing occurs and the nature roll (d6)
+reads **quest-linked**, roll the **live content table** for the current stage instead of
 free-framing a beat. The table is regenerated per stage from the horizon (`content_table.py`),
 banded to match the engine's intent:
 
@@ -55,14 +56,18 @@ banded to match the engine's intent:
 - **wild card** — defer to the generic §6 wildcard intersection.
 
 The **ambient** branch is unchanged: it runs the generic §6 content roll for world texture, no
-module obligation. For a **city** setting, its source is the campaign-agnostic urban table
-(§6-octies URBAN BEATS); a campaign may also carry its **own** city d100 in its module material
-(names, factions, threads), which supersedes the generic urban table for that campaign only. So a
-day still yields the three-way mix (arc beats, ambient color, quiet phases): the arc beats drawn
-from real module content, the ambient color from the urban or campaign table. **Three table tiers,
-kept separate:** generic live-tables and generic urban beats are campaign-agnostic (public engine);
-a campaign's own city table and its quest-linked live content table are campaign-specific (private
-module material).
+module obligation. For a **city** setting, its source is the campaign-agnostic Urban Beats
+supplement (§6-octies, if loaded — otherwise §6-nonies's generic Urban table); a campaign may
+also carry its **own** city cast table in its module material (names, factions, threads), which
+supersedes the generic one for that campaign only — the same more-specific-beats-generic
+principle §6-nonies's charter-overlay precedence rule already runs for any environment tag, not
+a special case, just applied here to a module-supplied table instead of a charter-supplied one.
+So a day still yields the three-way mix (arc beats, ambient color, quiet-leaning bands): the arc
+beats drawn from real module content, the ambient color from Urban Beats or the campaign-specific
+table. **Three table tiers, kept separate:** the generic live-tables module and the generic
+§6-octies Urban Beats table are campaign-agnostic (public engine); a campaign's own
+city cast table and its quest-linked live content table are campaign-specific (private module
+material, or charter-layer per PROJECT_ORIENTATION.md's tone/mechanics split).
 
 **B. Location arrival (occupancy chain).** The occupancy chain's **hook d6** (campaign
 mechanics-reference: 5-6 connects to a live thread) reads against the **horizon** when a
@@ -134,7 +139,7 @@ without turning coverage into a checklist.
 
 ## 7. ONE-LINE SUMMARY FOR THE DM
 
-> On a quest-linked disturbance under a chartered module, roll the live content table for the
+> On a quest-linked content firing under a chartered module, roll the live content table for the
 > current stage — real module content, in story order — instead of inventing a beat. Render
 > what the party experiences, advance the spine when a stage resolves, and never invent content
 > the manifest already holds or metaplot the spine does not. Ambient stays generic; the guard
