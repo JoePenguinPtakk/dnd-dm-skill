@@ -1,6 +1,5 @@
 ---
 name: dnd-dm
-description: Boot the v5 master prompt family (D&D 5.5E solo/small-group DM, structural-enforcement engine) and run a session in Claude Code. Trigger on "run a D&D session", "start/continue the campaign", "boot the master prompt", "play D&D", "boot from the save", or /dnd-dm. Do NOT trigger for questions about D&D rules in the abstract, or for editing the master prompt files themselves (that's engineering work, not play).
 ---
 
 # D&D DM: v5 master prompt boot
@@ -86,8 +85,11 @@ never holds live campaign state.
 
 | Campaign | Local path | Shape |
 |---|---|---|
-| Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Documents/GitHub/Fallen-Titans-Campaign` | flat: layers and saves at the repo root, carries a stale master-prompt copy (overwrite it, §2) |
-| Waterdeep: Dragon Heist (Rhogast / Oliver / Roy / Moss) | `~/Documents/GitHub/WaterDeepCamapaign` | foldered: `saves/`, `tables/`, plus its own play material |
+| Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Projects/Fallen-Titans-Campaign` | flat: layers and saves at the repo root, carries a stale master-prompt copy (overwrite it, §2) |
+| Waterdeep: Dragon Heist (Rhogast / Oliver / Roy / Moss) | `~/Projects/WaterDeepCamapaign` | foldered: `saves/`, `tables/`, plus its own play material; boots HEAD directly. Has a `bot/` — see §5 |
+| Tavern Catastrophe (Charlemagne / Renji) | `~/Projects/Tavern-Catastrophe` | foldered: `saves/`, `characters/`; emergent/homebrew, tier v5-S, boots HEAD directly (no pin — see its own README for why one existed briefly and was retired 2026-09-27). Has a `bot/` — see §5 |
+
+**Paths corrected 2026-09-27**: this table previously pointed at `~/Documents/GitHub/...` for the first two rows, a path that does not exist on this machine (`~/Documents/GitHub` itself is absent) — exactly the stale-path failure this skill's own doc warns about elsewhere. Verify a campaign's path actually resolves before trusting this table; update this row the moment a repo moves rather than letting the next boot rediscover the rot.
 
 **Layouts differ between campaigns, and that is expected.** Do not assume one
 campaign's filenames apply to another, and do not copy a campaign's directory
@@ -326,6 +328,16 @@ Two rules that do belong here, because they are about your behavior:
 - **Do not improvise a startup sequence when it has none.** Say the campaign
   ships no preflight, and ask. Guessing at another campaign's ops is how a
   session gets spent debugging instead of playing.
+- **Never blend out-of-character content into an in-character post, and never
+  post OOC content to the game channel at all.** A relay's mailbox takes a
+  `channel` field per message; in-fiction narration and mechanics go to
+  `game`, everything else (a clarifying question, a correction, meta
+  commentary about a roll or a rule) goes to `ooc`, as its own separate
+  message — never a parenthetical tacked onto a game post. Learned the hard
+  way (Tavern Catastrophe, 2026-09-27, caught twice in the same session):
+  the temptation is strongest for a short process note ("the DC should have
+  been X") that feels like it belongs right next to the roll it explains.
+  It doesn't. Split it out.
 
 Ops work is permitted pre-boot (§0). Finishing it does not lift the gate.
 
