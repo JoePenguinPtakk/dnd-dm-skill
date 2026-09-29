@@ -62,7 +62,7 @@ BOOT · <campaign name>
 TIER/BUILD: v5-<X> <build stamp, copied from the header you actually read>
 SOURCE: engine HEAD · <stale campaign copy overwritten: <filename> | no stale copy found>
 LAYERS: master=<filename> · charter=<filename|absent> · mechanics=<filename|absent> · save=<filename|absent>
-ENGINE: <path to roll.py> · test → <verbatim output of one real roll>
+ENGINE: <path to roll.py> · <verbatim SESSION START line> · test → <verbatim output of one real roll, with its [R####] ID>
 ```
 
 A missing layer is named as `absent`, never quietly skipped. If the save
@@ -148,10 +148,11 @@ Two constraints on what you are allowed to offer:
   only the header, the §10-bis self-check, and the §11 boot sequence differ.
   Never describe a tier as having more or fewer rules, better combat, or a
   richer world. It is an enforcement-weight choice, nothing else.
-- **Capability overrides preference.** If `roll.py` cannot execute here, pick 4
-  is the only valid answer regardless of which model is running, and you say so
-  rather than offering the other three. Conversely, do not push a user onto
-  v5-U just because they are on a small model; that is what v5-H is for.
+- **v5-U is Joe's choice, never yours.** It exists for a runtime that cannot run
+  code at all (a plain chat window, a phone). In Claude Code the engine runs, so
+  O, S, or H is the answer. If `roll.py` fails here, say so and stop; never
+  switch to v5-U to get around it. Do not push a user onto v5-U because they are
+  on a small model either; that is what v5-H is for.
 
 Once the user picks, record the **tier letter** in that campaign's `README.md`,
 not a copy of the file, so the next boot loads that tier's engine HEAD and never
@@ -164,6 +165,14 @@ it is a photograph of the engine on some past day, and every fix, every patched
 vulnerability and every resolved self-contradiction landed after it was taken
 is missing from it. Load `docs/MASTER_PROMPT_v5-<tier>_HEAD.md` from the engine
 repo, always, and never boot a session off a campaign-local copy.
+
+**Stale `dnd-dm` skill copies get the same treatment.** The authority copy of this
+skill lives in the engine repo at `.claude/skills/dnd-dm/`. At boot, compare the
+campaign repo's `.claude/skills/dnd-dm/` against it. A stale `SKILL.md`: overwrite
+it with the authority copy and say so on the boot receipt. Stale engine files
+(`roll.py`, `guard.py`, `dice-guard.py`) are guard-protected on purpose: name them
+on the boot receipt as stale so Joe can have them updated; never work around the
+guard to copy them yourself.
 
 **Overwrite the stale copy, do not preserve it.** When you find a campaign-local
 master prompt, replace it with the current engine HEAD for that campaign's tier
@@ -215,6 +224,35 @@ sample a uniform distribution, it generates a plausible token, so a
 hand-authored "I rolled a 14" is a fabrication wearing an audit label. §10-bis
 marks any `DM ROLLS` result with no execution artifact behind it as malformed.
 
+### The ledger is the proof (master prompt §1-sexies)
+
+`roll.py` writes every roll to `dice/ledger.jsonl` in the **campaign repo**,
+signed with a key in `~/.dnd-dice/` that you never read, and chained entry to
+entry. A `PreToolUse` guard (`guard.py`, beside this file) blocks any tool call
+that touches the ledger, the key, the engine, or the guard. So the only way an
+entry exists is a real roll. The `DM ROLLS` line you print is a copy; the
+`[R####]` ID in it is the proof.
+
+- **Boot, before any roll:** `python3 <skill-base-dir>/roll.py session start <campaign repo>`.
+  The engine refuses to roll without an open session.
+- **Every world result carries its ID**, pasted from the engine output.
+- **Want a say in a world fact? Load the dice, in the call:**
+  `mood:pick[wary=3|friendly=1|hostile=1]`. At least two outcomes, weight 1+
+  each, none above 90%. The engine refuses anything else.
+- **Rerolls only by RAW or a player-invoked feature:**
+  `--reroll-of R0042 --reason "Lucky feat"`. Never at your discretion.
+- **Reading:** `roll.py show 10`, `roll.py cite R0042`, `roll.py session status`
+  (real time elapsed, for the §5 pace floor), `roll.py audit <file>` (checks
+  every `[R####]` citation in a text against the ledger).
+- **Close:** `roll.py verify`, then `roll.py session end` (see §7 below).
+- **Guard trips are not obstacles to route around.** If the guard blocks a
+  call, you were about to touch the ledger by hand. Roll through the engine.
+  The guard also protects Claude Code's settings files, so it cannot be
+  switched off by editing them. Engine maintenance happens only when Joe runs
+  `python3 ~/.dnd-dice/dice-guard off` in his own Terminal; every on/off is
+  bannered, logged in the ledger, and announced in Discord. Never ask him to
+  unlock it so you can skip or fix a roll.
+
 In Claude Code the engine is **Bash running this skill's `roll.py`**. Call it
 by its absolute path from this skill's own base directory (the runtime prints
 that path when the skill loads); a bare relative path breaks the moment the
@@ -230,8 +268,8 @@ python3 <skill-base-dir>/roll.py attack:d20+5 damage:2d6+3
   to one call: `roll.py disturbance:d20 content:d100 quest-link:d6
   intersection:d20`. Never make four separate calls and never narrate a chain
   as separate hand-written numbers.
-- **Paste the output verbatim** into the `DM ROLLS` line. Do not retype,
-  reformat, round, or "clean up" the numbers.
+- **Paste the output verbatim** into the `DM ROLLS` line, `[R####]` IDs
+  included. Do not retype, reformat, round, or "clean up" the numbers.
 - **Everything world-side goes through it:** enemy attacks, saves and damage,
   initiative, morale saves, content and disturbance rolls, name generation,
   faction rolls, the `NEMESIS CHAIN`, and any NEM reroll (a *second, separate*
@@ -333,6 +371,8 @@ Ops work is permitted pre-boot (§0). Finishing it does not lift the gate.
 
 ## 6. While playing
 
+**The master prompt's §0-bis PLAY PIPELINE is the loop: six steps, every response.** Roll often; the dice are how the game escapes the obvious. Save budget by cutting rereads, extra calls, and long prose, never by skipping a die or a required block.
+
 Everything from here is inside the master prompt itself. Do not re-derive or
 restate its rules in this skill file: distance from the source increases drift
 risk, the same reason the master prompt inlines its own tables rather than
@@ -369,7 +409,11 @@ checkpoint actually produces a save state:
    no embedded rules, no "instructions to the next DM."
 4. **Record declined canon.** If a player-asserted fact was declined during
    play, note it in the save so a later session does not quietly adopt it.
-5. **Offer to commit it**, and do not commit without being asked. A save is
+5. **Close the ledger at session end:** run `roll.py verify` and print its
+   line (a failure is reported verbatim, never smoothed over), then
+   `roll.py session end`. The ledger (`dice/ledger.jsonl`) is committed
+   together with the save.
+6. **Offer to commit it**, and do not commit without being asked. A save is
    the user's record of their own campaign.
 
 ---
