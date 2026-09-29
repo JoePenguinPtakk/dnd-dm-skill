@@ -289,6 +289,33 @@ python3 <skill-base-dir>/roll.py attack:d20+5 damage:2d6+3
   the low faces from being over-represented. Do not "improve" this back to
   `random`.
 
+### Spawns: the bestiary (master prompt §4.1 CR RULES, §7-bis SPAWN PROCEDURE)
+
+`bestiary.py`, beside `roll.py`, holds all 331 SRD 5.2 stat blocks with
+environment tags (`bestiary.json`). It never rolls; it lists what legally fits
+a spawn and prints a ready `spawn-...:pick[...]` for the engine. The DM never
+picks a creature and never recalls a stat block from memory.
+
+```bash
+python3 <skill-base-dir>/bestiary.py candidates --env urban --levels 5,5,5 --npcs 1 --difficulty moderate --role lead
+```
+
+- **Roles:** `lead`, then `support --lead-cr <CR> --remaining <XP left>`,
+  `npc` (a named NPC outside a fight), `fauna` (texture, hooks, mounts, any CR
+  up to the ceiling, no budget). Add `--boss` or `--first-fight` when they apply;
+  `--quiet` prints only the header and the pick.
+- **Then:** paste the printed pick into the engine call, `check` the finished
+  composition (it must print `PASS`), `show <name>` for each block, and
+  `defaults <name>` for its strategy tier and morale.
+- **Environments:** a prompt tag (`urban`, `dungeon`, `sea`, ...), a delve
+  builder (`builder:tomb`), or a raw key (`sewer`). `envs` lists them.
+- Creatures spawned recently in this campaign get lower weight automatically
+  (read from the ledger's `spawn` picks).
+- Troll Limb is never rolled; it appears only through a Troll's Loathsome
+  Limbs trait.
+- The data is rebuilt from the SRD by `tools/build_bestiary.py` in the engine
+  repo (it also writes `docs/BESTIARY_INDEX.md` for the Universal tier).
+
 ### No engine available? Stop and tell Joe. Never switch tiers yourself.
 
 **In Claude Code the engine runs, so O, S, or H is the only answer.** If `roll.py`
