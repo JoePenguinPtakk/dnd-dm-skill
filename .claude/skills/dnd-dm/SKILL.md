@@ -316,6 +316,21 @@ python3 <skill-base-dir>/bestiary.py candidates --env urban --levels 5,5,5 --npc
 - The data is rebuilt from the SRD by `tools/build_bestiary.py` in the engine
   repo (it also writes `docs/BESTIARY_INDEX.md` for the Universal tier).
 
+### Content tables: custom tables and the table deck (master prompt §6-duodecies)
+
+- **Custom tables:** when the party reaches a place, plane, or arc no table fits,
+  write one between beats to `tables/custom/<name>.md` in the campaign repo,
+  from `docs/CUSTOM_TABLE_TEMPLATE.md`: four bands (Confrontation, Aid, Fight,
+  Wild) of 10 entries, specific to this campaign and these characters. Rewrite
+  a spent entry before the next roll.
+- **The deck:** at an ambient content firing, one engine call picks the table
+  (`deck:pick[...]`, equal weights, loadable) and rolls the content d100 with
+  the rest of the chain. **The d100's last digit always sets the band**, so
+  every table runs 30% fights. No table and no campaign ruling changes that.
+- **Reference tables** outside the deck (for example Waterdeep's solo downtime
+  table) are rolled through the engine when their scene fits, or mined for
+  entries when writing a custom table.
+
 ### No engine available? Stop and tell Joe. Never switch tiers yourself.
 
 **In Claude Code the engine runs, so O, S, or H is the only answer.** If `roll.py`
