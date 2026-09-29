@@ -1366,7 +1366,7 @@ Verified: 100 results, no gaps, no overlaps, 30 / 30 / 30 / 10 split. Every band
 - **The entry:** a custom table reads the d100's tens digit (0–9) as the entry number inside the band. The generic chain uses the environment cast and intersection as always. A table built with uneven bands (a campaign d100 in ranges, the Urban Beats d20s) is read **band-first**: the band from the last digit, then one more engine call rolls a die sized to that band's own entries; its own printed ranges no longer set the band.
 - Every picked entry still runs its intersection roll for the *why*, and a fight entry runs the §7-bis SPAWN PROCEDURE for the *who*.
 - Dice rolled in the call but not used by the picked table (the environment d12 when a custom table is picked) are cited as `unused` in the DM ROLLS section (§1-sexies rule 7).
-- **A campaign ruling that deliberately changes the band split** (a mechanics-reference retune) governs that campaign's deck instead of the 30% line.
+- **No table and no campaign ruling changes the 30% fight rate** (Joe, 2026-09-29). A campaign that wants more or fewer fights changes what its fight entries contain, never how often the fight band comes up.
 
 ---
 
@@ -1813,18 +1813,18 @@ The DM may load `area` and `size` to fit the builder (a sanctum has more shrines
 
 **Exits (d6), counting the way the party came in:** 1 dead end (one exit) · 2–3 one more exit · 4–5 two more · 6 two more, one of them secret. Every new exit leads to `unexplored` unless the **loop rule** applies. **Loop rule:** in a medium or large dungeon, the first exit rolled after half the areas are revealed connects back to an already-revealed area instead of a new one. **Budget rule:** new exits never exceed the areas still unrevealed. **Heart rule:** the last area revealed is the heart. If every open exit has been explored and areas remain, the heart lies behind a secret exit in the area revealed most recently, found by search.
 
-**The DUNGEON CONTENT TABLE (d20).** This is what the area holds. The flavor d12 says why and who.
+**The DUNGEON CONTENT TABLE (d20).** This is what the area holds. Creatures come up on 30% of areas, the same fight rate as every content table (§6). The flavor d12 says why and who.
 
 | d20 | Content | How it runs |
 |---|---|---|
-| 1–5 | **Creatures** | Occupants or wanderers. Roll reaction (§6); a fight or a parley. Stat blocks per §7-bis, budget per §4.1. |
-| 6–7 | **Trap** | Hidden. Build it with the §3-bis Trap Trigger, Effect, and Severity tables. Passive Perception against its DC reveals it; Investigation or Perception to find it when searching; thieves' tools or a spell to disable. Severity scales DC and damage (setback · dangerous · deadly). |
-| 8 | **Hazard** | Bad air, unstable floor, deep water, slick stone, magical darkness, collapse. RAW hazard rules (§4.4). |
-| 9–10 | **Puzzle or obstacle** | A locked mechanism, a riddle door, a sealed way. At least three clues placed in reach, more than one solution, and a skill-check fallback that costs something (time, noise, a resource). Never a single point of failure. |
-| 11 | **Trick or setback** | Something that turns progress back: a one-way door, a false prize, an alarm, a collapse behind the party. |
-| 12–13 | **Special** | A strange feature with an effect to learn or use: a fountain, a statue, an altar, a pool, an engine. |
-| 14 | **Clue or lore** | Evidence about the heart, an occupant group, or a danger ahead. Serves the three-clue rule for puzzles. |
-| 15–16 | **Traces** | Fresh signs of occupants: tracks, a warm meal, voices. Raises ALERT by 1 if the party lingers or is loud here. |
+| 1–6 | **Creatures** | Occupants or wanderers. Roll reaction (§6); a fight or a parley. Stat blocks per §7-bis, budget per §4.1. |
+| 7–8 | **Trap** | Hidden. Build it with the §3-bis Trap Trigger, Effect, and Severity tables. Passive Perception against its DC reveals it; Investigation or Perception to find it when searching; thieves' tools or a spell to disable. Severity scales DC and damage (setback · dangerous · deadly). |
+| 9 | **Hazard** | Bad air, unstable floor, deep water, slick stone, magical darkness, collapse. RAW hazard rules (§4.4). |
+| 10–11 | **Puzzle or obstacle** | A locked mechanism, a riddle door, a sealed way. At least three clues placed in reach, more than one solution, and a skill-check fallback that costs something (time, noise, a resource). Never a single point of failure. |
+| 12 | **Trick or setback** | Something that turns progress back: a one-way door, a false prize, an alarm, a collapse behind the party. |
+| 13–14 | **Special** | A strange feature with an effect to learn or use: a fountain, a statue, an altar, a pool, an engine. |
+| 15 | **Clue or lore** | Evidence about the heart, an occupant group, or a danger ahead. Serves the three-clue rule for puzzles. |
+| 16 | **Traces** | Fresh signs of occupants: tracks, a warm meal, voices. Raises ALERT by 1 if the party lingers or is loud here. |
 | 17–20 | **Empty** | Dressing only (§3-bis Dungeon Air, Odors, Features, Furnishings). A place to breathe. |
 
 **Treasure (d6):** creatures 1–3 · trap or puzzle 1–2 · anything else 1 → treasure present, hidden or guarded. None on a miss.
