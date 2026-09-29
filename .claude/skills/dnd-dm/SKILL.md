@@ -140,7 +140,7 @@ yourself. The four HEADs live in the engine repo's `docs/`:
 | 1 | `MASTER_PROMPT_v5-O_HEAD.md` | Opus tier | Lightest enforcement surface. Assumes the runtime holds long instructions without reminders. |
 | 2 | `MASTER_PROMPT_v5-S_HEAD.md` | Sonnet tier | The canonical middle build, and the default answer when the user has no preference. |
 | 3 | `MASTER_PROMPT_v5-H_HEAD.md` | Haiku tier and smaller | Heaviest enforcement. Full 15-point self-check every send, Five Laws restated at boot. Redundancy is the feature. |
-| 4 | `MASTER_PROMPT_v5-U_HEAD.md` | Any runtime with no code execution | Inverts Law 4: the DM rolls nothing, the players roll every die. Not a downgrade, see §3. |
+| 4 | `MASTER_PROMPT_v5-U_HEAD.md` | Models that cannot call tools | Fires like v5-H (same prohibitions, self-check, and boot); the one difference is that there is no engine, so the players throw every die, world dice included. Joe's choice only, see §3. |
 
 Two constraints on what you are allowed to offer:
 
