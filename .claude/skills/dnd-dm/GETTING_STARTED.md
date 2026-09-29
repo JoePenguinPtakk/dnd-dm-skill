@@ -87,7 +87,7 @@ Full workflow and templates are in `charter-generator/README.md`. In brief, inte
    channels. A worked charter ships as the Dragon Heist example if one is bundled; mirror its shape.
 
 At play time the **§6-septies bridge** (`docs/MASTER_PROMPT_supplement_chartered-module.md`) makes
-quest-linked disturbances roll onto this module's live content, in story order.
+quest-linked content firings roll onto this module's live content, in story order.
 
 ---
 
@@ -137,7 +137,7 @@ menu (this is `SKILL.md §2`'s tier menu) and let the user pick — do not pick 
 | v5-O | `docs/MASTER_PROMPT_v5-O_HEAD.md` | Opus tier | Lightest enforcement surface. |
 | v5-S | `docs/MASTER_PROMPT_v5-S_HEAD.md` | Sonnet tier | Canonical middle build; the default with no preference. |
 | v5-H | `docs/MASTER_PROMPT_v5-H_HEAD.md` | Haiku and smaller | Heaviest enforcement; redundancy is the feature. |
-| v5-U | `docs/MASTER_PROMPT_v5-U_HEAD.md` | No code execution | Players roll every die. |
+| v5-U | `docs/MASTER_PROMPT_v5-U_HEAD.md` | No code execution at all | Players roll every die, world dice included. **Joe's choice only**; never picked by the DM, and not used where the dice engine can run. |
 
 The mechanics are identical across all four; only enforcement weight, the self-check, and the boot
 sequence differ. Never describe a tier as having more or fewer rules. Record the chosen **tier letter**

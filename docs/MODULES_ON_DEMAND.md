@@ -17,7 +17,7 @@ malformed-if rules.
 | Module | Load when | Covers |
 |---|---|---|
 | **§4.2-bis Grid Surface** | The table explicitly opts into grid combat for a specific fight | Coordinate combat as an alternative to §4.2 relational positioning: `[x,y,z]` in a scratch file, computed distance, line of sight, a rendered board |
-| **§4.2-ter Tactical Engine** | The table explicitly opts into the engine for a specific fight, and the engine is reachable | The whole fight handed to an external engine: a handoff out, a state diff back, and the DM resolving none of it |
+| **§4.2-ter Tactical Engine** | **SHELVED: never loads** (2026-09-28). Its app rolls from a seed, outside the world-dice ledger, and rolls the players' dice for them, against master prompt Law 3 and §1-sexies. Kept for the record only | The whole fight handed to an external engine: a handoff out, a state diff back, and the DM resolving none of it |
 | **§5-quater Spearfishing** | The party fishes, forages from water, or the ration economy is under real pressure in a coastal or riverine setting | Foraging subsystem feeding the §5 ration economy |
 | **§6-ter Maritime Framework** | A campaign goes to sea: ships, crews, naval combat, voyages | Ship condition track, crew layer, helm maneuvers, inter-ship range rungs |
 | **§6-quater Dive System** | Anything happens underwater | Underwater as Mode B, the air clock, full rules of play |
@@ -28,11 +28,8 @@ these. The Waterdeep campaign has additionally **retired the grid permanently**
 (its house ruling #14), so §4.2-bis will never fire there and §4.2 relational
 positioning is the only combat mode.
 
-**Whether house ruling #14 also retires §4.2-ter is the table's call and is not
-assumed here.** The ruling was written about the grid module, which asks the DM
-to compute coordinates itself; §4.2-ter asks it to compute nothing at all. They
-fail in opposite directions, so the ruling does not obviously carry. Until the
-table says otherwise, treat §4.2-ter as available and §4.2-bis as retired.
+**§4.2-ter is shelved for every campaign** (see the index), so in Waterdeep
+§4.2 relational positioning is the only combat mode.
 
 ---
 
@@ -80,7 +77,7 @@ When combat triggers, after MODE (A/B) but before rolling initiative, the DM ass
 
 ## 2. THE A+C CONTRACT (how grid mode runs each turn)
 
-Grid mode is "A+C": **A** = the authoritative state lives in code; **C** = a visual panel mirrors it for the player. Three rules are inviolable.
+Grid mode is "A+C": **A** = the authoritative state lives in code; **C** = a visual panel mirrors it for the player. Four rules are inviolable.
 
 **(A) Truth lives in code, not in prose or in the panel.** At combat start the DM writes a `combat.json` scratch file via code execution (schema in §3). Every turn the DM *reads it, mutates it with code, writes it back.* The DM's narration and the visual panel are both **downstream** of that file. The DM never holds the board in its head and never recalls a position it could instead read.
 
@@ -88,8 +85,10 @@ Grid mode is "A+C": **A** = the authoritative state lives in code; **C** = a vis
 
 **(C) The panel is a read-only mirror.** Each turn, after mutating state, the DM renders the board with the visualization tool: the grid, tokens at their cells, static objects, and a stat readout. The panel cannot be read back by the DM and is never the source of truth — it exists so the player can *see* what the file *says*. It is redrawn fresh each turn (it is not a live self-updating game).
 
+**(D) Dice never come from the scratch code.** The scratch file holds geometry and state. Every world die is rolled by the dice engine into its ledger (master prompt §1-sexies), and every PC die is the player's (Law 3). Code that draws a random number for a roll is a path around the ledger, and is malformed.
+
 1. Read `combat.json`.
-2. Resolve the acting unit's move + action with code (legality, LOS, cover, to-hit, damage), mutate the file, write it back.
+2. Resolve the acting unit's move + action with code (legality, LOS, cover), apply the to-hit and damage dice from their only two sources (world dice from the dice engine and its ledger, PC dice from the player), mutate the file, write it back.
 3. Narrate the result in prose (the fiction).
 4. Re-render the visual panel from the new state.
 5. On a player turn, present options and hand control over.
@@ -159,6 +158,8 @@ Per player preference, the panel shows **exact enemy HP and positions** — no f
 <!-- INTEGRATED SUPPLEMENT: §4.2-ter tactical-engine (20260907) -->
 
 # SUPPLEMENT · §4.2-ter · TACTICAL ENGINE (optional handed-off combat)
+
+> **SHELVED (2026-09-28). Never load or propose this module.** The engine it hands off to rolls every die from a seed, outside the world-dice ledger, and rolls the players' dice for them. Both break the master prompt's dice rules (Law 3, §1-sexies). The text below is kept only as a record of the design.
 
 *Drop-in addition to the v5 master prompts. Adds a third combat surface: the whole fight is handed to an external engine, which resolves it, and the DM takes back a state diff. Does not replace §4.2 or §4.2-bis: it is a third alternative that one fight at a time can switch to. When the engine is not loaded (the default), everything in §4.2 governs as written.*
 

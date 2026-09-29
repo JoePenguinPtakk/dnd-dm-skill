@@ -265,18 +265,23 @@ python3 <skill-base-dir>/roll.py attack:d20+5 damage:2d6+3
 - **One call per chain.** §2 requires a generative chain to resolve in a
   single invocation returning all labelled values, because a model cannot echo
   a number it has not yet generated. Pass every die in the chain as arguments
-  to one call: `roll.py disturbance:d20 content:d100 quest-link:d6
+  to one call: `roll.py nature:d6 content:d100 environment:d12
   intersection:d20`. Never make four separate calls and never narrate a chain
   as separate hand-written numbers.
 - **Paste the output verbatim** into the `DM ROLLS` line, `[R####]` IDs
   included. Do not retype, reformat, round, or "clean up" the numbers.
-- **Everything world-side goes through it:** enemy attacks, saves and damage,
-  initiative, morale saves, content and disturbance rolls, name generation,
-  faction rolls, the `NEMESIS CHAIN`, and any NEM reroll (a *second, separate*
-  engine call, printed alongside the first).
-- **Never roll the player's own attacks or checks for them.** Those are
-  theirs. Apply their stated modifier to their stated roll, and do the
-  arithmetic yourself so they never have to correct your math.
+- **Everything world-side goes through it:** enemy and NPC attacks, saves and
+  damage, enemy and NPC initiative, morale saves, the content chain, NPC
+  attitude and reaction, name generation, faction rolls, the `NEMESIS CHAIN`,
+  any NEM reroll (a *second, separate* engine call, printed alongside the
+  first), and every table. There is no other path for a world die.
+- **Never roll the player's own dice for them**: attacks, saves, checks,
+  damage, initiative. Those are theirs and they are sovereign. A player rolls
+  by hand and reports the number, or types `%rollgo` / `%roll` and the bot rolls
+  it through the engine. Use the reported number as given, apply their stated
+  modifier, and do the arithmetic yourself so they never have to correct your
+  math. A declared action that RAW gates always gets its player roll; never
+  narrate past it.
 - `roll.py` with no arguments prints its usage, including advantage
   (`d20adv+7`) and disadvantage (`d20dis`) forms.
 - **Dice are drawn from OS entropy** (`secrets`), not `random`. There is no
@@ -284,17 +289,19 @@ python3 <skill-base-dir>/roll.py attack:d20+5 damage:2d6+3
   the low faces from being over-represented. Do not "improve" this back to
   `random`.
 
-### No engine available? Use the Universal build. It is not a downgrade.
+### No engine available? Stop and tell Joe. Never switch tiers yourself.
 
-**Tier choice is a capability question, not a model-name question.** If the
-model or environment running this cannot execute `roll.py` in any way (no
-shell, no code execution, a plain chat window, a phone), do **not** improvise
-by letting the DM write numbers. Switch to `docs/MASTER_PROMPT_v5-U_HEAD.md`.
+**In Claude Code the engine runs, so O, S, or H is the only answer.** If `roll.py`
+fails here, say so plainly and stop; do not improvise numbers and do not move
+to v5-U to get around it. v5-U exists only for a runtime that cannot execute
+code at all (a plain chat window, a phone), and **choosing it is Joe's call,
+never yours.**
 
 v5-U inverts Law 4 on purpose: **the DM rolls nothing and the players roll
-every die.** It assumes no code engine at all, which is precisely why it is
-the correct fallback. Critically, **it skips none of the world dice.** Enemy
-attacks, saves and damage, initiative, content/disturbance/intersection rolls,
+every die.** It assumes no code engine at all, which is why it exists only
+for runtimes that cannot run code, and only when Joe chooses it. Critically,
+**it skips none of the world dice.** Enemy
+attacks, saves and damage, initiative, content/intersection rolls,
 faction rolls, morale, even generative rolls like NPC names are all still
 rolled, but they move into the mandatory `REQUIRED ROLLS` section and are
 resolved only once the player supplies the result. Nothing is waved through,

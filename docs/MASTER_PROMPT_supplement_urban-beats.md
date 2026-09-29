@@ -11,20 +11,22 @@ quest-linked beats come from the §6-septies live content table, not here.*
 
 ## HOW TO USE
 
-Roll the §6 content chain as normal: **disturbance d20 → content d100 → band → urban d20** (this
-table replaces the band's generic intersection when the setting is a city). Then read the urban
-entry as a **situation with an implication**, skin it to the local fiction, and yield. Every entry
-is deliberately faction-neutral and name-free; the DM attaches the city's own people and places at
-the table. The bands are the §6 bands (25 / 25 / 40 / 10), so a content d100 lands in a band and you
-roll that band's d20 below.
+Roll the §6 content chain as normal, as world dice through the engine in one call: **nature d6 →
+content d100 → band → urban d20** (this table replaces the band's environment cast and generic
+intersection when the setting is a city). Then read the urban entry as a **situation with an
+implication** and skin it to the local fiction. Every entry is deliberately faction-neutral and
+name-free; the DM attaches the city's own people and places at the table. The bands are the §6
+interleaved bands (30 / 30 / 30 / 10, read by the content d100's last digit), so the d100 lands in a
+band and you roll that band's d20 below.
 
-- **01-25 → Confrontation d20** (nonviolent-confrontational)
-- **26-50 → Aid d20** (nonviolent-protective)
-- **51-90 → Fight d20** (a fight surfaces)
-- **91-00 → City wildcard d20**
+- **Last digit 1, 4, 7 → Confrontation d20** (nonviolent-confrontational)
+- **Last digit 2, 5, 8 → Aid d20** (nonviolent-protective)
+- **Last digit 3, 6, 9 → Fight d20** (a fight surfaces)
+- **Last digit 0 → City wildcard d20**
 
-Reserve the last slot of each band for the strange or the reframing. A result is a tool, never a
-verdict: reroll, combine, or overrule freely.
+Reserve the last slot of each band for the strange or the reframing. A result is a roll, and it
+stands (master prompt §1-sexies rule 4): no reroll, combining, or overruling except by a RAW or
+player-invoked mechanic.
 
 ---
 

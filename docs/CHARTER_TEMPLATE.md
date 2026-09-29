@@ -31,7 +31,7 @@ explicitly are NOT ("not a conspiracy," "not a chosen-one prophecy"). No proper 
 
 ## HARD TONE RULES (binding on the DM)
 
-- **‹Register› is tone and scope, NOT outcome — read this first.** The dice still rule. Karma-unlocked
+- **‹Register› is tone and scope, NOT outcome — read this first.** The dice still rule. The content
   bands stay fully open; the party still meets hard combat and the occasional dark beat. The register
   names the *kind* of story (‹two or three adjectives: e.g. bounded, concrete, roguish›), never
   "nothing bad happens." ‹A worked threat example: e.g. a skeleton captain can still kill a PC.›
@@ -59,10 +59,11 @@ always, it's the rule that stops a charter from quietly neutering the dice. The 
 *Guidance: Rename the board to fit the genre — Voyage Board, Contract Board, Delve Table, Docket,
 Job Board, Rumor Table. This is the closed menu of episode SHAPES the campaign generates. Build a d6–d10
 table. Each row is a recurring episode type plus its one-line structural shape (what the players do →
-what contests it). The DM rolls or picks from this table, or skins a triggered content-roll as the
-nearest row — it never invents an episode type that isn't on the board.*
+what contests it). When the players seek work, the PLAYER picks from this table (Channel A below);
+otherwise the DM rolls it through the dice engine, or skins a content firing as the nearest row. The
+DM never picks a row itself and never invents an episode type that isn't on the board.*
 
-Roll d‹N› or pick to fit when an objective is sought; or skin a triggered content-roll as the nearest type.
+The player picks when an objective is sought; otherwise roll d‹N› (world dice, through the engine), or skin a content firing as the nearest type.
 
 | d‹N› | ‹Episode type› | Shape |
 |---|---|---|
@@ -89,22 +90,23 @@ player asks "what's on offer?", roll 2–3 types up as a menu and let them pick.
 dice decorate it.
 
 **Channel B — SPONTANEOUS (the party is NOT seeking work and the world intrudes): straight dice, no
-menu.** Run the normal engine exactly as written — the per-phase Disturbance check, then the Content
-roll (d100 + Karma mod → band) → intersection roll. The player does NOT choose the type; the dice do.
+menu.** Run the normal engine exactly as written: the automatic content firing at each phase
+(nature d6 → flat interleaved content d100 → environment cast → intersection roll, all world dice
+through the engine). The player does NOT choose the type; the dice do.
 The charter still skins the *result* as the nearest board type / on-theme content (never an off-tone
 escalation), but the player takes what the world gives. This is the cold channel that keeps the menu
-honest — you can't fish for only easy jobs, because the open world rolls the full Karma-unlocked band
+honest — you can't fish for only easy jobs, because the open world rolls the full flat band
 and can hand you a hard fight.
 
 **Channel C — FREE ROAM (the player deliberately chooses to wander with no objective).** Distinct from
 B: the party isn't passing through on the way to something — they've *chosen* to explore with no job,
 just to see what's out there and let the world intrude. An intentional surrender to the dice.
-Mechanically it runs the **same cold engine as Channel B** — every phase gets its Disturbance check,
-full Karma-unlocked band, player takes what rolls, no menu — but free roam is the explicit context where
+Mechanically it runs the **same cold engine as Channel B**: every phase gets its content firing,
+the full flat band, player takes what rolls, no menu. But free roam is the explicit context where
 *being found by the world is the point*, not an interruption. Run the phase cadence normally; when
-nothing triggers, that's a quiet stretch (narrate the passage; let the players ‹do downtime appropriate
-to the setting›), and a triggered disturbance is the adventure the player went looking for by looking
-for nothing. The player ends free roam whenever they like (set a course, take a job, make for a hub).
+a firing lands on a low-key band, that's a quiet stretch (narrate the passage; let the players ‹do
+downtime appropriate to the setting›), and a firing that lands hard is the adventure the player went
+looking for by looking for nothing. The player ends free roam whenever they like (set a course, take a job, make for a hub).
 Free roam is how the world builds itself between objectives.
 
 **Reward on completion (any channel):** ‹coin + occasional loot/upgrade + Reputation movement, or
@@ -142,7 +144,7 @@ sometimes it goes sideways (a creature, weather, a rival crew), you come home ri
 wiser). Episodes stack into a life at sea, not a conspiracy.
 
 ## HARD TONE RULES
-- **Upbeat is tone and scope, NOT outcome — read this first.** The dice still rule. Karma-unlocked bands
+- **Upbeat is tone and scope, NOT outcome — read this first.** The dice still rule. The content bands
   stay fully open; the party still meets hard combat and the occasional dark beat. "Upbeat" means the
   *kind* of story (bounded, concrete, roguish), never "nothing bad happens." A skeleton captain can
   still kill a PC. Everything below constrains what kind of beat gets generated — never whether it can hurt.
@@ -162,7 +164,7 @@ wiser). Episodes stack into a life at sea, not a conspiracy.
 | 2 | **Bounty** | Hunt & defeat a named menace: skeleton captain, rogue beast, priced pirate. |
 | 3 | **Merchant haul** | Deliver cargo intact, on time — cargo is fragile/perishable/wanted. |
 | 4 | **Salvage / wreck** | Dive or board a wreck for its goods; weather, depth, or scavengers contest it. |
-| 5 | **Plunder** | Raid a vessel or coastal cache for loot (Karma-relevant if it's innocents). |
+| 5 | **Plunder** | Raid a vessel or coastal cache for loot (Affinity- and faction-relevant if it's innocents). |
 | 6 | **Fetch the oddity** | Retrieve a specific object (relic, beast's egg, rare catch) guarded by X. |
 | 7 | **Passenger / escort** | Carry someone or something that draws trouble; get them there alive. |
 | 8 | **Rumor / explore** | An uncharted spot; go see, and the dice decide what's there. |
