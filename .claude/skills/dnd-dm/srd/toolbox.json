@@ -1,0 +1,500 @@
+{
+ "meta": {
+  "source": "SRD 5.2.1 (sources/SRD_CC_v5.2.1.pdf)",
+  "attribution": "This work includes material from the System Reference Document 5.2.1 (\"SRD 5.2.1\") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode."
+ },
+ "traps": [
+  {
+   "name": "Collapsing Roof",
+   "detail": "Deadly Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Deadly",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 199,
+   "text": "**Trigger:** A creature crosses a trip wire\n\n**Duration:** Instantaneous\n\nThis trap uses a trip wire to collapse an unstable section of ceiling. The trip wire is 3 inches off the ground and stretches between two weak supports that topple when the trip wire is pulled.\n\nThe first creature that crosses the trip wire causes the supports to topple and the unstable section of ceiling to collapse. Each creature beneath the unstable section of ceiling must succeed on a DC 13 Dexterity saving throw, taking 11 (2d10) Bludgeoning damage on a failed save or half as much damage on a successful one. Rubble from the collapse turns the trapped area into Difficult Terrain.\n\n**Detect and Disarm.** As a Search action, a creature can examine the trapped area and make a DC 11 Wisdom (Perception) check, detecting the trip wire and the unstable section of ceiling on a successful check. Once detected, the trip wire can be easily cut or avoided (no ability check required).\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing the damage and the save DC, as shown in the following table.\n\n| Levels | Bludgeoning Damage | Save DC |\n|---|---|---|\n| 5\u201310 | 22 (4d10) | 15 |\n| 11\u201316 | 55 (10d10) | 17 |\n| 17\u201320 | 99 (18d10) | 19 |",
+   "environments": [
+    "caves",
+    "ruins",
+    "tomb",
+    "underworld",
+    "sewer"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Falling Net",
+   "detail": "Nuisance Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Nuisance",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 199,
+   "text": "**Trigger:** A creature crosses a trip wire\n\n**Duration:** Instantaneous\n\nA falling net trap uses a trip wire to release a weighted, 10-foot-square Net suspended from the ceiling. The trip wire is 3 inches off the ground and stretches between two columns or trees.\n\nThe first creature that crosses the trip wire causes the Net to fall on it. The target must succeed on a DC 10 Dexterity saving throw or have the Restrained condition until it escapes. The target succeeds automatically if it\u2019s Huge or larger. A creature can take an action to make a DC 10 Strength (Athletics) check, freeing itself or another creature within its reach from the Net on a successful check.\n\n**Detect and Disarm.** As a Search action, a creature can examine the trapped area and make a DC 11 Wisdom (Perception) check, detecting the trip wire and the suspended Net on a successful check. Once detected, the trip wire can be easily cut or avoided (no ability check required).\n\n**Destroy the Net.** Reducing the Net to 0 Hit Points frees any creature trapped in it (see \u201cAdventuring Gear\u201d for the Net\u2019s statistics).\n\n**Set the Trap.** A creature that has Thieves\u2019 Tools and all the trap\u2019s components (including a Net) can try to set a falling net trap, doing so with a successful DC 13 Dexterity (Sleight of Hand) check. Each attempt to set this trap takes 10 minutes.\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing the weight of the Net, which increases the save DC and the DC of the Strength (Athletics) check as follows: DC 12 at levels 5\u201310, DC 14 at levels 11\u201316, or DC 16 at levels 17\u201320.",
+   "environments": [
+    "caves",
+    "ruins",
+    "tomb",
+    "underworld",
+    "sewer",
+    "laboratory",
+    "temple",
+    "urban",
+    "forest"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Fire-Casting Statue",
+   "detail": "Deadly Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Deadly",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 199,
+   "text": "**Trigger:** A creature moves onto a pressure plate\n\n**Duration:** Instantaneous, and the trap resets at the start of the next turn\n\nWhen a creature moves onto this trap\u2019s pressure plate for the first time on a turn or starts its turn there, a nearby statue exhales a 15-foot Cone of magical flame. The statue can look like anything, such as a dragon or a wizard. Each creature in the Cone must succeed on a DC 15 Dexterity saving throw, taking 11 (2d10) Fire damage on a failed save or half as much damage on a successful one.\n\n**Detect and Disarm.** A *Detect Magic* spell reveals an aura of Evocation magic around the statue. As a Search action, a creature within 5 feet of the statue can examine it and make a DC 10 Wisdom (Perception) check, detecting a tiny glyph on the statue on a successful check. Once the glyph is found, a character can take a Study action to examine it and make a DC 15 Intelligence (Arcana) check, ascertaining that the glyph means \u201cfire\u201d on a successful check. As an action, a character can use a sharp tool to deface the glyph, which disarms the trap.\n\nAs a Search action, a creature can examine the section of floor that forms the pressure plate and make a DC 15 Wisdom (Perception) check, detecting the pressure plate on a successful check. Wedging an Iron Spike or similar object under the pressure plate prevents the trap from triggering.\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing the damage and the area of effect, as shown in the following table.\n\n| Levels | Fire Damage | Area of Effect |\n|---|---|---|\n| 5\u201310 | 22 (4d10) | 30-foot Cone |\n| 11\u201316 | 55 (10d10) | 60-foot Cone |\n| 17\u201320 | 99 (18d10) | 120-foot Cone |",
+   "environments": [
+    "temple",
+    "tomb",
+    "laboratory",
+    "ruins"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Hidden Pit",
+   "detail": "Nuisance Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Nuisance",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 200,
+   "text": "**Trigger:** A creature moves onto the pit\u2019s lid\n\n**Duration:** Instantaneous\n\nThis 10-foot-deep pit has a hinged lid constructed from material identical to the surrounding floor. When a creature moves onto the lid, it swings open like a trapdoor, causing the creature to fall into the pit. The lid remains open thereafter.\n\nA creature that falls into the pit takes 3 (1d6) Bludgeoning damage from the fall.\n\n**Detect and Disarm.** As a Study action, a creature can examine the section of floor that forms the pit\u2019s lid and make a DC 15 Intelligence (Investigation) check, detecting the pit on a successful check. Once the pit is detected, an Iron Spike or a similar object can be wedged between the pit\u2019s lid and the surrounding floor to prevent the lid from opening, thereby making it safe to cross. The cover can also be held shut using *Arcane Lock* or similar magic.\n\n**Escape.** A creature needs a Climb Speed, climbing gear, or magic such as *Spider Climb* to scale the pit\u2019s smooth walls. You can make the pit easier to escape by adding cracks in the walls big enough to serve as handholds and footholds.\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing the pit\u2019s depth and damage, as shown in the following table.\n\n| Levels | Pit Depth | Bludgeoning Damage |\n|---|---|---|\n| 5\u201310 | 30 feet | 10 (3d6) |\n| 11\u201316 | 60 feet | 21 (6d6) |\n| 17\u201320 | 120 feet | 42 (12d6) |",
+   "environments": [
+    "caves",
+    "ruins",
+    "tomb",
+    "underworld",
+    "sewer",
+    "laboratory",
+    "temple",
+    "forest",
+    "grassland"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Poisoned Darts",
+   "detail": "Deadly Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Deadly",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 200,
+   "text": "**Trigger:** A creature moves onto a pressure plate\n\n**Duration:** Instantaneous, and the trap resets at the start of the next turn if it has activated fewer than three times\n\nWhen a creature moves onto this trap\u2019s pressure plate for the first time on a turn, poisoned darts shoot from tubes embedded in the surrounding walls. The holes that house these tubes are obscured by dust and cobwebs or skillfully hidden amid bas-reliefs, murals, or frescoes.\n\nEach creature in the darts\u2019 path must succeed on a DC 13 Dexterity saving throw or be struck by 1d3 darts, taking 3 (1d6) Poison damage per dart.\n\n**Detect and Disarm.** As a Search action, a creature can examine the walls and make a DC 15 Wisdom (Perception) check, detecting the holes on a successful check. Plugging all the holes with wax, cloth, or detritus prevents the darts from firing.\n\nAs a Search action, a creature can examine the section of floor that forms the pressure plate and make a DC 15 Wisdom (Perception) check, detecting the pressure plate on a successful check. Wedging an Iron Spike or a similar object under the pressure plate prevents the trap from triggering.\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing each dart\u2019s Poison damage as follows: 7 (2d6) at levels 5\u201310, 14 (4d6) at levels 11\u201316, or 24 (7d6) at levels 17\u201320.",
+   "environments": [
+    "tomb",
+    "temple",
+    "ruins",
+    "laboratory",
+    "underworld"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Poisoned Needle",
+   "detail": "Nuisance Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Nuisance",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 200,
+   "text": "**Trigger:** A creature opens the trap\u2019s lock improperly or fails to disarm the trap\n\n**Duration:** Instantaneous\n\nA poisoned needle is hidden in a lock. When a creature opens the lock with any object other than the proper key, the needle springs out and stabs the creature. The creature makes a DC 11 Constitution saving throw. On a failed save, the creature takes 5 (1d10) Poison damage and has the Poisoned condition for 1 hour. On a successful save, the creature takes half as much damage only.\n\n**Avoid.** The trap doesn\u2019t trigger if the lock is opened using a *Knock* spell or similar magic.\n\n**Detect and Disarm.** As a Search action, a creature can examine the trapped lock and make a DC 15 Wisdom (Perception) check, detecting the needle on a successful check. Once the trap is detected, a character can take an action to try to disarm the trap, doing so with a successful DC 15 Dexterity (Sleight of Hand) check. On a failed check, the creature triggers the trap.\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing the damage and the save DC, as shown in the following table.\n\n| Levels | Poison Damage | Save DC |\n|---|---|---|\n| 5\u201310 | 11 (2d10) | 13 |\n| 11\u201316 | 22 (4d10) | 15 |\n| 17\u201320 | 55 (10d10) | 17 |",
+   "environments": [
+    "caves",
+    "ruins",
+    "tomb",
+    "underworld",
+    "sewer",
+    "laboratory",
+    "temple",
+    "urban"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Rolling Stone",
+   "detail": "Deadly Trap (Levels 11\u201316) or Nuisance Trap (Levels 17\u201320)",
+   "tiers": [
+    {
+     "severity": "Deadly",
+     "levels": [
+      11,
+      16
+     ]
+    },
+    {
+     "severity": "Nuisance",
+     "levels": [
+      17,
+      20
+     ]
+    }
+   ],
+   "page": 201,
+   "text": "**Trigger:** A creature moves onto a pressure plate\n\n**Duration:** Until the stone stops rolling\n\nWhen a creature moves onto a hidden pressure plate, a 5-foot-radius orb of solid stone is released from a secret compartment and begins to roll. The stone and all creatures nearby roll Initiative; the stone gets a +8 bonus on its Initiative roll.\n\nOn its turn, the stone moves 60 feet in one direction, changing course if redirected by an obstacle. The stone can move through creatures\u2019 spaces, and creatures can move through the stone\u2019s space, treating it as Difficult Terrain. Whenever the stone enters a creature\u2019s space for the first time on a turn or a creature enters the stone\u2019s space while the stone is rolling, that creature must succeed on a DC 15 Dexterity saving throw or take 55 (10d10) Bludgeoning damage and have the Prone condition.\n\nThe stone stops when it hits a wall or similar barrier. It can\u2019t go around corners, but creative dungeon builders incorporate curving turns into nearby passages that allow the stone to keep moving.\n\n**Detect and Disarm.** As a Study action, a creature can examine the section of floor that forms the pressure plate and make a DC 15 Intelligence (Investigation) check, deducing the pressure plate\u2019s function on a successful check. Wedging an Iron Spike or a similar object under the pressure plate prevents the trap from triggering.\n\n**Destroy the Stone.** The stone is a Large object that has AC 17, HP 100, a Damage Threshold of 10, and Immunity to Poison and Psychic damage.\n\n**Slow the Stone.** As an action, a creature can try to slow down the stone with a DC 20 Strength (Athletics) check. If the check is successful, the distance the stone moves on its turn is reduced by 15 feet. If that distance drops to 0, it stops moving and is no longer a threat.",
+   "environments": [
+    "tomb",
+    "temple",
+    "ruins",
+    "underworld",
+    "caves"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Spiked Pit",
+   "detail": "Deadly Trap (Levels 1\u20134)",
+   "tiers": [
+    {
+     "severity": "Deadly",
+     "levels": [
+      1,
+      4
+     ]
+    }
+   ],
+   "page": 201,
+   "text": "**Trigger:** A creature moves onto the pit\u2019s lid\n\n**Duration:** Instantaneous\n\nA 10-foot-deep pit has a hinged lid constructed from material identical to the surrounding floor. When a creature moves onto the lid, it swings open like a trapdoor, causing the creature to fall into the pit, which has sharpened wooden or metal spikes at the bottom. The lid remains open thereafter.\n\nA creature that falls into the pit lands at the bottom and takes 3 (1d6) Bludgeoning damage from the fall plus 9 (2d8) Piercing damage from the spikes.\n\n**Detect and Disarm.** As a Study action, a creature can examine the section of floor that forms the pit\u2019s lid and make a DC 15 Intelligence (Investigation) check, detecting the pit on a successful check. Once the hidden pit is detected, an Iron Spike or a similar object can be wedged between the pit\u2019s lid and the surrounding floor to prevent the lid from opening, thereby making it safe to cross. The cover can also be held shut using an *Arcane Lock* spell or similar magic.\n\n**Escape.** A creature needs a Climb Speed, climbing gear, or magic such as a *Spider Climb* spell to scale the pit\u2019s smooth walls. You can make the pit easier to escape by adding cracks in the walls big enough to serve as handholds and footholds.\n\n**At Higher Levels.** You can scale the trap for higher levels by increasing the pit\u2019s depth and damage, as shown in the following table.\n\n| Levels | Pit Depth | Damage |\n|---|---|---|\n| 5\u201310 | 30 feet | 10 (3d6) Bludgeoning plus 13 (3d8) Piercing |\n| 11\u201316 | 60 feet | 21 (6d6) Bludgeoning plus 36 (8d8) Piercing |\n| 17\u201320 | 120 feet | 42 (12d6) Bludgeoning plus 57 (13d8) Piercing |",
+   "environments": [
+    "caves",
+    "ruins",
+    "tomb",
+    "underworld",
+    "sewer",
+    "laboratory",
+    "temple",
+    "forest"
+   ],
+   "env_source": "manual"
+  }
+ ],
+ "poisons": [
+  {
+   "name": "Assassin\u2019s Blood",
+   "kind": "Ingested",
+   "price_gp": 150,
+   "page": 197,
+   "text": "A creature subjected to Assassin\u2019s Blood makes a DC 10 Constitution saving throw. On a failed save, the creature takes 6 (1d12) Poison damage and has the Poisoned condition for 24 hours. On a successful save, the creature takes half as much damage only."
+  },
+  {
+   "name": "Burnt Othur Fumes",
+   "kind": "Inhaled",
+   "price_gp": 500,
+   "page": 197,
+   "text": "A creature subjected to Burnt Othur Fumes must succeed on a DC 13 Constitution saving throw or take 10 (3d6) Poison damage, and it must repeat the save at the start of each of its turns. On each successive failed save, the creature takes 3 (1d6) Poison damage. After three successful saves, the poison ends."
+  },
+  {
+   "name": "Crawler Mucus",
+   "kind": "Contact",
+   "price_gp": 200,
+   "page": 197,
+   "text": "A creature subjected to Crawler Mucus must succeed on a DC 13 Constitution saving throw or have the Poisoned condition for 1 minute. The creature also has the Paralyzed condition while Poisoned in this way. The creature repeats the save at the end of each of its turns, ending the effect on itself on a success."
+  },
+  {
+   "name": "Essence of Ether",
+   "kind": "Inhaled",
+   "price_gp": 300,
+   "page": 197,
+   "text": "A creature subjected to Essence of Ether must succeed on a DC 15 Constitution saving throw or have the Poisoned condition for 8 hours. The creature also has the Unconscious condition while Poisoned in this way. The creature wakes up if it takes damage or if another creature takes an action to shake it awake."
+  },
+  {
+   "name": "Malice",
+   "kind": "Inhaled",
+   "price_gp": 250,
+   "page": 197,
+   "text": "A creature subjected to Malice must succeed on a DC 15 Constitution saving throw or have the Poisoned condition for 1 hour. The creature also has the Blinded condition while Poisoned in this way."
+  },
+  {
+   "name": "Midnight Tears",
+   "kind": "Ingested",
+   "price_gp": 1500,
+   "page": 197,
+   "text": "A creature that ingests Midnight Tears suffers no effect until the stroke of midnight. Any effect that ends the Poisoned condition neutralizes this poison. If the poison hasn\u2019t been neutralized before midnight, the creature makes a DC 17 Constitution saving throw, taking 31 (9d6) Poison damage on a failed save or half as much damage on a successful one."
+  },
+  {
+   "name": "Oil of Taggit",
+   "kind": "Contact",
+   "price_gp": 400,
+   "page": 198,
+   "text": "A creature subjected to Oil of Taggit must succeed on a DC 13 Constitution saving throw or have the Poisoned condition for 24 hours. The creature also has the Unconscious condition while Poisoned in this way. It wakes up if it takes damage."
+  },
+  {
+   "name": "Pale Tincture",
+   "kind": "Ingested",
+   "price_gp": 250,
+   "page": 198,
+   "text": "A creature subjected to Pale Tincture must succeed on a DC 16 Constitution saving throw or take 3 (1d6) Poison damage and have the Poisoned condition. The Poisoned creature repeats the save every 24 hours, taking 3 (1d6) Poison damage on a failed save. The damage the poison deals can\u2019t be healed by any means while the creature remains Poisoned. After seven successful saves against the poison, the creature is no longer Poisoned."
+  },
+  {
+   "name": "Purple Worm Poison",
+   "kind": "Injury",
+   "price_gp": 2000,
+   "page": 198,
+   "text": "A creature subjected to Purple Worm Poison makes a DC 21 Constitution saving throw, taking 35 (10d6) Poison damage on a failed save or half as much damage on a successful one."
+  },
+  {
+   "name": "Serpent Venom",
+   "kind": "Injury",
+   "price_gp": 200,
+   "page": 198,
+   "text": "A creature subjected to Serpent Venom must succeed on a DC 11 Constitution saving throw, taking 10 (3d6) Poison damage on a failed save or half as much damage on a successful one."
+  },
+  {
+   "name": "Spider\u2019s Sting",
+   "kind": "Injury",
+   "price_gp": 200,
+   "page": 198,
+   "text": "A creature subjected to Spider\u2019s Sting must succeed on a DC 13 Constitution saving throw or have the Poisoned condition for 1 hour. If the creature fails the save by 5 or more, the creature also has the Unconscious condition while Poisoned in this way. The creature wakes up if it takes damage or if another creature takes an action to shake it awake."
+  },
+  {
+   "name": "Torpor",
+   "kind": "Ingested",
+   "price_gp": 600,
+   "page": 198,
+   "text": "A creature subjected to Torpor poison must succeed on a DC 15 Constitution saving throw or have the Poisoned condition for 4d6 hours. The creature\u2019s Speed is halved while the creature is Poisoned in this way."
+  },
+  {
+   "name": "Truth Serum",
+   "kind": "Ingested",
+   "price_gp": 150,
+   "page": 198,
+   "text": "A creature subjected to Truth Serum must succeed on a DC 11 Constitution saving throw or have the Poisoned condition for 1 hour. The Poisoned creature can\u2019t knowingly communicate a lie."
+  },
+  {
+   "name": "Wyvern Poison",
+   "kind": "Injury",
+   "price_gp": 1200,
+   "page": 198,
+   "text": "A creature subjected to Wyvern Poison makes a DC 14 Constitution saving throw, taking 24 (7d6) Poison damage on a failed save or half as much damage on a successful one."
+  }
+ ],
+ "contagions": [
+  {
+   "name": "Cackle Fever",
+   "page": 194,
+   "text": "*Magical Contagion*\n\nCheaply made potions and elixirs are sometimes tainted by Cackle Fever, which affects Humanoids only (gnomes are strangely immune). A creature suffers the following effects 1d4 days after infection:\n\n**Fever.** The creature gains 1 Exhaustion level, which lasts until the contagion ends on the creature.\n\n**Uncontrollable Laughter.** While the creature has the Exhaustion condition, the creature makes a DC 13 Constitution saving throw each time it takes damage other than Psychic damage. On a failed save, the creature takes 5 (1d10) Psychic damage and has the Incapacitated condition as it laughs uncontrollably. At the end of each of its turns, the creature repeats the save, ending the effect on itself on a success. After 1 minute, it succeeds automatically.\n\n**Fighting the Contagion.** At the end of each Long Rest, an infected creature makes a DC 13 Constitution saving throw. After the creature succeeds on three of these saves, the contagion ends on it, and the creature is immune to Cackle Fever for 1 year.\n\n**Spreading the Contagion.** Any Humanoid (other than a gnome) that starts its turn within a 10-foot Emanation originating from a creature infected with Cackle Fever must succeed on a DC 10 Constitution saving throw or also become infected with the contagion. On a successful save, the Humanoid can\u2019t catch the contagion from that particular infected creature for the next 24 hours.",
+   "environments": [
+    "urban",
+    "grassland",
+    "hills"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Sewer Plague",
+   "page": 194,
+   "text": "*Magical Contagion*\n\nFouled potions and alchemical waste can give rise to Sewer Plague, which incubates in sewers and refuse heaps and is sometimes transmitted by creatures that dwell in such areas, including otyughs and rats. Any Humanoid that is wounded by a creature that carries the contagion or that comes into contact with contaminated filth or offal must succeed on a DC 11 Constitution saving throw or become infected with Sewer Plague. A creature suffers the following effects 1d4 days after infection:\n\n**Fatigue.** The creature gains 1 Exhaustion level.\n\n**Weakness.** While the creature has any Exhaustion levels, it regains only half the normal number of Hit Points from spending Hit Point Dice.\n\n**Restlessness.** While the creature has any Exhaustion levels, finishing a Long Rest neither restores lost Hit Points nor reduces the creature\u2019s Exhaustion level.\n\n**Fighting the Contagion.** Daily at dawn, an infected creature makes a DC 11 Constitution saving throw. On a failed save, the creature gains 1 Exhaustion level as its fatigue worsens. On a successful save, the creature\u2019s Exhaustion level decreases by 1. If the creature\u2019s Exhaustion level is reduced to 0, the contagion ends on the creature.",
+   "environments": [
+    "sewer",
+    "swamp",
+    "urban"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Sight Rot",
+   "page": 194,
+   "text": "*Magical Contagion*\n\nAny Beast or Humanoid that drinks water tainted by Sight Rot must succeed on a DC 15 Constitution saving throw or have the Blinded condition until the contagion ends.\n\n**Fighting the Contagion.** Magic such as a *Heal* or *Lesser Restoration* spell ends the contagion immediately. A character who is proficient with an Herbalism Kit can use it to create one dose of nonmagical ointment, which takes 1 hour. When applied to the eyes of a creature suffering from Sight Rot, the ointment suppresses the contagion on that creature for 24 hours. If the contagion is suppressed in this way for a total of 72 hours (requiring three doses and applications of the ointment), the contagion ends on the creature.\n\n**Spreading the Contagion.** Any Humanoid that makes skin contact with a creature infected with Sight Rot must succeed on a DC 15 Constitution saving throw or also become infected with the contagion. On a successful save, the Humanoid can\u2019t catch the contagion from that particular infected creature for the next 24 hours.",
+   "environments": [
+    "swamp",
+    "forest"
+   ],
+   "env_source": "manual"
+  }
+ ],
+ "curses": [
+  {
+   "name": "Bestow Curse",
+   "page": 193,
+   "text": "The simplest curses are created by the *Bestow Curse* spell. The effects of such curses are limited and can be ended by the *Remove Curse* spell.\n\n*Bestow Curse* provides useful benchmarks for gauging the potency of other curses. A curse that lasts for 1 minute equates to a level 3 spell, while one that lasts until dispelled equates to a level 9 spell."
+  },
+  {
+   "name": "Cursed Creatures",
+   "page": 193,
+   "text": "Some monsters are associated with curses, whether as part of their origins or due to their ability to spread curses\u2014werewolves being a prime example.\n\nYou decide how a spell like *Remove Curse* affects a creature with accursed origins. For example, you might decide that a mummy was created through a curse and it can be destroyed permanently only by casting *Remove Curse* on its corpse."
+  },
+  {
+   "name": "Cursed Magic Items",
+   "page": 193,
+   "text": "Cursed magic items are created deliberately or originate as the result of supernatural events. Such items are detailed in \u201cMagic Items.\u201d"
+  },
+  {
+   "name": "Narrative Curses",
+   "page": 193,
+   "text": "A curse might manifest during an adventure when a creature\u2019s violation of a taboo warrants supernatural punishment, such as breaking a vow, defiling a tomb, or murdering an innocent. Such a curse can have any effects you design, or it might be a customized version of another type of curse discussed in this section.\n\nA creature affected by such a curse should know why they\u2019re being punished and be able to learn how to end their curse, likely by symbolically righting the wrong they committed. How a spell like *Remove Curse* affects a curse that\u2019s part of your adventure is up to you\u2014the spell might merely suppress the effects of the curse for a time. Regardless, narrative curses should feel like rare, potent magic rooted in the lore of your campaign."
+  },
+  {
+   "name": "Environmental Curses",
+   "page": 193,
+   "text": "Some locations are so suffused with evil that anyone who lingers there is burdened with a curse. Demonic Possession is one example of an environmental curse.\n\n**Demonic Possession.** Demonic Possession arises from the chaos and evil of the Abyss and commonly besets creatures that interact with demonic objects or linger in desecrated locations, where demonic spirits await victims.\n\nA creature that becomes the target of Demonic Possession must succeed on a DC 15 Charisma saving throw or be possessed by a bodiless demonic entity. Whenever the possessed creature rolls a 1 on a D20 Test, the demonic entity takes control of the creature and determines the creature\u2019s behavior thereafter. At the end of each of the possessed creature\u2019s later turns, the creature makes a DC 15 Charisma saving throw, regaining control of itself on a success.\n\nAfter finishing a Long Rest, a creature with Demonic Possession makes a DC 15 Charisma saving throw. On a successful save, the effect ends on the creature. A *Dispel Evil and Good* spell or any magic that removes a curse also ends the effect on it."
+  },
+  {
+   "name": "Rest and Recuperation",
+   "page": 194,
+   "text": "If a creature infected with a magical contagion spends 3 days recuperating\u2014engaging in no activities that would interrupt a Long Rest\u2014the creature makes a DC 15 Constitution saving throw at the end of the recuperation period. On a successful save, the creature has Advantage on saving throws to fight off the magical contagion for the next 24 hours."
+  },
+  {
+   "name": "Example Contagions",
+   "page": 194,
+   "text": "The following examples show how magical contagions can work. Feel free to alter the saving throw DCs, effects, and other characteristics of these contagions to suit your campaign."
+  }
+ ],
+ "environmental_effects": [
+  {
+   "name": "Deep Water",
+   "page": 195,
+   "text": "Swimming through deep water (more than 100 feet deep) presents additional challenges because of the water\u2019s pressure and cold temperature. After each hour of swimming in deep water, a creature that lacks a Swim Speed must succeed on a DC 10 Constitution saving throw or gain 1 Exhaustion level.",
+   "environments": [
+    "ocean",
+    "lake"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Extreme Cold",
+   "page": 195,
+   "text": "When the temperature is 0 degrees Fahrenheit or lower, a creature exposed to the extreme cold must succeed on a DC 10 Constitution saving throw at the end of each hour or gain 1 Exhaustion level. Creatures that have Resistance or Immunity to Cold damage automatically succeed on the save.",
+   "environments": [
+    "arctic",
+    "mountain"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Extreme Heat",
+   "page": 195,
+   "text": "When the temperature is 100 degrees Fahrenheit or higher, a creature exposed to the extreme heat and without access to drinkable water must succeed on a Constitution saving throw at the end of each hour or gain 1 Exhaustion level. The DC is 5 for the first hour and increases by 1 for each additional hour. Creatures wearing Medium or Heavy armor have Disadvantage on the save. Creatures that have Resistance or Immunity to Fire damage automatically succeed on the save.",
+   "environments": [
+    "desert",
+    "srd_plane-of-fire"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Frigid Water",
+   "page": 195,
+   "text": "A creature can be immersed in frigid water for a number of minutes equal to its Constitution score before suffering any ill effects. Each additional minute spent in frigid water requires the creature to succeed on a DC 10 Constitution saving throw or gain 1 Exhaustion level. Creatures with Resistance or Immunity to Cold damage automatically succeed on the save, as do creatures that are naturally adapted to living in ice-cold water.",
+   "environments": [
+    "arctic",
+    "ocean",
+    "lake",
+    "mountain"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Heavy Precipitation",
+   "page": 195,
+   "text": "Everything within an area of heavy rain or heavy snowfall is Lightly Obscured, and creatures in the area have Disadvantage on all Wisdom (Perception) checks. Heavy rain also extinguishes open flames.",
+   "environments": [
+    "forest",
+    "grassland",
+    "hills",
+    "mountain",
+    "swamp",
+    "coast",
+    "ocean",
+    "urban",
+    "arctic"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "High Altitude",
+   "page": 195,
+   "text": "Traveling at altitudes of 10,000 feet or higher above sea level is taxing for most creatures because of the reduced amount of oxygen in the air. Each hour such a creature spends traveling at high altitude counts as 2 hours for the purpose of determining how long that creature can travel (see \u201cTravel Pace\u201d).\n\nCreatures can become acclimated to a high altitude by spending 30 days or more at this elevation. Creatures can\u2019t become acclimated to elevations above 20,000 feet unless they are native to such environments.",
+   "environments": [
+    "mountain"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Slippery Ice",
+   "page": 195,
+   "text": "Slippery ice is Difficult Terrain. A creature that moves onto slippery ice for the first time on a turn or starts its turn there must succeed on a DC 10 Dexterity saving throw or have the Prone condition.",
+   "environments": [
+    "arctic",
+    "mountain"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Strong Wind",
+   "page": 195,
+   "text": "Strong wind imposes Disadvantage on ranged attack rolls with weapons. It also extinguishes open flames and disperses fog. A flying creature in a strong wind must land at the end of its turn or fall.\n\nA strong wind in a desert can create a sandstorm that imposes Disadvantage on Wisdom (Perception) checks.",
+   "environments": [
+    "mountain",
+    "coast",
+    "ocean",
+    "desert",
+    "grassland",
+    "arctic",
+    "srd_plane-of-air"
+   ],
+   "env_source": "manual"
+  },
+  {
+   "name": "Thin Ice",
+   "page": 195,
+   "text": "Thin ice has a weight tolerance of 3d10 \u00d7 10 pounds per 10-foot-square area. Whenever the total weight on an area of thin ice exceeds its tolerance, the ice in that area breaks. All creatures on broken ice fall through. Below the ice is frigid water (see \u201cFrigid Water\u201d above).",
+   "environments": [
+    "arctic",
+    "lake"
+   ],
+   "env_source": "manual"
+  }
+ ],
+ "fear_and_stress": [
+  {
+   "name": "Fear Effects",
+   "page": 196,
+   "text": "Whenever the characters encounter something that is supernaturally frightful, use the Frightened condition as the baseline effect. Fear effects typically require a Wisdom saving throw, with a save DC based on how terrifying the situation is. The Sample Fear DCs table provides some examples.\n\n##### Sample Fear DCs\n\n| Example | Save DC |\n|---|---|\n| When the characters open a sarcophagus, a harmless yet terrifying apparition appears. | 10 |\n| A character triggers a magical trap that creates an illusory manifestation of that character\u2019s worst fears, visible only to that character. | 15 |\n| A portal to the Abyss opens, revealing a nightmarish realm of torment and slaughter. | 20 |\n\nTypically, a Frightened creature repeats the saving throw at the end of each of its turns, ending the effect on itself on a success.\n\nAt your discretion, a Frightened creature might be subject to other effects as long as the Frightened condition lasts. Consider these examples:\n\n- The Frightened creature must take the Dash action on each of its turns and uses its movement to get farther away from the source of its fear.\n\n- Attack rolls against the Frightened creature have Advantage.\n\n- The Frightened creature can do only one of the following on each of its turns: move, take an action, or take a Bonus Action."
+  },
+  {
+   "name": "Mental Stress Effects",
+   "page": 196,
+   "text": "When a character is subjected to an effect that causes intense mental stress, Psychic damage is the best way to emulate that effect.\n\nThe Sample Mental Stress Effects table provides a few examples of such effects, with suggested saving throw DCs and damage. Mental stress can usually be resisted with a successful Wisdom save, but sometimes an Intelligence or Charisma save is more appropriate. On a successful save, a character might take half as much damage instead of no damage, at your discretion.\n\n##### Sample Mental Stress Effects\n\n| Example | Save DC | Psychic Damage |\n|---|---|---|\n| A character ingests a hallucinogenic substance that distorts the character\u2019s perception of reality. | 10 | 1d6 |\n| A character touches a fiendish idol that tears at the character\u2019s mind, threatening to shatter it. | 15 | 3d6 |\n| A magical trap flings a character into the Far Realm until the end of that character\u2019s next turn. | 20 | 9d6 |\n\n#### Prolonged Effects\n\nExposure to mental stress can cause prolonged effects. Consider the following possibilities.\n\n**Short-Term Effects.** The character has the Frightened, Incapacitated, or Stunned condition for 1d10 minutes. This condition might be accompanied by alarming behavior or hallucinations. These effects can be suppressed with the *Calm Emotions* spell or removed by the *Lesser Restoration* spell.\n\n**Long-Term Effects.** The character has Disadvantage on some or all ability checks for 1d10 \u00d7 10 hours, stemming from an unwillingness or inability to exert a particular set of abilities. The character might feel enervated and unable to exert much Strength, for example, or become so suspicious of others that Charisma checks are more difficult. These effects can be suppressed with the *Calm Emotions* spell or removed by the *Lesser Restoration* spell.\n\n**Indefinite Effects.** An indefinite effect is a longterm effect (see above) that lasts until removed by a *Greater Restoration* spell. It can be suppressed by a *Calm Emotions* spell."
+  }
+ ]
+}

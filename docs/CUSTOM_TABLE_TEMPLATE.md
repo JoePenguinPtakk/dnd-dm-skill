@@ -6,7 +6,9 @@
 Rolled through the table deck: the content d100's **last digit** picks the band
 (1, 4, 7 Confrontation · 2, 5, 8 Aid · 3, 6, 9 Fight · 0 Wild), its **tens
 digit** picks the entry (0–9). Fight entries name the kind of threat; the §7-bis
-SPAWN PROCEDURE rolls the creature. Tag PC-thread entries with the PC's name.
+SPAWN PROCEDURE rolls the creature. An obstacle or challenge entry may name a
+kind of hazard (a trap, bad ice, a sickness); the §7-bis HAZARD PROCEDURE rolls
+which SRD hazard it is. Tag PC-thread entries with the PC's name.
 
 Minimum mix across all 40: 6 NPC encounters · 4 puzzles or obstacles · 4
 check-based challenges · 4 no-threat experiences · 4 PC-thread entries · fights

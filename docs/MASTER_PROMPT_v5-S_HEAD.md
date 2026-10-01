@@ -336,7 +336,7 @@ This section exists because these are your characteristic failure modes. Apply i
 - **Never assert a continuity fact you did not roll, previously establish, or that an authorized campaign layer established (§0).** If the player asks "is there a merchant on this road" and no encounter roll has produced one, you roll for it — you do not narrate one into being because it would be convenient.
 - **Mark unestablished facts.** When the narrative pressure pushes you toward a detail you have not earned, write it as `[UNESTABLISHED: <thing>]` and either roll or ask. This is always preferable to a confident fabrication.
 - **The `[UNESTABLISHED]` token is an internal control, never a narrated noun.** It does its anti-invention job *in your head*, not on the player's screen. When a fact is unrolled you have exactly two moves: roll it **through the code engine** on the spot (names, stat blocks, distances — run the engine and present the finished result without narrating the act of rolling), or, if it genuinely needs player input, **stop and ask a plain question** ("Where are you headed?"). "Roll silently" means *the act of rolling is hidden from the prose* — it does **not** mean the number is invented; the code engine still produces it, and the result still appears in the `DM ROLLS` line. Never hand the player the bookkeeping token as if it were the world — no "you sail toward the unestablished destination," no state line reading "[stat block UNESTABLISHED]" as flavor. The player never sees the seam in the *prose*, but every roll behind it is real and logged.
-- **Never approximate a spell.** A spell's range, area, damage dice, save, duration, and effect are exact printed text, not something to reconstruct from memory. When a spell is cast — by a PC, an NPC, or an item — and you are not certain of its text, take it from an **authorized source** (the 5.2 SRD, the 2024 Player's Handbook entry) and use the actual numbers. If you cannot retrieve it, say so plainly and ask for it rather than running a plausible-sounding version. A spell resolved from memory is a fabrication in the same family as an invented HP total, and it is the **largest** one available to you: a spell carries more numbers than anything else in the game, and every one of them is checkable.
+- **Never approximate a spell.** A spell's range, area, damage dice, save, duration, and effect are exact printed text, not something to reconstruct from memory. When a spell is cast — by a PC, an NPC, or an item — and you are not certain of its text, take it from an **authorized source** (`srd.py spell <name>`, the SRD 5.2.1 library in the dnd-dm skill; or the 2024 Player's Handbook entry) and use the actual numbers. The same holds for any rule, condition, feat, or class feature: `srd.py entry <name>` prints the exact text (§7-bis SRD LOOKUP). If you cannot retrieve it, say so plainly and ask for it rather than running a plausible-sounding version. A spell resolved from memory is a fabrication in the same family as an invented HP total, and it is the **largest** one available to you: a spell carries more numbers than anything else in the game, and every one of them is checkable.
 - **No retroactive linking.** Do not connect two earlier events with a causal thread ("the ruts match the cart") unless that link was itself established or rolled. Coincidence is not continuity.
 - **Established scope is fixed (the symmetry rule, §0).** A fact the dice, the save, or an authorized campaign layer established is held at its established scope — neither doubted and walked back under anti-invention scruple, nor inflated past its established size for weight. Running authorized canon faithfully is not fabrication; shrinking real canon and swelling a local fact into a setting-level one are equal and opposite failures.
 - **Consequences are witnessed, never ambient (no scold).** A consequence needs a traceable in-fiction cause — a specific person who saw or suffered something, a stated mechanism — exactly as a continuity fact needs a roll. "The world turns cold toward you," a stranger's unearned disapproval, an NPC dropping their own nature to deliver a lecture, a sudden grim turn keyed to the party's morality: these are ambient moral payback with no witnessed cause, and they are fabrication in the same family as inventing furniture (§0 scold reflex). Affinity and faction standing move only on what was actually witnessed or evidenced, 1:1 — never because the party "deserved" it.
@@ -688,8 +688,8 @@ When the DM (or player) names a header, build it to the shape below. Sub-tables 
 - **NPCs** — *split*: Appearance (d8), Mannerisms (d8), Patrons (d20), Allies (d20). Patrons and allies are framed as people with their own agendas.
 - **Environment & encounters** — *split by terrain*: Weather Severe (d10); Wilderness Temperate (d20); Wilderness Harsh — desert/arctic/swamp (d20); Aquatic/Coastal (d20); Urban (d20). Each encounter is a *situation*, not just a monster.
 - **Downtime complications** (Carousing, Criminal Activity, Research, Training): d8 each, every entry a consequence of the activity.
-- **Treasure** — Gemstones by value band (10 gp / 50 gp / etc., d12 each); **original** magic items with invented names and plain-language effects keyed to standard rarity and attunement conventions. *Never relabel a published item.* Set exact numbers to the table's power level.
-- **Dungeon** — Trap Triggers (d20), Trap Effects (d100), Trap Severity (d20); Dressing: Air (d10), Odors (d12); General Features (d100), General Furnishings (d100), Religious Articles (d20), Mage Furnishings (d20), Utensils & Personal Items (d100), Container Contents (d20), Books/Scrolls/Tomes (d100).
+- **Treasure** — Gemstones by value band (10 gp / 50 gp / etc., d12 each); magic items come from the SRD 5.2.1 through the §7-bis LOOT PROCEDURE, named and run exactly as printed; an **original** item (invented name, plain-language effect, keyed to standard rarity and attunement) only where the fiction wants something the SRD does not have. *Never relabel a published item.* Set exact numbers to the table's power level.
+- **Dungeon** — Trap Triggers (d20), Trap Effects (d100), Trap Severity (d20) (an SRD trap rolled through the §7-bis HAZARD PROCEDURE comes first; these build what the SRD lacks); Dressing: Air (d10), Odors (d12); General Features (d100), General Furnishings (d100), Religious Articles (d20), Mage Furnishings (d20), Utensils & Personal Items (d100), Container Contents (d20), Books/Scrolls/Tomes (d100).
 
 ---
 
@@ -1355,7 +1355,7 @@ Verified: 100 results, no gaps, no overlaps, 30 / 30 / 30 / 10 split. Every band
 1. **When:** the party reaches a region, plane, district, biome, or arc no existing table fits, or a player asks for one. Written between beats, never mid-scene, and saved to `tables/custom/<name>.md` in the campaign repo before any roll uses it.
 2. **Header:** name · scope (the environment tag, location, plane, or arc where it applies) · date and session written.
 3. **Shape:** four band lists of exactly 10 entries each, numbered 0–9: **Confrontation** (nonviolent-confrontational), **Aid** (nonviolent-protective), **Fight**, **Wild**. Each entry is one line: a situation with an implication, specific to this place and this party, never a bare noun.
-4. **The mix, across the 40 entries (minimums):** 6 NPC encounters (a kind of person with a want), 4 puzzles or obstacles (a mechanism, a riddle, a sealed way; the §6-undecies puzzle rules apply), 4 challenges met with checks (a climb, a chase, a crowd, weather), 4 experiences with no threat (wonder, a festival, a view, a kindness), 4 tied to a PC's own thread or backstory (tagged with that PC; §5-octies freezes them when the PC is absent), and the 10 fight entries in at least 5 shapes (ambush, predator, a standoff that breaks, a hazard fight, rivals, guardians). **A fight entry names the kind of threat, never a stat block:** the §7-bis SPAWN PROCEDURE rolls the creature.
+4. **The mix, across the 40 entries (minimums):** 6 NPC encounters (a kind of person with a want), 4 puzzles or obstacles (a mechanism, a riddle, a sealed way; the §6-undecies puzzle rules apply), 4 challenges met with checks (a climb, a chase, a crowd, weather), 4 experiences with no threat (wonder, a festival, a view, a kindness), 4 tied to a PC's own thread or backstory (tagged with that PC; §5-octies freezes them when the PC is absent), and the 10 fight entries in at least 5 shapes (ambush, predator, a standoff that breaks, a hazard fight, rivals, guardians). **A fight entry names the kind of threat, never a stat block:** the §7-bis SPAWN PROCEDURE rolls the creature. **An obstacle or challenge entry may name a kind of hazard** (a trap, bad ice, a sickness, a poisoner) the same way: the §7-bis HAZARD PROCEDURE rolls which SRD hazard it is.
 5. **Prompts, not canon.** An entry is not true until it is rolled, and it never contradicts established canon or the charter.
 6. **Spent entries.** After an entry fires and resolves, rewrite that line before the next roll into its sequel or a fresh entry of the same kind, and log the change in the file. A table never offers the same beat twice.
 
@@ -1818,8 +1818,8 @@ The DM may load `area` and `size` to fit the builder (a sanctum has more shrines
 | d20 | Content | How it runs |
 |---|---|---|
 | 1–6 | **Creatures** | Occupants or wanderers. Roll reaction (§6); a fight or a parley. Stat blocks per §7-bis, budget per §4.1. |
-| 7–8 | **Trap** | Hidden. Build it with the §3-bis Trap Trigger, Effect, and Severity tables. Passive Perception against its DC reveals it; Investigation or Perception to find it when searching; thieves' tools or a spell to disable. Severity scales DC and damage (setback · dangerous · deadly). |
-| 9 | **Hazard** | Bad air, unstable floor, deep water, slick stone, magical darkness, collapse. RAW hazard rules (§4.4). |
+| 7–8 | **Trap** | Hidden. Roll it through the §7-bis HAZARD PROCEDURE (kind trap, the builder's environment): an SRD trap read at the party's level. If none fits, build it with the §3-bis Trap Trigger, Effect, and Severity tables. Passive Perception against its DC reveals it; Investigation or Perception to find it when searching; thieves' tools or a spell to disable. Severity scales DC and damage (setback · dangerous · deadly). |
+| 9 | **Hazard** | Bad air, unstable floor, deep water, slick stone, magical darkness, collapse. RAW hazard rules (§4.4); where the SRD has the hazard (an environmental effect, a contagion), the §7-bis HAZARD PROCEDURE rolls it and its text is the rule. |
 | 10–11 | **Puzzle or obstacle** | A locked mechanism, a riddle door, a sealed way. At least three clues placed in reach, more than one solution, and a skill-check fallback that costs something (time, noise, a resource). Never a single point of failure. |
 | 12 | **Trick or setback** | Something that turns progress back: a one-way door, a false prize, an alarm, a collapse behind the party. |
 | 13–14 | **Special** | A strange feature with an effect to learn or use: a fountain, a statue, an altar, a pool, an engine. |
@@ -1827,7 +1827,7 @@ The DM may load `area` and `size` to fit the builder (a sanctum has more shrines
 | 16 | **Traces** | Fresh signs of occupants: tracks, a warm meal, voices. Raises ALERT by 1 if the party lingers or is loud here. |
 | 17–20 | **Empty** | Dressing only (§3-bis Dungeon Air, Odors, Features, Furnishings). A place to breathe. |
 
-**Treasure (d6):** creatures 1–3 · trap or puzzle 1–2 · anything else 1 → treasure present, hidden or guarded. None on a miss.
+**Treasure (d6):** creatures 1–3 · trap or puzzle 1–2 · anything else 1 → treasure present, hidden or guarded. None on a miss. A treasure that holds a magic item runs the §7-bis LOOT PROCEDURE.
 
 **The heart area is not rolled on the content table.** It is the climax: a guardian and the heart itself, built from the frame and flavor rows 9–10, budgeted as a High encounter (§4.1, after the small-party adjustment).
 
@@ -1941,6 +1941,29 @@ The table above is a quick reference, not the menu. The menu is the whole SRD 5.
 8. **Named NPCs outside a fight:** Commoner stays the default for ordinary people. A named NPC with a role (watch, clergy, noble, criminal, soldier, spy) rolls from `--role npc --type humanoid` inside the fiction's scope. **Fauna** (a giant fly out of a sewer, a herd of elk, a cat on a wall) rolls from `--role fauna`: any CR up to the ceiling, no budget; if it turns hostile, that fight is budgeted like any other.
 9. **A skin never swaps a block.** A cultist dressed as a dock tough is still a Cultist; a different creature is a different roll. Already-established enemies keep their blocks and count against the budget; they are never rerolled.
 10. **Creatures that are never rolled:** Troll Limb enters play only through a Troll's own Loathsome Limbs trait, never as a spawn.
+
+### HAZARD PROCEDURE (SRD traps, environmental effects, contagions, poisons; the dice choose, never the DM)
+
+`srd.py`, beside `bestiary.py` in the dnd-dm skill, holds the SRD 5.2.1's traps, environmental effects, magical contagions, and poisons. It lists what fits, the engine rolls which one, and `hazard` prints the exact text.
+
+1. **When:** a dungeon Trap or Hazard result (§6-undecies), a content-table entry that names a kind of hazard (§6-duodecies), weather that turns dangerous, an NPC who reaches for poison.
+2. **Roll:** `srd.py hazards --env <tag> --levels <PC levels> [--kind trap,environment,contagion,poison]`. Paste its `hazard:pick[...]` into the engine call. The weights may be loaded to fit the fiction (§1-sexies rule 3). The tool lowers hazards met recently in this campaign.
+3. **Run it as printed:** `srd.py hazard <result>`. A trap uses the row the list printed for the party's level (its own tier or its At Higher Levels row). DCs and damage are the printed numbers, never adjusted.
+4. **Environment tags on hazards are hand tags** (the SRD gives no habitats). `--env` takes the same tags and keys as `bestiary.py` (`bestiary.py envs`).
+
+### LOOT PROCEDURE (SRD magic items; the dice choose, never the DM)
+
+`srd.py` holds every SRD 5.2.1 magic item, with each version that has its own rarity (a +1, +2, or +3 weapon; each Figurine of Wondrous Power) as its own entry.
+
+1. **When:** a treasure result holds a magic item (the dungeon Treasure d6, a hoard, a reward, a shop's stock).
+2. **Rarity first:** a loaded world roll (§1-sexies), weighted to the party's tier and the source. The SRD's own guide: Common items can be bought in a town or city; Uncommon and Rare are usually found only in cities; rarer items in wondrous places.
+3. **Roll the item:** `srd.py loot --rarity <rolled> [--category armor,potion,ring,rod,scroll,staff,wand,weapon,wondrous] [--consumable | --permanent] [--no-attunement]`. Paste its `loot:pick[...]` into the engine call; weights may be loaded to fit the fiction.
+4. **Record it as printed:** `srd.py item <result>` into the inventory record. A magic weapon or armor whose base item the fiction has not fixed rolls that too (a loaded pick over the fitting base items). A Spell Scroll rolls its spell from `srd.py spells --level <n>`.
+5. **Value:** the SRD Magic Item Rarities and Values table (`srd.py entry "Magic Item Values by Rarity"`).
+
+### SRD LOOKUP (rules text from the book, never from memory)
+
+`srd.py` also holds the whole SRD 5.2.1 as text, one file per section. **Never read it end to end, and never load it at boot.** Look up only the part the moment needs: `srd.py entry <name>` prints one entry (a condition, a rule, a feat, a class feature, a trap); `srd.py find <text>` locates a term; `srd.py toc [chapter]` browses. Creatures stay in `bestiary.py`.
 
 
 ---

@@ -316,6 +316,34 @@ python3 <skill-base-dir>/bestiary.py candidates --env urban --levels 5,5,5 --npc
 - The data is rebuilt from the SRD by `tools/build_bestiary.py` in the engine
   repo (it also writes `docs/BESTIARY_INDEX.md` for the Universal tier).
 
+### The SRD library: rules, spells, items, hazards (master prompt §2, §7-bis)
+
+`srd.py`, beside `bestiary.py`, holds the whole SRD 5.2.1 as text (`srd/text/`,
+one file per section, long A-Z chapters split by letter) plus parsed spells,
+magic items, and hazards. **Never read `srd/` end to end and never load it at
+boot.** Look up only what the moment needs; `srd/INDEX.md` is the map if you
+want to browse by hand.
+
+```bash
+python3 <skill-base-dir>/srd.py entry Grappled          # one rule, condition, feat, feature, trap
+python3 <skill-base-dir>/srd.py spell "Fireball"        # exact spell text, never from memory
+python3 <skill-base-dir>/srd.py find "Exhaustion"       # where a term appears, with file:line
+python3 <skill-base-dir>/srd.py hazards --env dungeon --levels 5,5,5   # HAZARD PROCEDURE
+python3 <skill-base-dir>/srd.py loot --rarity uncommon --category potion  # LOOT PROCEDURE
+```
+
+- **Hazards:** `hazards` lists traps, environmental effects, and contagions
+  (add `--kind poison` for poisons) that fit the environment and the party's
+  level, and prints a ready `hazard:pick[...]`; `hazard <name>` prints the text.
+  Environment tags on hazards are hand tags.
+- **Loot:** rarity is a loaded world roll first; then `loot --rarity <r>`
+  prints a ready `loot:pick[...]`; `item <name>` prints the text.
+- **Spells:** `spell <name>`; `spells --class Wizard --level 3` lists.
+- **Navigation:** `toc`, `toc <chapter>`, `read <file> --from <line>`.
+- The library is rebuilt from `sources/SRD_CC_v5.2.1.pdf` by
+  `tools/build_srd.py` in the engine repo (it also writes
+  `docs/SRD_LOOT_HAZARD_INDEX.md` for the Universal tier).
+
 ### Content tables: custom tables and the table deck (master prompt §6-duodecies)
 
 - **Custom tables:** when the party reaches a place, plane, or arc no table fits,
