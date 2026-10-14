@@ -57,6 +57,11 @@ DEFAULT_CONFIG = {
     "recent_memory": 12,
     "max_share": 0.90,       # the dice engine refuses an outcome above 90%
     "ignore_speakers": [],   # audit: PC names and test posts, set per campaign
+    # callbacks: people, threads and items from elsewhere (not the party's current region)
+    "callback_max_session": 1,     # at most this many callbacks in one session
+    "callback_gap_sessions": 2,    # at least this many sessions between callbacks
+    "callback_npc_cooldown": 6,    # the same entity is not called back again for this long
+    "near": {},                    # region -> [regions close enough for an in-person visit]
 }
 
 INVERSE = {"employs": "works-for", "works-for": "employs", "leader-of": "follows",
@@ -181,7 +186,8 @@ class Lore:
             self.cfg.update(json.loads(p.read_text()))
         sp = self.root / "state.json"
         self.state = json.loads(sp.read_text()) if sp.exists() else \
-            {"session": 0, "new_npc": 0, "encounter_new": 0, "recent": []}
+            {"session": 0, "new_npc": 0, "encounter_new": 0, "recent": [],
+             "region": "", "callbacks_this_session": 0, "last_callback_session": -99}
 
     def save_state(self):
         (self.root / "state.json").write_text(json.dumps(self.state, indent=1) + "\n")
@@ -222,6 +228,24 @@ def alive(e):
     return str(e["fm"].get("status", "alive")).lower().startswith(("alive", "unknown", "active"))
 
 
+def region_of(L):
+    return str(L.state.get("region", "")).lower()
+
+
+def is_sealed(e):
+    return str(e["fm"].get("sealed", "")).lower() == "yes"
+
+
+def is_local(L, e):
+    """Local = the party's current region, or no home recorded."""
+    r, home = region_of(L), str(e["fm"].get("home", "")).lower()
+    return (not r) or (not home) or home == r
+
+
+def callback_ok(e):
+    return str(e["fm"].get("callback", "yes")).lower() != "no" and not is_sealed(e)
+
+
 def where_of(e):
     return [w.strip().lower() for w in e["fm"].get("where", []) or []]
 
@@ -254,14 +278,15 @@ def pick_str(label, weights):
 
 # ---------------------------------------------------------------- candidates
 
-def candidate_weights(L, ents, places, roles, exclude, types=("npc",)):
+def candidate_weights(L, ents, places, roles, exclude, types=("npc",), region_any=False):
     sess = L.state.get("session", 0)
     recent = L.state.get("recent", [])
     recent_set = set(recent)
     last3 = recent[-3:]
     out, relaxed = {}, False
     pool = [e for e in ents.values() if e["fm"].get("type") in types and alive(e)
-            and e["slug"] not in exclude]
+            and e["slug"] not in exclude and not is_sealed(e)
+            and (region_any or is_local(L, e))]
     if places and "any" not in places:
         pool = [e for e in pool if set(where_of(e)) & set(places)]
     if roles:
@@ -288,6 +313,34 @@ def candidate_weights(L, ents, places, roles, exclude, types=("npc",)):
     return out, relaxed
 
 
+def callback_pool(L, ents):
+    """Far (not in the current region), unsealed, off cooldown. Weight 1, +2 want, +1 tie to a local NPC."""
+    sess = L.state.get("session", 0)
+    out = {}
+    for e in ents.values():
+        fm = e["fm"]
+        if fm.get("type") not in ("npc", "thread", "item") or is_local(L, e) or not callback_ok(e):
+            continue
+        if not str(fm.get("status", "alive")).lower().startswith(("alive", "unknown", "active", "open", "missing")):
+            continue
+        last = L.num(fm, "last_callback", -99)
+        if sess - last < L.cfg["callback_npc_cooldown"]:
+            continue
+        w = 1
+        if str(fm.get("want", "")).strip():
+            w += 2
+        if any(t in ents and is_local(L, ents[t]) and alive(ents[t]) for _, t in L.ties_of(fm)):
+            w += 1
+        out[e["slug"]] = w
+    return out
+
+
+def callback_budget_ok(L):
+    sess = L.state.get("session", 0)
+    return (L.state.get("callbacks_this_session", 0) < L.cfg["callback_max_session"]
+            and sess - L.state.get("last_callback_session", -99) >= L.cfg["callback_gap_sessions"])
+
+
 # ---------------------------------------------------------------- commands
 
 def cmd_init(L, a):
@@ -303,7 +356,7 @@ def cmd_init(L, a):
 
 
 def cmd_session(L, a):
-    L.state.update({"session": a.n, "new_npc": 0, "encounter_new": 0, "recent": []})
+    L.state.update({"session": a.n, "new_npc": 0, "encounter_new": 0, "recent": [], "callbacks_this_session": 0})
     L.save_state()
     print(f"LORE SESSION {a.n} started. NEW-NPC 0/{L.cfg['cap_session']}")
 
@@ -316,7 +369,16 @@ def cmd_encounter(L, a):
 
 def cmd_budget(L, a):
     s, c = L.cfg["cap_session"], L.cfg["cap_encounter"]
-    print(f"NEW-NPC session {L.state['new_npc']}/{s} · encounter {L.state['encounter_new']}/{c}")
+    print(f"NEW-NPC session {L.state['new_npc']}/{s} · encounter {L.state['encounter_new']}/{c} · "
+          f"region: {region_of(L) or 'unset'} · callbacks {L.state.get('callbacks_this_session', 0)}/{L.cfg['callback_max_session']}")
+
+
+def cmd_region(L, a):
+    if a.slug:
+        L.state["region"] = a.slug.lower()
+        L.save_state()
+        event(L, f"REGION now {a.slug.lower()}", [])
+    print(f"REGION {region_of(L) or 'unset'}")
 
 
 def cmd_find(L, a):
@@ -344,7 +406,9 @@ def cmd_find(L, a):
         return 1
     for score, e, where in hits[:a.limit]:
         fm = e["fm"]
-        print(f"{e['slug']} | {fm.get('type')} | {fm.get('name', e['slug'])} | {fm.get('status', '')} | "
+        flags = (" SEALED (never drawn, never resurfaced)" if is_sealed(e) else "") + \
+                (f" [far: home {fm.get('home')}]" if not is_local(L, e) else "")
+        print(f"{e['slug']} | {fm.get('type')} | {fm.get('name', e['slug'])} | {fm.get('status', '')}{flags} | "
               f"roles: {', '.join(fm.get('roles', []) or [])} | matched in: {', '.join(where)} | {e['path'].relative_to(L.root.parent)}")
     if len(hits) > a.limit:
         print(f"... {len(hits) - a.limit} more")
@@ -362,15 +426,15 @@ def cmd_show(L, a):
 
 
 def build_index(L, ents):
-    lines = [f"# LORE INDEX", "", "type | name | aliases | roles | status | where | file", "---|---|---|---|---|---|---"]
+    lines = [f"# LORE INDEX", "", "type | name | aliases | roles | status | home | where | flags | file", "---|---|---|---|---|---|---|---|---"]
     for slug in sorted(ents, key=lambda s: (ents[s]["fm"].get("type", ""), ents[s]["fm"].get("name", s).lower())):
         e = ents[slug]
         fm = e["fm"]
         rel = e["path"].relative_to(L.root)
         lines.append(" | ".join([
             fm.get("type", ""), fm.get("name", slug), "; ".join(fm.get("aliases", []) or []),
-            "; ".join(fm.get("roles", []) or []), str(fm.get("status", "")),
-            "; ".join(fm.get("where", []) or []), str(rel)]))
+            "; ".join(fm.get("roles", []) or []), str(fm.get("status", "")), str(fm.get("home", "")),
+            "; ".join(fm.get("where", []) or []), "SEALED" if is_sealed(e) else "", str(rel)]))
     return "\n".join(lines) + "\n"
 
 
@@ -410,7 +474,7 @@ def cmd_candidates(L, a):
     places = [p.strip().lower() for p in (a.place or "any").split(",")]
     roles = [r for r in (a.role or "").split(",") if r.strip()]
     exclude = set((a.exclude or "").split(","))
-    w, relaxed = candidate_weights(L, ents, places, roles, exclude)
+    w, relaxed = candidate_weights(L, ents, places, roles, exclude, region_any=(a.region == "any"))
     if not w:
         print("NO CANDIDATES (alive known NPCs matching the place). who-roll: known weight 0.")
         return 1
@@ -433,7 +497,13 @@ def cmd_who(L, a):
     roles = [r for r in (a.role or "").split(",") if r.strip()]
     w, relaxed = candidate_weights(L, ents, places, roles, set())
     ww = dict(L.cfg["who_weights"])
+    cbw = ww.pop("callback", 1)
     notes = []
+    cbpool = callback_pool(L, ents)
+    if cbpool and callback_budget_ok(L):
+        ww["callback"] = cbw
+    elif cbpool:
+        notes.append("callback budget spent or in cooldown: callback removed")
     if not w:
         ww["known"] = 0
         notes.append("no known candidate fits: known removed")
@@ -442,7 +512,7 @@ def cmd_who(L, a):
         ww["new"] = 0
         notes.append(f"NEW-NPC cap reached ({L.state['new_npc']}/{L.cfg['cap_session']} session, "
                      f"{L.state['encounter_new']}/{L.cfg['cap_encounter']} encounter): new removed")
-    if ww["known"] and ww["known"] < ww["new"]:
+    if ww.get("known") and ww["known"] < ww.get("new", 0):
         ww["known"] = ww["new"]
         notes.append("known raised to equal new (rule: reuse is never rarer than new)")
     ww = {k: v for k, v in ww.items() if v > 0}
@@ -454,7 +524,63 @@ def cmd_who(L, a):
     print(pick_str("who", ww))
     for n in notes:
         print("note:", n)
-    print(f"known candidates here: {len(w)}")
+    print(f"known candidates here: {len(w)}" + (f" · far callbacks eligible: {len(cbpool)}" if "callback" in ww else ""))
+    if "callback" in ww:
+        print("if who=callback: lore.py callbacks")
+    return 0
+
+
+def cmd_callbacks(L, a):
+    ents = L.load_all()
+    if a.via:
+        e = ents.get(a.via)
+        if not e:
+            print(f"NO SUCH ENTITY: {a.via}")
+            return 1
+        via = {"rumor": 4, "letter": 3, "traveler_with_news": 2}
+        near = [x.lower() for x in L.cfg.get("near", {}).get(region_of(L), [])]
+        mobile = str(e["fm"].get("mobile", "")).lower() == "yes"
+        homeok = str(e["fm"].get("home", "")).lower() in near
+        if mobile or homeok:
+            via["in_person"] = 1
+        print(pick_str("via", via))
+        print("A far person arrives by a mechanism, never by teleporting." + ("" if "in_person" in via else " In person is off the table: not mobile, home not near."))
+        return 0
+    pool = callback_pool(L, ents)
+    print(f"REGION {region_of(L) or 'unset'} · callbacks this session {L.state.get('callbacks_this_session', 0)}/{L.cfg['callback_max_session']}"
+          f" · gap rule {L.cfg['callback_gap_sessions']} sessions")
+    if not pool:
+        print("NO CALLBACK CANDIDATES (everyone far is sealed, dead, on cooldown, or opted out).")
+        return 1
+    if not callback_budget_ok(L):
+        print("BUDGET SPENT or in the gap: no callback now.")
+        return 1
+    w = cap_share(pool, L.cfg["max_share"]) if len(pool) > 1 else pool
+    for slug, wt in sorted(w.items(), key=lambda x: -x[1])[:a.limit]:
+        fm = ents[slug]["fm"]
+        print(f"{wt:2d}  {slug}: {fm.get('name', slug)} ({'; '.join(fm.get('roles', []) or [])}) home {fm.get('home')} last_seen S{fm.get('last_seen', '?')}")
+    print(pick_str("cb", w) if len(w) > 1 else "ONE CANDIDATE: no pick needed.")
+    print("then, for the person drawn: lore.py callbacks --via <slug>   (how the callback reaches the party)")
+    print("SIZE RULE: a callback is small (a letter, a name in conversation, news from a trader, an object arriving). It does not start a quest by itself; it may offer a hook the party is free to ignore.")
+    print("After using it: lore.py callback-done <slug> --via <how>")
+    return 0
+
+
+def cmd_callbackdone(L, a):
+    ents = L.load_all()
+    e = ents.get(a.slug)
+    if not e:
+        print(f"NO SUCH ENTITY: {a.slug}")
+        return 1
+    sess = L.state.get("session", 0)
+    e["fm"]["last_callback"] = str(sess)
+    body = e["body"].rstrip("\n") + f"\n- S{sess}: CALLBACK ({a.via or 'unspecified'}). {a.note or ''}\n"
+    write_entity(e, body=body)
+    L.state["callbacks_this_session"] = L.state.get("callbacks_this_session", 0) + 1
+    L.state["last_callback_session"] = sess
+    L.save_state()
+    event(L, f"CALLBACK {a.slug} via {a.via or 'unspecified'}", [a.slug])
+    print(f"CALLBACK recorded. {L.state['callbacks_this_session']}/{L.cfg['callback_max_session']} this session.")
     return 0
 
 
@@ -557,6 +683,9 @@ def cmd_add(L, a):
         fm["want"] = a.want or ""
         fm["fear"] = a.fear or ""
         fm["ties"] = []
+    for kv in a.set or []:
+        k, _, v = kv.partition("=")
+        fm[k.strip()] = v.strip()
     fm["first_seen"] = str(a.first_seen if a.first_seen is not None else sess)
     fm["last_seen"] = str(a.last_seen if a.last_seen is not None else sess)
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -733,9 +862,12 @@ def main():
     p = sub.add_parser("show"); p.add_argument("slug"); p.set_defaults(f=cmd_show)
     p = sub.add_parser("index"); p.set_defaults(f=cmd_index)
     p = sub.add_parser("verify"); p.add_argument("--expect"); p.set_defaults(f=cmd_verify)
-    p = sub.add_parser("candidates"); p.add_argument("--place"); p.add_argument("--role"); p.add_argument("--exclude"); p.add_argument("--limit", type=int, default=15); p.set_defaults(f=cmd_candidates)
+    p = sub.add_parser("candidates"); p.add_argument("--place"); p.add_argument("--role"); p.add_argument("--exclude"); p.add_argument("--region"); p.add_argument("--limit", type=int, default=15); p.set_defaults(f=cmd_candidates)
     p = sub.add_parser("who"); p.add_argument("--place"); p.add_argument("--role"); p.set_defaults(f=cmd_who)
     p = sub.add_parser("beat"); p.add_argument("slug"); p.set_defaults(f=cmd_beat)
+    p = sub.add_parser("region"); p.add_argument("slug", nargs="?"); p.set_defaults(f=cmd_region)
+    p = sub.add_parser("callbacks"); p.add_argument("--limit", type=int, default=10); p.add_argument("--via"); p.set_defaults(f=cmd_callbacks)
+    p = sub.add_parser("callback-done"); p.add_argument("slug"); p.add_argument("--via"); p.add_argument("--note"); p.set_defaults(f=cmd_callbackdone)
     p = sub.add_parser("cast-beat"); p.add_argument("slug", nargs="?"); p.add_argument("--exclude"); p.set_defaults(f=cmd_castbeat)
     p = sub.add_parser("add")
     p.add_argument("type", choices=sorted(TYPES)); p.add_argument("--name", required=True); p.add_argument("--slug")
@@ -744,6 +876,7 @@ def main():
     p.add_argument("--want"); p.add_argument("--fear"); p.add_argument("--note")
     p.add_argument("--force", action="store_true"); p.add_argument("--override")
     p.add_argument("--seed", action="store_true", help="recovered history: not counted, not 'recent'")
+    p.add_argument("--set", action="append", help="extra front-matter field, key=value (home, voice, block, tier, know, strat, sealed, callback, mobile, status)")
     p.add_argument("--first-seen", type=int, dest="first_seen"); p.add_argument("--last-seen", type=int, dest="last_seen")
     p.set_defaults(f=cmd_add)
     p = sub.add_parser("touch"); p.add_argument("slug"); p.add_argument("--note"); p.set_defaults(f=cmd_touch)
