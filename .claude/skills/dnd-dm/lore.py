@@ -35,6 +35,7 @@ Entity files start with a front-matter block (a small YAML subset):
 Usage:  lore.py [--lore DIR] <command> ...      (python3, standard library only)
 """
 import argparse
+import time
 import datetime
 import hashlib
 import json
@@ -51,7 +52,8 @@ DIRS = ["npcs", "places", "items", "factions", "threads", "events"]
 DEFAULT_CONFIG = {
     # who-roll: known + unnamed + new. Rule: known >= new, always.
     "who_weights": {"known": 5, "unnamed": 3, "new": 2},
-    "cap_session": 10,       # new named NPCs per session (Joe, 2026-10-13)
+    "cap_window_count": 10,  # new named NPCs per window (Joe, 2026-10-13: 10 per 4 hours of play)
+    "cap_window_hours": 4,
     "cap_encounter": 2,      # new named NPCs per encounter
     "neglect_sessions": 3,   # unseen this long earns a return bonus
     "recent_memory": 12,
@@ -104,12 +106,28 @@ REQUIRED_NPC = ["origin", "sex", "race", "look", "manner", "want", "fear", "voic
                 "home", "roles", "where", "status", "first_seen", "last_seen", "tier", "know"]
 UNKNOWN = {"unrecorded"}          # an explicit "we looked and it is not recorded"
 PENDING = {"unassigned"}          # voice: the DM casts it at the NPC's next appearance (§1-quater)
-FIELD_ORDER = ["type", "name", "aliases", "sex", "race", "look", "manner", "roles", "status", "where", "home",
+FIELD_ORDER = ["type", "name", "aliases", "convention", "sex", "race", "look", "manner", "roles", "status", "where", "home",
                "origin", "module_ref", "canon", "named", "affinity", "want", "fear", "ties", "voice", "block", "tier",
                "know", "strat", "sealed", "callback", "mobile", "first_seen", "last_seen", "last_callback"]
 
 STOP_PREFIX = {"CHECK", "Still", "Voice", "Voices", "Arc", "ROLL", "NEEDED", "LOOP", "XP", "Roy's"}
 
+
+# The twelve placeholder conventions: how a person is present without being a new named NPC.
+CONVENTIONS = {
+ "henchman": ("Henchman", "Unnamed muscle in a hostile or hired group: 'the henchman', numbered if two speak ('Henchman 2'). One stat block per group."),
+ "stock-commoner": ("Stock commoner", "Background crowd and bystanders: no file, a Commoner block if one is hit. Speaks as 'a bystander' or 'the crowd'."),
+ "role-label": ("Role label", "Known by job and place: 'the tavern keeper', 'the gate sergeant'. Gets an unnamed file if they might return."),
+ "look-tag": ("Look tag", "One distinguishing visible trait is the handle: 'the woman in the green shawl', 'the one-eyed carter'. The tag becomes the alias."),
+ "ordinal": ("Ordinal", "Same-role members in one scene: 'the first guard', 'the second guard'."),
+ "collective-voice": ("Collective voice", "A group speaks as one: 'the patrol', 'the Watch', 'the crowd'. Speaker prefix is the group name."),
+ "title-only": ("Title only", "A rank or office with one holder: 'the Sergeant', 'the Clerk', 'the Steward'. If two hold it, use ordinals."),
+ "faction-livery": ("Faction livery", "Identified by emblem or dress: 'a Zhentarim sellsword', 'a Guild thug'. A reusable stock figure per faction."),
+ "relational-label": ("Relational label", "Identified by a tie to a known NPC: 'Tessy's master', 'the Lady's steward', 'Perrin's mother'. The tie is recorded."),
+ "party-nickname": ("Party nickname", "The players' own name for them ('Sausage Kid'). The DM adopts it and records it as the alias."),
+ "voice-only": ("Voice only", "Heard, not seen: 'a voice behind the door', 'someone on the stair'. No file unless pursued."),
+ "hearsay": ("Hearsay", "Spoken of, never present: 'a dockhand said', 'the woman at the well'. Filed only if the party pulls the thread."),
+}
 
 # ---------------------------------------------------------------- parsing
 
@@ -286,6 +304,30 @@ def pick_str(label, weights):
 
 # ---------------------------------------------------------------- candidates
 
+def window_count(L):
+    now = time.time()
+    w = L.cfg["cap_window_hours"] * 3600
+    return len([t for t in L.state.get("new_times", []) if now - t < w])
+
+
+def cap_hit(L):
+    """(window_full, encounter_full)"""
+    return window_count(L) >= L.cfg["cap_window_count"], L.state.get("encounter_new", 0) >= L.cfg["cap_encounter"]
+
+
+def cap_text(L):
+    return (f"NEW-NPC {window_count(L)}/{L.cfg['cap_window_count']} in the last {L.cfg['cap_window_hours']} h · "
+            f"encounter {L.state.get('encounter_new', 0)}/{L.cfg['cap_encounter']}")
+
+
+def record_new(L):
+    now = time.time()
+    keep = [t for t in L.state.get("new_times", []) if now - t < 24 * 3600]
+    L.state["new_times"] = keep + [now]
+    L.state["new_npc"] = L.state.get("new_npc", 0) + 1
+    L.state["encounter_new"] = L.state.get("encounter_new", 0) + 1
+
+
 def candidate_weights(L, ents, places, roles, exclude, types=("npc",), region_any=False):
     sess = L.state.get("session", 0)
     recent = L.state.get("recent", [])
@@ -366,18 +408,17 @@ def cmd_init(L, a):
 def cmd_session(L, a):
     L.state.update({"session": a.n, "new_npc": 0, "encounter_new": 0, "recent": [], "callbacks_this_session": 0})
     L.save_state()
-    print(f"LORE SESSION {a.n} started. NEW-NPC 0/{L.cfg['cap_session']}")
+    print(f"LORE SESSION {a.n} started. {cap_text(L)}")
 
 
 def cmd_encounter(L, a):
     L.state["encounter_new"] = 0
     L.save_state()
-    print(f"LORE ENCOUNTER reset. NEW-NPC session {L.state['new_npc']}/{L.cfg['cap_session']}, encounter 0/{L.cfg['cap_encounter']}")
+    print(f"LORE ENCOUNTER reset. {cap_text(L)}")
 
 
 def cmd_budget(L, a):
-    s, c = L.cfg["cap_session"], L.cfg["cap_encounter"]
-    print(f"NEW-NPC session {L.state['new_npc']}/{s} · encounter {L.state['encounter_new']}/{c} · "
+    print(f"{cap_text(L)} · "
           f"region: {region_of(L) or 'unset'} · callbacks {L.state.get('callbacks_this_session', 0)}/{L.cfg['callback_max_session']}")
 
 
@@ -515,11 +556,11 @@ def cmd_who(L, a):
     if not w:
         ww["known"] = 0
         notes.append("no known candidate fits: known removed")
-    capped = L.state["new_npc"] >= L.cfg["cap_session"] or L.state["encounter_new"] >= L.cfg["cap_encounter"]
+    wfull, efull = cap_hit(L)
+    capped = wfull or efull
     if capped:
         ww["new"] = 0
-        notes.append(f"NEW-NPC cap reached ({L.state['new_npc']}/{L.cfg['cap_session']} session, "
-                     f"{L.state['encounter_new']}/{L.cfg['cap_encounter']} encounter): new removed")
+        notes.append(f"NEW-NPC cap reached ({cap_text(L)}): new removed. Unnamed conventions only (lore.py conventions) unless the players pull a thread that needs a name.")
     if ww.get("known") and ww["known"] < ww.get("new", 0):
         ww["known"] = ww["new"]
         notes.append("known raised to equal new (rule: reuse is never rarer than new)")
@@ -671,13 +712,15 @@ def cmd_add(L, a):
     if dest.exists():
         print(f"REFUSED: {dest} exists.")
         return 1
-    counted = typ == "npc" and named and not a.seed
-    if counted and not a.override:
-        if L.state["new_npc"] >= L.cfg["cap_session"]:
-            print(f"REFUSED: NEW-NPC session cap {L.state['new_npc']}/{L.cfg['cap_session']} reached. Use an unnamed role or a known NPC. (--override \"<reason>\" only on Joe's word.)")
-            return 1
-        if L.state["encounter_new"] >= L.cfg["cap_encounter"]:
-            print(f"REFUSED: NEW-NPC encounter cap {L.state['encounter_new']}/{L.cfg['cap_encounter']} reached. Use an unnamed role or a known NPC.")
+    counted = typ == "npc" and named and not a.seed and not a.module
+    if a.convention and a.convention not in CONVENTIONS:
+        print(f"REFUSED: unknown convention {a.convention!r}. Run `lore.py conventions`.")
+        return 1
+    if counted and not (a.override or a.pulled):
+        wfull, efull = cap_hit(L)
+        if wfull or efull:
+            print(f"REFUSED: {cap_text(L)}. Present this person by a placeholder convention (lore.py conventions), or recycle someone known. "
+                  f"A new name is allowed past the cap only when the players pull the thread or a thread needs the name: --pulled \"<what they pulled>\".")
             return 1
     sess = L.state.get("session", 0)
     fm = {"type": typ, "name": a.name}
@@ -694,22 +737,25 @@ def cmd_add(L, a):
     for kv in a.set or []:
         k, _, v = kv.partition("=")
         fm[k.strip()] = v.strip()
+    if a.convention:
+        fm["convention"] = a.convention
+    if a.module:
+        fm["origin"] = "module"
     fm["first_seen"] = str(a.first_seen if a.first_seen is not None else sess)
     fm["last_seen"] = str(a.last_seen if a.last_seen is not None else sess)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(dump(fm, (a.note or "") + "\n"))
     if counted:
-        L.state["new_npc"] += 1
-        L.state["encounter_new"] += 1
+        record_new(L)
     if not a.seed:
         L.state["recent"] = (L.state.get("recent", []) + [slug])[-L.cfg["recent_memory"]:]
     L.save_state()
-    event(L, f"{'SEEDED' if a.seed else 'NEW'} {typ} {slug}: {a.name}" + (f" (override: {a.override})" if a.override else ""), [slug])
+    event(L, f"{'SEEDED' if a.seed else 'NEW'} {typ} {slug}: {a.name}" + (f" (override: {a.override})" if a.override else "") + (f" (pulled: {a.pulled})" if a.pulled else "") + (" (module NPC introduced as themselves: not counted)" if a.module else ""), [slug])
     cmd_index(L, a)
     if counted:
-        print(f"ADDED {slug}. NEW-NPC {L.state['new_npc']}/{L.cfg['cap_session']} · encounter {L.state['encounter_new']}/{L.cfg['cap_encounter']}")
+        print(f"ADDED {slug}. {cap_text(L)}")
     else:
-        why = "seeded history" if a.seed else ("unnamed role" if typ == "npc" else typ)
+        why = "seeded history" if a.seed else ("module NPC introduced as themselves" if a.module else ("unnamed role" if typ == "npc" else typ))
         print(f"ADDED {slug} (not counted: {why}).")
     return 0
 
@@ -750,20 +796,28 @@ def cmd_name(L, a):
     if e["fm"].get("named") == "yes":
         print(f"{a.slug} already has a name.")
         return 1
-    if not a.override and (L.state["new_npc"] >= L.cfg["cap_session"] or L.state["encounter_new"] >= L.cfg["cap_encounter"]):
-        print("REFUSED: NEW-NPC cap reached. The role stays unnamed.")
+    if not (a.override or a.pulled) and any(cap_hit(L)):
+        print(f"REFUSED: {cap_text(L)}. The role stays unnamed unless the players pull the thread: --pulled \"<what they pulled>\".")
         return 1
     old = e["fm"].get("name", a.slug)
     e["fm"]["name"] = a.name
     e["fm"]["named"] = "yes"
     e["fm"].setdefault("aliases", []).append(old)
     write_entity(e)
-    L.state["new_npc"] += 1
-    L.state["encounter_new"] += 1
+    record_new(L)
     L.save_state()
-    event(L, f"NAMED {a.slug}: {old} is {a.name}", [a.slug])
+    event(L, f"NAMED {a.slug}: {old} is {a.name}" + (f" (pulled: {a.pulled})" if a.pulled else ""), [a.slug])
     cmd_index(L, a)
-    print(f"NAMED {a.slug}. NEW-NPC {L.state['new_npc']}/{L.cfg['cap_session']}")
+    print(f"NAMED {a.slug}. {cap_text(L)}")
+    return 0
+
+
+def cmd_conventions(L, a):
+    print("PLACEHOLDER CONVENTIONS (a person who is present without being a new named NPC). Use one when the NEW-NPC cap is full, or whenever no name is needed:")
+    for i, (k, (n, d)) in enumerate(CONVENTIONS.items(), 1):
+        print(f"{i:2d}. {k}: {n}. {d}")
+    print("Naming always fires, past the cap, when the players pull the thread (ask the name, follow, question, hire) or a thread needs an established name:")
+    print("  lore.py name <slug> <name> --pulled \"<what they pulled>\"   or   lore.py add npc --name ... --pulled \"...\"")
     return 0
 
 
@@ -932,12 +986,16 @@ def main():
     p.add_argument("--unnamed", action="store_true"); p.add_argument("--affinity", type=int, default=0)
     p.add_argument("--want"); p.add_argument("--fear"); p.add_argument("--note")
     p.add_argument("--force", action="store_true"); p.add_argument("--override")
+    p.add_argument("--pulled", help="the players pulled this thread, or a thread needs the name: allowed past the cap")
+    p.add_argument("--module", action="store_true", help="a chartered-module NPC introduced as themselves: not counted")
+    p.add_argument("--convention", help="placeholder convention id for an unnamed role (lore.py conventions)")
     p.add_argument("--seed", action="store_true", help="recovered history: not counted, not 'recent'")
     p.add_argument("--set", action="append", help="extra front-matter field, key=value (home, voice, block, tier, know, strat, sealed, callback, mobile, status)")
     p.add_argument("--first-seen", type=int, dest="first_seen"); p.add_argument("--last-seen", type=int, dest="last_seen")
     p.set_defaults(f=cmd_add)
     p = sub.add_parser("touch"); p.add_argument("slug"); p.add_argument("--note"); p.set_defaults(f=cmd_touch)
-    p = sub.add_parser("name"); p.add_argument("slug"); p.add_argument("name"); p.add_argument("--override"); p.set_defaults(f=cmd_name)
+    p = sub.add_parser("name"); p.add_argument("slug"); p.add_argument("name"); p.add_argument("--override"); p.add_argument("--pulled"); p.set_defaults(f=cmd_name)
+    p = sub.add_parser("conventions"); p.set_defaults(f=cmd_conventions)
     p = sub.add_parser("set"); p.add_argument("slug"); p.add_argument("pairs", nargs="+"); p.set_defaults(f=cmd_set)
     p = sub.add_parser("check"); p.add_argument("--strict", action="store_true"); p.add_argument("--verbose", action="store_true"); p.set_defaults(f=cmd_check)
     p = sub.add_parser("tie"); p.add_argument("a"); p.add_argument("kind"); p.add_argument("b"); p.set_defaults(f=cmd_tie)

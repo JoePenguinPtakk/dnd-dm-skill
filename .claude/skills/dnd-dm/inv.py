@@ -314,6 +314,9 @@ def cmd_setlb(a, h):
     if not i:
         print("NO SUCH ITEM"); return 1
     i["lb"] = a.each
+    if a.note:
+        i["note"] = ((i.get("note", "") + " | ") if i.get("note") else "") + a.note
+    i.pop("negligible", None) if a.each else None
     save(a.dir, h)
     log(a.dir, {"op": "set-lb", "container": a.container, "item": a.name, "lb": a.each})
     print(f"SET {a.name} in {a.container}: {a.each:g} lb each")
@@ -346,7 +349,7 @@ def main():
     p.add_argument("--note"); p.add_argument("--lore"); p.set_defaults(f=cmd_additem)
     p = sub.add_parser("drop-item"); p.add_argument("container"); p.add_argument("name"); p.add_argument("--qty", type=int, default=1); p.add_argument("--note"); p.set_defaults(f=cmd_dropitem)
     p = sub.add_parser("move-item"); p.add_argument("src"); p.add_argument("dst"); p.add_argument("name"); p.add_argument("--qty", type=int, default=1); p.add_argument("--haul", action="store_true"); p.set_defaults(f=cmd_moveitem)
-    p = sub.add_parser("set-lb"); p.add_argument("container"); p.add_argument("name"); p.add_argument("each", type=float); p.set_defaults(f=cmd_setlb)
+    p = sub.add_parser("set-lb"); p.add_argument("container"); p.add_argument("name"); p.add_argument("each", type=float); p.add_argument("--note"); p.set_defaults(f=cmd_setlb)
     p = sub.add_parser("weight"); p.add_argument("name"); p.set_defaults(f=cmd_weight)
     p = sub.add_parser("move"); p.add_argument("src"); p.add_argument("dst"); p.add_argument("amount"); p.add_argument("denom", nargs="?")
     p.add_argument("--note"); p.add_argument("--haul", action="store_true"); p.set_defaults(f=cmd_move)
