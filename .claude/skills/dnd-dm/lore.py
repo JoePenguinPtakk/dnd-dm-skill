@@ -46,7 +46,7 @@ from pathlib import Path
 
 TYPES = {"npc": "npcs", "npc-group": "npcs", "place": "places", "item": "items",
          "faction": "factions", "thread": "threads"}
-LIST_KEYS = {"aliases", "roles", "where", "ties", "members"}
+LIST_KEYS = {"aliases", "roles", "where", "ties", "members", "guessed"}
 DIRS = ["npcs", "places", "items", "factions", "threads", "events"]
 
 DEFAULT_CONFIG = {
@@ -108,7 +108,7 @@ UNKNOWN = {"unrecorded"}          # an explicit "we looked and it is not recorde
 PENDING = {"unassigned"}          # voice: the DM casts it at the NPC's next appearance (§1-quater)
 FIELD_ORDER = ["type", "name", "aliases", "convention", "sex", "race", "look", "manner", "roles", "status", "where", "home",
                "origin", "module_ref", "canon", "named", "affinity", "want", "fear", "ties", "voice", "block", "tier",
-               "know", "strat", "sealed", "callback", "mobile", "first_seen", "last_seen", "last_callback"]
+               "know", "strat", "sealed", "callback", "mobile", "guessed", "first_seen", "last_seen", "last_callback"]
 
 STOP_PREFIX = {"CHECK", "Still", "Voice", "Voices", "Arc", "ROLL", "NEEDED", "LOOP", "XP", "Roy's"}
 
@@ -826,6 +826,50 @@ def cmd_conventions(L, a):
     return 0
 
 
+RACE_ROW = {"human": 13, "half-elf": 1, "dwarf": 1, "halfling": 1, "elf": 1, "half-orc": 1, "tiefling": 1, "rarer": 1}   # the §6-bis race d20: 1-13 human
+
+
+def voice_sex(voice):
+    v = str(voice or "").lower()
+    if v.startswith(("af_", "bf_")):
+        return "female"
+    if v.startswith(("am_", "bm_")):
+        return "male"
+    return None
+
+
+def cmd_fill(L, a):
+    ents = L.load_all()
+    e = ents.get(a.slug)
+    if not e:
+        print(f"NO SUCH ENTITY: {a.slug}")
+        return 1
+    fm = e["fm"]
+    unk = [k for k in ("race", "sex", "look", "manner", "want", "fear") if str(fm.get(k, "")).strip().lower() in UNKNOWN]
+    if not unk:
+        print(f"{a.slug}: nothing unrecorded to fill.")
+        return 0
+    print(f"{fm.get('name', a.slug)} ({'; '.join(fm.get('roles', []) or [])}) unrecorded: {', '.join(unk)}")
+    print("Fill a field the first time the scene needs it, from what the file already records; mark each guess with `lore.py set <slug> field=value --guess`.")
+    if "race" in unk:
+        w = dict(RACE_ROW)
+        for kv in (a.tilt or "").split(","):
+            if "=" in kv:
+                k, _, v = kv.partition("=")
+                if k.strip() in w:
+                    w[k.strip()] = max(1, int(v))
+        w = cap_share(w, L.cfg["max_share"])
+        print("race: assume human unless the role or place implies otherwise. If the scene could go either way, roll:", pick_str("race", w))
+    if "sex" in unk:
+        vs = voice_sex(fm.get("voice"))
+        print("sex:", f"{vs} (the cast voice {fm.get('voice')} is {vs}); `lore.py set {a.slug} sex={vs} --guess`" if vs else "no voice cast yet: best fit to the name and role, else an even pick.")
+    if "look" in unk or "manner" in unk:
+        print("look/manner: the best fit to the role, the place and the recorded facts; specific and small (one visible trait, one habit of speech or bearing).")
+    if "want" in unk or "fear" in unk:
+        print("want/fear: the want roll (supplement section 4-bis): a weighted `want:pick[...]` over what a person of this role could hold, weighted by recorded ties and debts.")
+    return 0
+
+
 def cmd_set(L, a):
     ents = L.load_all()
     e = ents.get(a.slug)
@@ -840,10 +884,21 @@ def cmd_set(L, a):
             fm[k] = [x.strip() for x in split_list(v.strip().strip("[]"))]
         else:
             fm[k] = v.strip()
+    if a.guess:
+        g = fm.get("guessed", []) or []
+        for kv in a.pairs:
+            k = kv.partition("=")[0].strip()
+            if k not in g:
+                g.append(k)
+        fm["guessed"] = g
+    else:
+        g = [x for x in (fm.get("guessed", []) or []) if x not in [kv.partition("=")[0].strip() for kv in a.pairs]]
+        if "guessed" in fm:
+            fm["guessed"] = g
     order = {k: i for i, k in enumerate(FIELD_ORDER)}
     e["fm"] = dict(sorted(fm.items(), key=lambda kv: order.get(kv[0], 99)))
     write_entity(e)
-    print(f"SET {a.slug}: {', '.join(x.split('=')[0] for x in a.pairs)}")
+    print(f"SET {a.slug}: {', '.join(x.split('=')[0] for x in a.pairs)}" + (" (marked as a DM guess)" if a.guess else ""))
     return 0
 
 
@@ -869,6 +924,9 @@ def cmd_check(L, a):
         if missing or (a.strict and unknown) or a.verbose:
             rows.append((slug, missing, unknown, pending))
     total = sum(1 for e in ents.values() if e["fm"].get("type") == "npc")
+    guessed = sum(1 for e in ents.values() if e["fm"].get("type") == "npc" and e["fm"].get("guessed"))
+    if guessed:
+        print(f"({guessed} NPC files carry DM guesses; `guessed:` lists which fields)")
     for slug, missing, unknown, pending in rows:
         print(f"{slug}: MISSING {missing or '-'} | unrecorded {len(unknown)}: {', '.join(unknown) or '-'} | voice pending: {'yes' if pending else 'no'}")
     print(f"LORE CHECK: {nfull}/{total} NPC files have every required field (a value, or an explicit 'unrecorded')." + (" [strict: unrecorded counts as missing]" if a.strict else ""))
@@ -1001,7 +1059,8 @@ def main():
     p = sub.add_parser("touch"); p.add_argument("slug"); p.add_argument("--note"); p.set_defaults(f=cmd_touch)
     p = sub.add_parser("name"); p.add_argument("slug"); p.add_argument("name"); p.add_argument("--override"); p.add_argument("--pulled"); p.set_defaults(f=cmd_name)
     p = sub.add_parser("conventions"); p.set_defaults(f=cmd_conventions)
-    p = sub.add_parser("set"); p.add_argument("slug"); p.add_argument("pairs", nargs="+"); p.set_defaults(f=cmd_set)
+    p = sub.add_parser("set"); p.add_argument("slug"); p.add_argument("pairs", nargs="+"); p.add_argument("--guess", action="store_true", help="mark these fields as the DM's best guess, not a recorded fact"); p.set_defaults(f=cmd_set)
+    p = sub.add_parser("fill"); p.add_argument("slug"); p.add_argument("--tilt", help="race=weight,... to load the race pick toward what the role and place make likely"); p.set_defaults(f=cmd_fill)
     p = sub.add_parser("check"); p.add_argument("--strict", action="store_true"); p.add_argument("--verbose", action="store_true"); p.set_defaults(f=cmd_check)
     p = sub.add_parser("tie"); p.add_argument("a"); p.add_argument("kind"); p.add_argument("b"); p.set_defaults(f=cmd_tie)
     p = sub.add_parser("status"); p.add_argument("slug"); p.add_argument("value"); p.set_defaults(f=cmd_status)

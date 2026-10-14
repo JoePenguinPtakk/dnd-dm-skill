@@ -186,6 +186,10 @@ DM supplies the particulars from what the file and the scene already hold.
 The same applies to `fear`. A NPC with both blank is still fully usable as a known
 person: the beat-roll simply has less to read against.
 
+### 4-quater. Fill on contact (Joe, 2026-10-13)
+
+Unrecorded fields are filled with best guesses as play goes, not by random draw unless the draw is weighted to what makes the most sense. Most people met are human unless the role or place implies otherwise; the occasional exotic person comes from the §6-bis race row (13 in 20 human), loaded toward the role and place (`lore.py fill <slug> --tilt dwarf=6`). Sex follows the cast voice when there is one. Look and manner are one visible trait and one habit that suit the role and the file. Each guess is filed with `lore.py set ... --guess` (the `guessed:` list), becomes fact once play uses it, and yields to a player's correction. `lore.py check` reports how many files carry guesses.
+
 ### 4-ter. The completeness check
 
 `lore.py check` lists every NPC file that lacks a required field (a value, or an

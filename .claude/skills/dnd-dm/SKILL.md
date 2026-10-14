@@ -485,6 +485,15 @@ Two rules that do belong here, because they are about your behavior:
   ships no preflight, and ask. Guessing at another campaign's ops is how a
   session gets spent debugging instead of playing.
 
+**Posting to Discord: split, never dump.** Generate every field the master prompt
+requires and show the whole response in the terminal, as always. Post it to Discord
+with `dm_post.py` (this folder): the players' room gets the narration, the VITALS strip
+(or COMBAT STATE), roll gates, a simplified LOOP, the CHOICE line and the options; the
+private dm room gets the roll logs, the collapsed block, the full LOOP and the notes;
+the dice room is fed by the relay from the dice record. Nothing in the master prompt
+changes. Anything the splitter does not recognise as a players' block goes to the dm
+room. A campaign without a `DM_CHANNEL_ID` posts nothing private: the rows are dropped.
+
 Ops work is permitted pre-boot (§0). Finishing it does not lift the gate.
 
 ---
