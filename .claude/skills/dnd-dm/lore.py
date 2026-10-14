@@ -100,6 +100,14 @@ STOP_SPEAKERS = {"HP", "AC", "DM", "NEEDED", "CHOICE", "VITALS", "ROLL", "ROLL G
                  "DM ROLLS", "DM ROLLS THIS RESPONSE", "CHAIN", "NEMESIS CHAIN", "SAVED", "RESULT"}
 
 
+REQUIRED_NPC = ["origin", "pronouns", "race", "look", "manner", "want", "fear", "voice", "affinity",
+                "home", "roles", "where", "status", "first_seen", "last_seen", "tier", "know"]
+UNKNOWN = {"unrecorded"}          # an explicit "we looked and it is not recorded"
+PENDING = {"unassigned"}          # voice: the DM casts it at the NPC's next appearance (§1-quater)
+FIELD_ORDER = ["type", "name", "aliases", "pronouns", "race", "look", "manner", "roles", "status", "where", "home",
+               "origin", "module_ref", "canon", "named", "affinity", "want", "fear", "ties", "voice", "block", "tier",
+               "know", "strat", "sealed", "callback", "mobile", "first_seen", "last_seen", "last_callback"]
+
 STOP_PREFIX = {"CHECK", "Still", "Voice", "Voices", "Arc", "ROLL", "NEEDED", "LOOP", "XP", "Roy's"}
 
 
@@ -239,7 +247,7 @@ def is_sealed(e):
 def is_local(L, e):
     """Local = the party's current region, or no home recorded."""
     r, home = region_of(L), str(e["fm"].get("home", "")).lower()
-    return (not r) or (not home) or home == r
+    return (not r) or (not home) or home in UNKNOWN or home == r
 
 
 def callback_ok(e):
@@ -759,6 +767,55 @@ def cmd_name(L, a):
     return 0
 
 
+def cmd_set(L, a):
+    ents = L.load_all()
+    e = ents.get(a.slug)
+    if not e:
+        print(f"NO SUCH ENTITY: {a.slug}")
+        return 1
+    fm = e["fm"]
+    for kv in a.pairs:
+        k, _, v = kv.partition("=")
+        k = k.strip()
+        if k in LIST_KEYS:
+            fm[k] = [x.strip() for x in split_list(v.strip().strip("[]"))]
+        else:
+            fm[k] = v.strip()
+    order = {k: i for i, k in enumerate(FIELD_ORDER)}
+    e["fm"] = dict(sorted(fm.items(), key=lambda kv: order.get(kv[0], 99)))
+    write_entity(e)
+    print(f"SET {a.slug}: {', '.join(x.split('=')[0] for x in a.pairs)}")
+    return 0
+
+
+def cmd_check(L, a):
+    ents = L.load_all()
+    rows, nfull = [], 0
+    for slug, e in sorted(ents.items()):
+        fm = e["fm"]
+        if fm.get("type") != "npc":
+            continue
+        missing, unknown, pending = [], [], []
+        for k in REQUIRED_NPC:
+            v = fm.get(k, "")
+            vs = ", ".join(v) if isinstance(v, list) else str(v)
+            if not vs.strip():
+                missing.append(k)
+            elif vs.strip().lower() in UNKNOWN:
+                unknown.append(k)
+            elif k == "voice" and vs.strip().lower() in PENDING:
+                pending.append(k)
+        if not missing and not (a.strict and unknown):
+            nfull += 1
+        if missing or (a.strict and unknown) or a.verbose:
+            rows.append((slug, missing, unknown, pending))
+    total = sum(1 for e in ents.values() if e["fm"].get("type") == "npc")
+    for slug, missing, unknown, pending in rows:
+        print(f"{slug}: MISSING {missing or '-'} | unrecorded {len(unknown)}: {', '.join(unknown) or '-'} | voice pending: {'yes' if pending else 'no'}")
+    print(f"LORE CHECK: {nfull}/{total} NPC files have every required field (a value, or an explicit 'unrecorded')." + (" [strict: unrecorded counts as missing]" if a.strict else ""))
+    return 0 if nfull == total else 1
+
+
 def cmd_tie(L, a):
     ents = L.load_all()
     for s in (a.a, a.b):
@@ -881,6 +938,8 @@ def main():
     p.set_defaults(f=cmd_add)
     p = sub.add_parser("touch"); p.add_argument("slug"); p.add_argument("--note"); p.set_defaults(f=cmd_touch)
     p = sub.add_parser("name"); p.add_argument("slug"); p.add_argument("name"); p.add_argument("--override"); p.set_defaults(f=cmd_name)
+    p = sub.add_parser("set"); p.add_argument("slug"); p.add_argument("pairs", nargs="+"); p.set_defaults(f=cmd_set)
+    p = sub.add_parser("check"); p.add_argument("--strict", action="store_true"); p.add_argument("--verbose", action="store_true"); p.set_defaults(f=cmd_check)
     p = sub.add_parser("tie"); p.add_argument("a"); p.add_argument("kind"); p.add_argument("b"); p.set_defaults(f=cmd_tie)
     p = sub.add_parser("status"); p.add_argument("slug"); p.add_argument("value"); p.set_defaults(f=cmd_status)
     p = sub.add_parser("event"); p.add_argument("text"); p.add_argument("--who"); p.set_defaults(f=cmd_event)
