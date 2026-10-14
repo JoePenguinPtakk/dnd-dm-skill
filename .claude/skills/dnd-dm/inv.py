@@ -197,6 +197,12 @@ def cmd_verify(a, h):
     uw = sum(len(unweighed(c)) for c in h["containers"].values())
     ni = sum(sum(i.get("qty", 1) for i in c.get("items", [])) for c in h["containers"].values())
     print(f"HOLDINGS OK containers={len(h['containers'])} total={tot:,.1f} gp items={ni} unweighed={uw} hash={sig}" if not over else f"HOLDINGS OVER CAPACITY: {over}")
+    if getattr(a, "expect", None):
+        import re
+        m = re.search(r"hash=([0-9a-f]+)", a.expect)
+        if m and m.group(1) != sig:
+            print(f"HOLDINGS MISMATCH: the save expects hash={m.group(1)}, found {sig}. STOP and reconcile before play.")
+            return 1
     return 1 if over else 0
 
 
@@ -341,7 +347,7 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("show"); p.add_argument("container", nargs="?"); p.set_defaults(f=cmd_show)
     p = sub.add_parser("load"); p.set_defaults(f=cmd_load)
-    p = sub.add_parser("verify"); p.set_defaults(f=cmd_verify)
+    p = sub.add_parser("verify"); p.add_argument("--expect"); p.set_defaults(f=cmd_verify)
     p = sub.add_parser("init"); p.set_defaults(f=lambda a, h: (Path(a.dir).mkdir(parents=True, exist_ok=True), save(a.dir, h), print("INIT", a.dir))[2] or 0)
     p = sub.add_parser("items"); p.add_argument("container", nargs="?"); p.set_defaults(f=cmd_items)
     p = sub.add_parser("add-item"); p.add_argument("container"); p.add_argument("name"); p.add_argument("--qty", type=int, default=1)

@@ -63,6 +63,8 @@ TIER/BUILD: v5-<X> <build stamp, copied from the header you actually read>
 SOURCE: engine HEAD · <stale campaign copy overwritten: <filename> | no stale copy found>
 LAYERS: master=<filename> · charter=<filename|absent> · mechanics=<filename|absent> · save=<filename|absent>
 ENGINE: <path to roll.py> · <verbatim SESSION START line> · test → <verbatim output of one real roll, with its [R####] ID>
+LORE: <verbatim `lore.py verify` line> · region=<where the party is> · <`lore.py budget` line>
+HOLDINGS: <verbatim `inv.py verify` line>
 ```
 
 A missing layer is named as `absent`, never quietly skipped. If the save
@@ -114,6 +116,11 @@ Filenames vary; roles do not. Resolve each layer by what it *does*:
 | 2 | **Charter** (tone + quest-model lens; no mechanics, no state) | campaign repo | `*CHARTER*.md` |
 | 3 | **Mechanics reference / house rules** (durable campaign dice rulings) | campaign repo | `*MECHANICS*.md`, `HOUSE_RULES.md` |
 | 4 | **Save state** (all current state) | campaign repo, newest file | `*save*.md`, `saves/SAVE_S<n>_*.md` |
+| (ledgers) | **Lore register** (every person, place, item, faction and thread ever recorded) and **holdings ledger** (coin and items by container, with weights). Cumulative; the save only stamps them | campaign repo | `lore/`, `holdings/` |
+
+The two ledgers are not layers you read for rules; they are the campaign's memory.
+The save stamps their state (`LORE:` and `HOLDINGS:`), and boot verifies the stamps
+(§3, §4).
 
 **This skill boots the v5 family only:** `v5-O`, `v5-S`, `v5-H`, `v5-U`. If a
 campaign pins a master prompt from any other family, stop and ask rather than
@@ -359,6 +366,38 @@ python3 <skill-base-dir>/srd.py loot --rarity uncommon --category potion  # LOOT
   table) are rolled through the engine when their scene fits, or mined for
   entries when writing a custom table.
 
+### The lore register and the holdings ledger (master prompt §6-terdecies, §5-quinquies)
+
+Two tools beside `roll.py`, both standard-library Python, both run from the campaign
+repo. They keep the campaign's memory, so a new session does not depend on what the
+last save remembered to list.
+
+- **`lore.py`** keeps `lore/` (one markdown file per person, place, item, faction and
+  thread, plus `INDEX.md` and `events/`). Look up with `find <name or role>` (always
+  search by role too), `show`, `candidates`. Roll with `who`, `beat`, `cast-beat`,
+  `callbacks`: each prints the `pick[...]` line to paste into the one `roll.py` call.
+  Record with `add`, `touch`, `name`, `tie`, `set`, `status`, `event`. Check with
+  `budget`, `audit <session log>`, `check`, `verify`. `conventions` prints the twelve
+  placeholder conventions. `session <n>` and `region <where>` run at boot. `add`
+  refuses a duplicate name and refuses a new named NPC past the budget (10 in 4 hours,
+  2 per encounter). `--pulled "<what the players pulled>"` allows a name the players
+  asked for; `--module` marks a chartered-module NPC introduced as themselves (not
+  counted); `--seed` loads history without counting it.
+- **`inv.py`** keeps `holdings/` (coin and items by container: each PC's person, each
+  PC's private stash, the party wallet, carts). `show`, `load`, `items` and
+  `weight <name>` look up; `add-item`, `drop-item`, `move`, `move-item` and `set-lb`
+  record; `verify` stamps. It refuses to put more than Strength x 15 lb on a person,
+  and refuses a move between two places until the haul has been played (`--haul`).
+- **Neither tool rolls dice.** They print the weights; the dice go through the engine
+  as always. Neither is guard-protected, so the rule is yours to keep: do not edit
+  `lore/` or `holdings/` files by hand when a command does it.
+- **A campaign with no `lore/` yet:** run `lore.py init`, then seed it from the newest
+  save's NPC registry and quest table with `lore.py add npc --seed --first-seen <n>
+  --last-seen <n> ...`. Search the earlier saves and `CAMPAIGN_HISTORY.md` for anyone
+  the newest save lists only "by reference". Write `unrecorded` where the sources are
+  silent and never guess a field. Run `lore.py check`.
+- **Waterdeep is the model:** its `lore/` and `holdings/` are seeded and checked.
+
 ### No engine available? Stop and tell Joe. Never switch tiers yourself.
 
 **In Claude Code the engine runs, so O, S, or H is the only answer.** If `roll.py`
@@ -391,7 +430,11 @@ rather than inventing it. Do not load the SRD into context wholesale.
 
 Load in role order: **master prompt → charter → mechanics reference Part 1 →
 save state.** That is strictly most-stable to least-stable, and the order is a
-caching contract, not a preference.
+caching contract, not a preference. After the save, open the ledgers (master prompt
+§11, step 0-bis): `lore.py session <n>`, `lore.py region <where the party is>`,
+`lore.py verify --expect <the save's LORE stamp>`, `inv.py verify`. Read the ledgers
+through their tools on demand, never whole; only `lore/INDEX.md` is worth reading at
+boot, and only on a small campaign.
 
 - The boot layers are the **cached prefix** of every request in the session.
   Prompt caching invalidates from the first changed byte forward, so static
@@ -486,10 +529,14 @@ checkpoint actually produces a save state:
    no embedded rules, no "instructions to the next DM."
 4. **Record declined canon.** If a player-asserted fact was declined during
    play, note it in the save so a later session does not quietly adopt it.
-5. **Close the ledger at session end:** run `roll.py verify` and print its
+5. **Close the ledgers at session end:** run `roll.py verify` and print its
    line (a failure is reported verbatim, never smoothed over), then
-   `roll.py session end`. The ledger (`dice/ledger.jsonl`) is committed
-   together with the save.
+   `roll.py session end`. The dice ledger (`dice/ledger.jsonl`) is committed
+   together with the save. Then run `lore.py audit <the session's Discord log>`
+   (every speaker has a file), `lore.py check` and `lore.py verify`, and
+   `inv.py verify`; stamp the `LORE:` and `HOLDINGS:` lines in the save and
+   commit `lore/` and `holdings/` with it. A name with no file is filed before
+   the session closes.
 6. **Offer to commit it**, and do not commit without being asked. A save is
    the user's record of their own campaign.
 

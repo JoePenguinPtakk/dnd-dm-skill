@@ -152,6 +152,11 @@ in the campaign's README so a later boot never sees this menu again.
   state, and a `README.md` that names the tier letter and lists the layer files. Keep it separate from
   the skill; the skill never holds live campaign state. (A private git repo per campaign is the durable
   choice — it is the campaign's memory across machines.)
+- **Start the two ledgers.** In the campaign folder run `lore.py init` (creates `lore/`, the cast
+  register) and `inv.py --dir holdings init` (creates `holdings/`, the coin and item ledger), both from
+  the skill folder. Every person, place and item the campaign names from now on is filed there, and every
+  coin and item that moves goes through `inv.py`. See SKILL.md §3, "The lore register and the holdings
+  ledger".
 - **Characters.** New party → make PCs now (or at the first scene, per the master prompt's character
   handling), and record the sheets in the campaign's save state. Existing sheets → import them.
 

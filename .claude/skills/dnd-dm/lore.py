@@ -510,7 +510,12 @@ def cmd_verify(L, a):
         print(f"LORE STALE: INDEX.md does not match the files (run `lore.py index`). Would be: entities={len(ents)} hash={h}")
         return 1
     if a.expect:
-        n, _, eh = a.expect.partition(":")
+        import re as _re
+        m1 = _re.search(r"entities=(\d+)", a.expect); m2 = _re.search(r"hash=([0-9a-f]+)", a.expect)
+        if m1:
+            n, eh = m1.group(1), (m2.group(1) if m2 else "")
+        else:
+            n, _, eh = a.expect.partition(":")
         if int(n) != len(ents) or (eh and eh != h):
             print(f"LORE MISMATCH: save expects {a.expect}, found entities={len(ents)} hash={h}. STOP and reconcile before play.")
             return 1
