@@ -160,7 +160,7 @@ def parse(text):
         elif val.startswith("[") and val.endswith("]"):
             fm[key] = split_list(val[1:-1])
         else:
-            fm[key] = val.strip("\"'")
+            fm[key] = val[1:-1] if len(val) >= 2 and val[0] == val[-1] and val[0] in "\"'" else val
     return fm, "\n".join(lines[end + 1:])
 
 
