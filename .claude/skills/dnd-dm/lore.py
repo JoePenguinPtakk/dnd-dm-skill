@@ -100,11 +100,11 @@ STOP_SPEAKERS = {"HP", "AC", "DM", "NEEDED", "CHOICE", "VITALS", "ROLL", "ROLL G
                  "DM ROLLS", "DM ROLLS THIS RESPONSE", "CHAIN", "NEMESIS CHAIN", "SAVED", "RESULT"}
 
 
-REQUIRED_NPC = ["origin", "pronouns", "race", "look", "manner", "want", "fear", "voice", "affinity",
+REQUIRED_NPC = ["origin", "sex", "race", "look", "manner", "want", "fear", "voice", "affinity",
                 "home", "roles", "where", "status", "first_seen", "last_seen", "tier", "know"]
 UNKNOWN = {"unrecorded"}          # an explicit "we looked and it is not recorded"
 PENDING = {"unassigned"}          # voice: the DM casts it at the NPC's next appearance (§1-quater)
-FIELD_ORDER = ["type", "name", "aliases", "pronouns", "race", "look", "manner", "roles", "status", "where", "home",
+FIELD_ORDER = ["type", "name", "aliases", "sex", "race", "look", "manner", "roles", "status", "where", "home",
                "origin", "module_ref", "canon", "named", "affinity", "want", "fear", "ties", "voice", "block", "tier",
                "know", "strat", "sealed", "callback", "mobile", "first_seen", "last_seen", "last_callback"]
 
