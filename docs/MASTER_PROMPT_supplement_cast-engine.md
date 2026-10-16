@@ -33,7 +33,7 @@ a session, about 1 or 2 per encounter.
 
 State lives in the campaign repo under `lore/` (one markdown file per entity,
 INDEX.md, events/). The `lore.py` tool in the skill does every lookup, count and
-weight. The DM never estimates a weight, a count, or a match.
+list. The DM never estimates a count, a list, or a match, and never sets a weight.
 
 An NPC file carries: name, aliases, roles, status, where (place and ward tags),
 affinity, **want**, **fear**, **ties** (typed edges to other entities), first
@@ -62,7 +62,10 @@ player needs a person. It adds one die to the existing batched call:
 
 `lore.py who --place <place and ward tags> --role <roles the cast row can bear>`
 
-prints the line to paste into the call, for example `who:pick[known=5|unnamed=3|new=2]`.
+prints the die and which outcomes are closed. Roll `who:d12` on the printed table
+(build 20261015a, Joe: the DM never sets odds, and neither does a config file):
+**1-6 known · 7-9 unnamed · 10-11 new · 12 callback.** A closed outcome reads as
+**unnamed**.
 
 | Outcome | What happens |
 |---|---|
@@ -71,28 +74,22 @@ prints the line to paste into the call, for example `who:pick[known=5|unnamed=3|
 | **new** | Today's birth path, unchanged: §6 introduction and the §6-bis five-roll name. It counts toward the NEW-NPC budget. |
 | **callback** | Rare. Someone, or something, from elsewhere or long ago reaches the party by a mechanism. Section 3-bis. Present only when an eligible far entity exists and the callback budget is open. |
 
-**The tool sets the weights, by rule, so the DM cannot tilt them:**
-- Default 5 known, 3 unnamed, 2 new, 1 callback (when open). A campaign may retune in `lore/config.json`.
-- **Known is never lighter than new.** If a campaign's numbers say otherwise, the
-  tool raises known to equal new.
-- No known candidate fits the place and role: known is removed before the roll
-  (not rerolled after it).
+**The table is printed, so nobody can tilt it:**
+- Known 6 in 12, unnamed 3, new 2, callback 1. No campaign retunes it.
+- No known candidate fits the place and role: known is closed and reads as unnamed.
 - **NEW-NPC budget (Joe, 2026-10-13):** at most **10 new named NPCs in any 4 hours
   of play, and 2 in any one encounter.** At either limit `new` is removed before
-  the roll, and `lore.py add` refuses. **Not counted:** a known NPC (recycling is
+  the roll: it is closed and reads as unnamed, and `lore.py add` refuses. **Not counted:** a known NPC (recycling is
   the point), and a chartered-module NPC introduced as themselves
   (`lore.py add --module`). **Allowed past the cap:** a name the players pull
   (section 7), logged with what they pulled (`--pulled`). The rest of an
   encounter's cast is present by a placeholder convention (section 7-bis).
-- If only one outcome remains, there is nothing uncertain and no roll is made.
-
-Engine limits still hold (at least two outcomes, every weight 1 or more, no
-outcome above 90%). The tool applies them when it prints the line.
+- If known, new and callback are all closed, the person is unnamed and no roll is made.
 
 ## 3. Picking which known person (second call, only if who=known)
 
-`lore.py candidates --place <tags> --role <roles>` prints the eligible people and
-the `cand:pick[...]` line. This is the one case where a result decides the next
+`lore.py candidates --place <tags> --role <roles>` prints every eligible person and
+the flat `cand:pick[...]` line, pasted whole. This is the one case where a result decides the next
 roll, so a second engine call is allowed.
 
 **Eligible:** alive (or unknown), plausibly present (§2 timeline integrity),
@@ -100,11 +97,10 @@ matching the place by tag, matching a role if any match exists (if none match, t
 list falls back to place alone, because anyone local can bear a proposition or a
 grievance), and not named in the exclude list.
 
-**Weights, computed by the tool:** base 2. Plus 2 for an open want. Plus 2 for a
-tie to someone who appeared this session. Plus 2 for not being seen in 3 or more
-sessions (a return is due: this is how someone met once and never seen again
-comes back). Plus 1 for a role match. Minus 1 (never below 1) for appearing in
-the last three entries (no repeats back to back).
+**No weights (build 20261015a).** Every eligible person is one outcome. Anyone who
+appeared in the last three cast entries is left out, as long as two or more others
+remain (no repeats back to back). Someone met once long ago comes back because
+everyone local stays on the list, not because the list leans toward them.
 
 A single eligible NPC needs no pick: that NPC is the known branch.
 
@@ -118,15 +114,17 @@ A person with no `home` counts as local. When the party travels and the region
 changes, the old cast becomes far and the new place's people become local, by the same rule.
 
 **Callback** is the only way a far or long-gone entity reaches the party. It is the
-fourth who-roll outcome, weight 1 (about 9% of who-rolls while it is open), and it is
+fourth who-roll outcome, a 12 on the d12 (1 in 12 while it is open; closed, it reads as unnamed), and it is
 closed by budget:
 - at most **1 per session** (`callback_max_session`);
 - at least **2 sessions** between callbacks (`callback_gap_sessions`);
 - the same entity is not called back again for **6 sessions** (`callback_npc_cooldown`).
 
 If `callback` is rolled: `lore.py callbacks` prints the eligible far entities and the
-`cb:pick[...]` line (weight 1, plus 2 for a recorded want, plus 1 for a tie to a local
-person); then `lore.py callbacks --via <slug>` prints the delivery pick.
+flat `cb:pick[...]` line, every eligible entity once; then `lore.py callbacks --via <slug>`
+prints the delivery die, `via:d10`: 1-4 rumor · 5-7 letter · 8-9 traveler with news ·
+10 in person (closed unless the file says `mobile: yes` or home is near; closed, it
+reads as traveler with news).
 
 **Delivery, never teleporting.** A far person reaches the party as a **rumor**, a
 **letter**, or a **traveler with news**. They arrive **in person** only if their file
@@ -154,14 +152,17 @@ charter A.4. Only Joe unseals.
 
 A known NPC arriving in a scene is not a prop. One die says what they are doing:
 
-`lore.py beat <slug>` prints `beat:pick[...]`. Outcomes:
+`lore.py beat <slug>` prints the printed die, `beat:d12`: **1-5 ordinary · 6 own_want ·
+7 tie · 8 gossip · 9 asks_party · 10 offers_party · 11 friction · 12 trouble_at_their_door**.
+Outcomes:
 **ordinary** (texture, the heaviest) · **own_want** (their want moves or stalls) ·
 **tie** (something with a person they are tied to) · **gossip** (news of a tied
 person) · **asks_party** (a favor, information, help) · **offers_party** (news,
 a tip, a trade, an introduction) · **friction** (a quarrel with the party) ·
 **trouble_at_their_door**.
 
-Affinity tilts it, by rule: warm NPCs offer more, cold NPCs bring friction. A
+Affinity colors how the beat plays (a warm offer, a cold one), never which beat comes
+up (build 20261015a: no weights). A
 `tie` or `gossip` result then picks which tie (a second pick, only if they have
 more than one).
 
@@ -176,19 +177,22 @@ A want is a recorded fact, never a DM guess. When a known NPC whose `want` reads
 `unrecorded` is drawn for an `own_want` beat, or for a cast beat, a want is rolled
 first, once, and recorded:
 
-`lore.py` has no table for it; the DM builds one `want:pick[...]` call from the kinds of
-want a person of that role could hold (coin, safety for someone, standing, a person,
-a grudge settled, a secret kept, a duty done, knowledge, a favor repaid, to be left
-alone), weighted by recorded facts (a debt, a tie, an Affinity). The winner is
+Roll the printed `want:d12` (`lore.py fill <slug>` prints it): 1 coin · 2 safety for
+someone · 3 standing · 4 a person · 5 a grudge settled · 6 a secret kept · 7 a duty
+done · 8 knowledge · 9 a favor repaid · 10 to be left alone · 11 a place of their own ·
+12 a thing they lost. No weights: a recorded debt or tie shapes the particulars, never
+the odds. The winner is
 written with `lore.py set <slug> want="..."` and never changed except by play. The
 DM supplies the particulars from what the file and the scene already hold.
 
-The same applies to `fear`. A NPC with both blank is still fully usable as a known
+The same applies to `fear`, on the printed `fear:d12`: 1 poverty · 2 harm to someone ·
+3 disgrace · 4 a person · 5 a past act coming out · 6 the law · 7 a faction · 8 failing
+a duty · 9 the unknown · 10 losing their place · 11 sickness or injury · 12 being alone. A NPC with both blank is still fully usable as a known
 person: the beat-roll simply has less to read against.
 
 ### 4-quater. Fill on contact (Joe, 2026-10-13)
 
-Unrecorded fields are filled with best guesses as play goes, not by random draw unless the draw is weighted to what makes the most sense. Most people met are human unless the role or place implies otherwise; the occasional exotic person comes from the §6-bis race row (13 in 20 human), loaded toward the role and place (`lore.py fill <slug> --tilt dwarf=6`). Sex follows the cast voice when there is one. Look and manner are one visible trait and one habit that suit the role and the file. Each guess is filed with `lore.py set ... --guess` (the `guessed:` list), becomes fact once play uses it, and yields to a player's correction. `lore.py check` reports how many files carry guesses.
+Unrecorded fields are filled with best guesses as play goes, not by random draw, unless the scene could go either way, and then the draw is flat. Most people met are human unless the role or place implies otherwise; the occasional exotic person comes from the §6-bis race row (13 in 20 human), rolled flat on that row (`lore.py fill <slug>` prints it). Sex follows the cast voice when there is one. Look and manner are one visible trait and one habit that suit the role and the file. Each guess is filed with `lore.py set ... --guess` (the `guessed:` list), becomes fact once play uses it, and yields to a player's correction. `lore.py check` reports how many files carry guesses.
 
 ### 4-ter. The completeness check
 
@@ -206,12 +210,13 @@ day, and at the session boundary for each day of the gap (§5-sexies), up to 3
 beats per boundary. It does not replace or change a content firing, so the
 30% fight rule and every table's odds are untouched.
 
-1. `lore.py cast-beat` prints `npc:pick[...]` over known NPCs that have at least
+1. `lore.py cast-beat` prints a flat `npc:pick[...]` over known NPCs that have at least
    one tie. One engine call, one result.
-2. `lore.py cast-beat <slug>` prints `tie:pick[...]` (which tie), `act:pick[...]`
-   and `vis:d6`. Act kinds: nothing_new · aid · trade · gossip · quarrel ·
-   favor_asked · betrayal · courtship · seeks_the_party. The tie kind tilts the
-   act (rivals quarrel, debtors ask favors, kin aid, lovers court).
+2. `lore.py cast-beat <slug>` prints a flat `tie:pick[...]` (which tie), the printed
+   `act:d10` and `vis:d6`. Act, d10: 1-2 nothing_new · 3 aid · 4 trade · 5 gossip ·
+   6 quarrel · 7 favor_asked · 8 betrayal · 9 courtship · 10 seeks_the_party. No
+   weights: an act the tie cannot support (courtship between rivals) is not narrated,
+   and the DM rolls the next candidate (the bounds below).
 3. **Visibility** (the same shape as the nemesis chain, §7-sexies): 1 to 3
    hidden until the party meets it, 4 to 5 a rumor or trace is available if they
    look, 6 openly known.
@@ -233,8 +238,8 @@ alone.
 ## 6. Birth with ties (the `new` outcome, one addition)
 
 When the birth path creates a new named NPC, one more engine pick runs in the same
-call: **ties:pick[none=3|one=4|two=2]**, then for each tie a kind and a target
-from the known cast at that place. New people therefore arrive connected
+call: the printed **ties:d10** (1-3 none · 4-8 one · 9-10 two), then for each tie a
+flat pick of the kind and of the target from the known cast at that place. New people therefore arrive connected
 (a chandler's apprentice, a steward's cousin). `lore.py tie <a> <kind> <b>` records
 both directions. This is the main way the cast grows denser while the count of
 new names stays low.
