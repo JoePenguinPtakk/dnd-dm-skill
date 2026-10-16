@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""lore.py: the campaign's cast register and the weights for the CAST ENGINE.
+"""lore.py: the campaign's cast register and the lists for the CAST ENGINE.
 
 The master prompt's §6-terdecies (docs/MASTER_PROMPT_supplement_cast-engine.md)
 says what to do. This tool does the bookkeeping and the arithmetic so the DM
-never estimates a weight, a count, or a lookup. It rolls no dice. Every
-`pick[...]` string it prints goes into one roll.py call, as written.
+never estimates a count, a list, or a lookup. It rolls no dice. Every
+`pick[...]` it prints is flat (no weights, §1-sexies rule 3) and goes into one
+roll.py call exactly as written; every die it names reads on a printed table.
 
 Lore lives in <campaign repo>/lore/ :
     INDEX.md         one line per entity (rebuilt by `index`)
-    config.json      weights and caps (defaults below; a campaign may retune)
+    config.json      caps and windows (defaults below; a campaign may retune)
     state.json       session number, NEW-NPC counters, recent appearances
     npcs/ places/ items/ factions/ threads/   one markdown file per entity
     events/S<nn>.md  one line per event
@@ -50,14 +51,11 @@ LIST_KEYS = {"aliases", "roles", "where", "ties", "members", "guessed"}
 DIRS = ["npcs", "places", "items", "factions", "threads", "events"]
 
 DEFAULT_CONFIG = {
-    # who-roll: known + unnamed + new. Rule: known >= new, always.
-    "who_weights": {"known": 5, "unnamed": 3, "new": 2},
     "cap_window_count": 10,  # new named NPCs per window (Joe, 2026-10-13: 10 per 4 hours of play)
     "cap_window_hours": 4,
     "cap_encounter": 2,      # new named NPCs per encounter
-    "neglect_sessions": 3,   # unseen this long earns a return bonus
+    "neglect_sessions": 3,   # unseen this long (kept for reports; no longer a weight)
     "recent_memory": 12,
-    "max_share": 0.90,       # the dice engine refuses an outcome above 90%
     "ignore_speakers": [],   # audit: PC names and test posts, set per campaign
     # callbacks: people, threads and items from elsewhere (not the party's current region)
     "callback_max_session": 1,     # at most this many callbacks in one session
@@ -76,23 +74,6 @@ INVERSE = {"employs": "works-for", "works-for": "employs", "leader-of": "follows
 # act table for a beat between two tied NPCs: kind of act -> base weight
 ACTS = ["nothing_new", "aid", "trade", "gossip", "quarrel", "favor_asked",
         "betrayal", "courtship", "seeks_the_party"]
-ACT_BASE = {"nothing_new": 3, "aid": 1, "trade": 1, "gossip": 2, "quarrel": 1,
-            "favor_asked": 1, "betrayal": 1, "courtship": 1, "seeks_the_party": 1}
-ACT_BY_TIE = {
-    "rival": {"quarrel": 3, "betrayal": 2},
-    "enemy": {"quarrel": 3, "betrayal": 2},
-    "owes": {"favor_asked": 3},
-    "owed-by": {"favor_asked": 2},
-    "kin": {"aid": 2, "favor_asked": 1},
-    "parent-of": {"aid": 2}, "child-of": {"aid": 2},
-    "lover": {"courtship": 3, "quarrel": 1},
-    "employs": {"trade": 2}, "works-for": {"trade": 2},
-    "leader-of": {"trade": 1, "aid": 1}, "follows": {"aid": 1},
-    "patron-of": {"favor_asked": 2}, "client-of": {"favor_asked": 2},
-    "informant-for": {"gossip": 3}, "handler-of": {"gossip": 3},
-    "friend": {"aid": 2, "gossip": 1}, "ally": {"aid": 2},
-    "neighbor": {"gossip": 2, "trade": 1},
-}
 VIS_TEXT = "vis d6: 1-3 hidden until the party meets it | 4-5 a rumor or trace is available if they look | 6 openly known"
 
 STOP_SPEAKERS = {"HP", "AC", "DM", "NEEDED", "CHOICE", "VITALS", "ROLL", "ROLL GATE", "EXPOSITION",
@@ -286,20 +267,30 @@ def role_match(e, roles):
     return any(r.strip().lower() in hay for r in roles if r.strip())
 
 
-def cap_share(weights, max_share):
-    """Lower the heaviest weights until no outcome exceeds max_share. Weights stay >= 1."""
-    w = dict(weights)
-    for _ in range(200):
-        tot = sum(w.values())
-        top = max(w, key=w.get)
-        if len(w) < 2 or w[top] / tot <= max_share or w[top] <= 1:
-            break
-        w[top] -= 1
-    return w
-
-
 def pick_str(label, weights):
-    return f"{label}:pick[" + "|".join(f"{k}={v}" for k, v in weights.items()) + "]"
+    """A flat pick: every outcome once, no weights (THE FAIR DICE LADDER, §1-sexies rule 3)."""
+    return f"{label}:pick[" + "|".join(weights) + "]"
+
+
+def drop_recent(keys, recent3):
+    """Leave out anyone in the last three cast entries, as long as two or more others remain."""
+    fresh = [k for k in keys if k not in recent3]
+    return fresh if len(fresh) >= 2 else list(keys)
+
+
+# Printed tables (the HEAD and the cast-engine supplement carry the same rows).
+WHO_TABLE = "who:d12 · 1-6 known · 7-9 unnamed · 10-11 new · 12 callback · a closed outcome reads as unnamed"
+VIA_TABLE = "via:d10 · 1-4 rumor · 5-7 letter · 8-9 traveler_with_news · 10 in_person (closed: reads as traveler_with_news)"
+BEAT_TABLE = ("beat:d12 · 1-5 ordinary · 6 own_want · 7 tie · 8 gossip · 9 asks_party · 10 offers_party · "
+              "11 friction · 12 trouble_at_their_door · a result the file cannot support reads as ordinary")
+ACT_TABLE = ("act:d10 · 1-2 nothing_new · 3 aid · 4 trade · 5 gossip · 6 quarrel · 7 favor_asked · 8 betrayal · "
+             "9 courtship · 10 seeks_the_party · a result the tie cannot support is not narrated: roll the next candidate")
+RACE_TABLE = ("race:d20 (§6-bis race row) · 1-13 human · 14 half-elf · 15 dwarf · 16 halfling · 17 elf · 18 half-orc · "
+              "19 tiefling · 20 rarer (add a d6)")
+WANT_TABLE = ("want:d12 · 1 coin · 2 safety for someone · 3 standing · 4 a person · 5 a grudge settled · 6 a secret kept · "
+              "7 a duty done · 8 knowledge · 9 a favor repaid · 10 to be left alone · 11 a place of their own · 12 a thing they lost")
+FEAR_TABLE = ("fear:d12 · 1 poverty · 2 harm to someone · 3 disgrace · 4 a person · 5 a past act coming out · 6 the law · "
+              "7 a faction · 8 failing a duty · 9 the unknown · 10 losing their place · 11 sickness or injury · 12 being alone")
 
 
 # ---------------------------------------------------------------- candidates
@@ -530,18 +521,19 @@ def cmd_candidates(L, a):
     exclude = set((a.exclude or "").split(","))
     w, relaxed = candidate_weights(L, ents, places, roles, exclude, region_any=(a.region == "any"))
     if not w:
-        print("NO CANDIDATES (alive known NPCs matching the place). who-roll: known weight 0.")
+        print("NO CANDIDATES (alive known NPCs matching the place). who-roll: known is closed.")
         return 1
-    w = cap_share(w, L.cfg["max_share"]) if len(w) > 1 else w
-    for slug, wt in sorted(w.items(), key=lambda x: -x[1])[:a.limit]:
+    keys = drop_recent(sorted(w), L.state.get("recent", [])[-3:])
+    for slug in keys[:a.limit]:
         fm = ents[slug]["fm"]
-        print(f"{wt:2d}  {slug}: {fm.get('name', slug)} ({'; '.join(fm.get('roles', []) or [])}) last_seen S{fm.get('last_seen', '?')}")
+        print(f"  {slug}: {fm.get('name', slug)} ({'; '.join(fm.get('roles', []) or [])}) last_seen S{fm.get('last_seen', '?')}")
     if relaxed:
         print("(role filter matched nobody, so the list is by place alone)")
-    if len(w) == 1:
+    if len(keys) == 1:
         print("ONE CANDIDATE: no pick needed; the known branch is this NPC.")
     else:
-        print(pick_str("cand", w))
+        print("Paste it whole: flat, never edited (§1-sexies rule 3).")
+        print(pick_str("cand", keys))
     return 0
 
 
@@ -550,37 +542,21 @@ def cmd_who(L, a):
     places = [p.strip().lower() for p in (a.place or "any").split(",")]
     roles = [r for r in (a.role or "").split(",") if r.strip()]
     w, relaxed = candidate_weights(L, ents, places, roles, set())
-    ww = dict(L.cfg["who_weights"])
-    cbw = ww.pop("callback", 1)
-    notes = []
-    cbpool = callback_pool(L, ents)
-    if cbpool and callback_budget_ok(L):
-        ww["callback"] = cbw
-    elif cbpool:
-        notes.append("callback budget spent or in cooldown: callback removed")
+    closed = []
     if not w:
-        ww["known"] = 0
-        notes.append("no known candidate fits: known removed")
+        closed.append("known (no known person fits the place and role)")
     wfull, efull = cap_hit(L)
-    capped = wfull or efull
-    if capped:
-        ww["new"] = 0
-        notes.append(f"NEW-NPC cap reached ({cap_text(L)}): new removed. Unnamed conventions only (lore.py conventions) unless the players pull a thread that needs a name.")
-    if ww.get("known") and ww["known"] < ww.get("new", 0):
-        ww["known"] = ww["new"]
-        notes.append("known raised to equal new (rule: reuse is never rarer than new)")
-    ww = {k: v for k, v in ww.items() if v > 0}
-    if len(ww) < 2:
-        only = next(iter(ww)) if ww else "unnamed"
-        print(f"WHO: only one outcome is open ({only}); no roll needed. " + "; ".join(notes))
-        return 0
-    ww = cap_share(ww, L.cfg["max_share"])
-    print(pick_str("who", ww))
-    for n in notes:
-        print("note:", n)
-    print(f"known candidates here: {len(w)}" + (f" · far callbacks eligible: {len(cbpool)}" if "callback" in ww else ""))
-    if "callback" in ww:
-        print("if who=callback: lore.py callbacks")
+    if wfull or efull:
+        closed.append(f"new (NEW-NPC cap reached, {cap_text(L)}; unnamed conventions only, lore.py conventions, "
+                      "unless the players pull a thread that needs a name)")
+    cbpool = callback_pool(L, ents)
+    if not (cbpool and callback_budget_ok(L)):
+        closed.append("callback (none eligible, or the budget is spent or in its gap)")
+    print(WHO_TABLE)
+    for c in closed:
+        print("closed:", c)
+    print(f"known candidates here: {len(w)}" + (f" · far callbacks eligible: {len(cbpool)}" if cbpool else ""))
+    print("if who=known: lore.py candidates ... · if who=callback (and open): lore.py callbacks")
     return 0
 
 
@@ -591,14 +567,11 @@ def cmd_callbacks(L, a):
         if not e:
             print(f"NO SUCH ENTITY: {a.via}")
             return 1
-        via = {"rumor": 4, "letter": 3, "traveler_with_news": 2}
         near = [x.lower() for x in L.cfg.get("near", {}).get(region_of(L), [])]
         mobile = str(e["fm"].get("mobile", "")).lower() == "yes"
         homeok = str(e["fm"].get("home", "")).lower() in near
-        if mobile or homeok:
-            via["in_person"] = 1
-        print(pick_str("via", via))
-        print("A far person arrives by a mechanism, never by teleporting." + ("" if "in_person" in via else " In person is off the table: not mobile, home not near."))
+        print(VIA_TABLE)
+        print("A far person arrives by a mechanism, never by teleporting." + ("" if (mobile or homeok) else " in_person is closed: not mobile, home not near."))
         return 0
     pool = callback_pool(L, ents)
     print(f"REGION {region_of(L) or 'unset'} · callbacks this session {L.state.get('callbacks_this_session', 0)}/{L.cfg['callback_max_session']}"
@@ -609,11 +582,11 @@ def cmd_callbacks(L, a):
     if not callback_budget_ok(L):
         print("BUDGET SPENT or in the gap: no callback now.")
         return 1
-    w = cap_share(pool, L.cfg["max_share"]) if len(pool) > 1 else pool
-    for slug, wt in sorted(w.items(), key=lambda x: -x[1])[:a.limit]:
+    keys = sorted(pool)
+    for slug in keys[:a.limit]:
         fm = ents[slug]["fm"]
-        print(f"{wt:2d}  {slug}: {fm.get('name', slug)} ({'; '.join(fm.get('roles', []) or [])}) home {fm.get('home')} last_seen S{fm.get('last_seen', '?')}")
-    print(pick_str("cb", w) if len(w) > 1 else "ONE CANDIDATE: no pick needed.")
+        print(f"  {slug}: {fm.get('name', slug)} ({'; '.join(fm.get('roles', []) or [])}) home {fm.get('home')} last_seen S{fm.get('last_seen', '?')}")
+    print(pick_str("cb", keys) if len(keys) > 1 else "ONE CANDIDATE: no pick needed.")
     print("then, for the person drawn: lore.py callbacks --via <slug>   (how the callback reaches the party)")
     print("SIZE RULE: a callback is small (a letter, a name in conversation, news from a trader, an object arriving). It does not start a quest by itself; it may offer a hook the party is free to ignore.")
     print("After using it: lore.py callback-done <slug> --via <how>")
@@ -645,24 +618,17 @@ def cmd_beat(L, a):
         print(f"NO SUCH ENTITY: {a.slug}")
         return 1
     fm = e["fm"]
-    aff = L.num(fm, "affinity", 0)
-    w = {"ordinary": 6}
-    if str(fm.get("want", "")).strip():
-        w["own_want"] = 3
-    if L.ties_of(fm):
-        w["tie"] = 3
-        w["gossip"] = 3
-    else:
-        w["gossip"] = 1
-    w["asks_party"] = 2 + (1 if aff >= 0 else 0)
-    w["offers_party"] = 2 + (3 if aff >= 11 else 1 if aff >= 1 else 0)
-    w["friction"] = 1 + (3 if aff <= -5 else 0)
-    w["trouble_at_their_door"] = 1
-    w = cap_share(w, L.cfg["max_share"])
-    print(pick_str("beat", w))
+    print(BEAT_TABLE)
+    print(f"Affinity {L.num(fm, 'affinity', 0)} colors how the beat plays, never which beat comes up.")
+    if str(fm.get("want", "")).strip().lower() in UNKNOWN:
+        print("want is unrecorded: an own_want result rolls it first:", WANT_TABLE)
     ties = L.ties_of(fm)
-    if ties:
-        print("if beat=tie or gossip, pick which tie next:", pick_str("tie", {f"{k}:{t}": 1 for k, t in ties}) if len(ties) > 1 else f"only tie: {ties[0][0]}:{ties[0][1]}")
+    if not ties:
+        print("no ties: a tie or gossip result reads as ordinary")
+    elif len(ties) > 1:
+        print("if beat=tie or gossip, which tie next:", pick_str("tie", [f"{k}:{t}" for k, t in ties]))
+    else:
+        print(f"only tie: {ties[0][0]}:{ties[0][1]}")
     return 0
 
 
@@ -670,12 +636,11 @@ def cmd_castbeat(L, a):
     ents = L.load_all()
     if not a.slug:
         w, _ = candidate_weights(L, ents, ["any"], [], set(a.exclude.split(",")) if a.exclude else set())
-        w = {s: x for s, x in w.items() if L.ties_of(ents[s]["fm"])}
-        if len(w) < 2:
+        keys = sorted(s for s in w if L.ties_of(ents[s]["fm"]))
+        if len(keys) < 2:
             print("Fewer than two known NPCs with ties: no cast beat available.")
             return 1
-        w = cap_share(w, L.cfg["max_share"])
-        print(pick_str("npc", w))
+        print(pick_str("npc", keys))
         print("then: lore.py cast-beat <slug>")
         return 0
     e = ents.get(a.slug)
@@ -687,15 +652,10 @@ def cmd_castbeat(L, a):
         print(f"{a.slug} has no ties.")
         return 1
     if len(ties) > 1:
-        print(pick_str("tie", {f"{k}:{t}": 1 for k, t in ties}))
+        print(pick_str("tie", [f"{k}:{t}" for k, t in ties]))
     else:
         print(f"only tie: {ties[0][0]}:{ties[0][1]}")
-    acts = dict(ACT_BASE)
-    for k, _ in ties:
-        for act, bonus in ACT_BY_TIE.get(k, {}).items():
-            acts[act] += bonus
-    acts = cap_share(acts, L.cfg["max_share"])
-    print(pick_str("act", acts))
+    print(ACT_TABLE)
     print("vis:d6")
     print(VIS_TEXT)
     print("Bounds: local scale, the NPCs' own circle. The cause must trace to a recorded want, fear or tie. No multi-session arc yet.")
@@ -826,7 +786,6 @@ def cmd_conventions(L, a):
     return 0
 
 
-RACE_ROW = {"human": 13, "half-elf": 1, "dwarf": 1, "halfling": 1, "elf": 1, "half-orc": 1, "tiefling": 1, "rarer": 1}   # the §6-bis race d20: 1-13 human
 
 
 def voice_sex(voice):
@@ -852,21 +811,16 @@ def cmd_fill(L, a):
     print(f"{fm.get('name', a.slug)} ({'; '.join(fm.get('roles', []) or [])}) unrecorded: {', '.join(unk)}")
     print("Fill a field the first time the scene needs it, from what the file already records; mark each guess with `lore.py set <slug> field=value --guess`.")
     if "race" in unk:
-        w = dict(RACE_ROW)
-        for kv in (a.tilt or "").split(","):
-            if "=" in kv:
-                k, _, v = kv.partition("=")
-                if k.strip() in w:
-                    w[k.strip()] = max(1, int(v))
-        w = cap_share(w, L.cfg["max_share"])
-        print("race: assume human unless the role or place implies otherwise. If the scene could go either way, roll:", pick_str("race", w))
+        print("race: assume human unless the role or place implies otherwise. If the scene could go either way, roll it flat:", RACE_TABLE)
     if "sex" in unk:
         vs = voice_sex(fm.get("voice"))
         print("sex:", f"{vs} (the cast voice {fm.get('voice')} is {vs}); `lore.py set {a.slug} sex={vs} --guess`" if vs else "no voice cast yet: best fit to the name and role, else an even pick.")
     if "look" in unk or "manner" in unk:
         print("look/manner: the best fit to the role, the place and the recorded facts; specific and small (one visible trait, one habit of speech or bearing).")
     if "want" in unk or "fear" in unk:
-        print("want/fear: the want roll (supplement section 4-bis): a weighted `want:pick[...]` over what a person of this role could hold, weighted by recorded ties and debts.")
+        print("want/fear (supplement section 4-bis), rolled once and recorded:")
+        print("  ", WANT_TABLE)
+        print("  ", FEAR_TABLE)
     return 0
 
 
@@ -1060,7 +1014,7 @@ def main():
     p = sub.add_parser("name"); p.add_argument("slug"); p.add_argument("name"); p.add_argument("--override"); p.add_argument("--pulled"); p.set_defaults(f=cmd_name)
     p = sub.add_parser("conventions"); p.set_defaults(f=cmd_conventions)
     p = sub.add_parser("set"); p.add_argument("slug"); p.add_argument("pairs", nargs="+"); p.add_argument("--guess", action="store_true", help="mark these fields as the DM's best guess, not a recorded fact"); p.set_defaults(f=cmd_set)
-    p = sub.add_parser("fill"); p.add_argument("slug"); p.add_argument("--tilt", help="race=weight,... to load the race pick toward what the role and place make likely"); p.set_defaults(f=cmd_fill)
+    p = sub.add_parser("fill"); p.add_argument("slug"); p.set_defaults(f=cmd_fill)
     p = sub.add_parser("check"); p.add_argument("--strict", action="store_true"); p.add_argument("--verbose", action="store_true"); p.set_defaults(f=cmd_check)
     p = sub.add_parser("tie"); p.add_argument("a"); p.add_argument("kind"); p.add_argument("b"); p.set_defaults(f=cmd_tie)
     p = sub.add_parser("status"); p.add_argument("slug"); p.add_argument("value"); p.set_defaults(f=cmd_status)

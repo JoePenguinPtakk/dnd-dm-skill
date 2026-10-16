@@ -2,7 +2,7 @@
 """bestiary.py: creature lookup for spawns (master prompt §4.1 and §7-bis).
 
 Read-only. It never rolls a die: it lists the creatures that legally fit a
-spawn and prints a ready weighted `pick[...]` for the dice engine, which does
+spawn and prints a ready flat `pick[...]` for the dice engine, which does
 the rolling and keeps the record. It also prints exact stat blocks, so no
 block is ever recalled from memory.
 
@@ -190,13 +190,11 @@ def recent_spawns(limit=30):
     return [norm(n) for n in reversed(names)][:limit]
 
 
-def weight(c, recent):
-    n = norm(c["name"])
-    if n in recent[:10]:
-        return 1
-    if n in recent:
-        return 2
-    return 3
+def flat_rows(rows, name_of, recent):
+    """THE FAIR DICE LADDER (§1-sexies rule 3): no weights. A candidate met in the last 10
+    picks of this kind is left out, as long as two or more others remain."""
+    fresh = [r for r in rows if norm(name_of(r)) not in recent[:10]]
+    return fresh if len(fresh) >= 2 else rows
 
 
 def cmd_candidates(a):
@@ -274,8 +272,11 @@ def cmd_candidates(a):
             fl = f"  [{', '.join(f)}]" if f else ""
             print(f"  CR {crs(c['cr']):>4} {c['name']} ({c['type']}){spend}{fl}")
     if len(rows) >= 2:
-        pick = "|".join(f"{token(c['name'])}={weight(c, recent)}" for c, _, _ in rows)
-        print(f"{len(rows)} candidates. Roll it through the engine (weights may be loaded to fit the fiction, §1-sexies):")
+        drawn = flat_rows(rows, lambda r: r[0]["name"], recent)
+        pick = "|".join(token(c["name"]) for c, _, _ in drawn)
+        left = len(rows) - len(drawn)
+        print(f"{len(drawn)} candidates" + (f" ({left} met recently left out)" if left else "") +
+              ". Paste it whole into the engine call: flat, never edited (§1-sexies rule 3):")
         print(f"{label}:pick[{pick}]")
     elif len(rows) == 1:
         print(f"Only one candidate ({rows[0][0]['name']}): a one-outcome table is a decision, not a roll. "
@@ -286,7 +287,8 @@ def cmd_candidates(a):
         print(f"Count is the most that fits the remaining XP, capped at {cap} (2 per PC). Leftover XP may buy a third block (at most three).")
     if any(r[2] for r in rows):
         print("Flags: check IMMUNE-WEAPONS / RESIST-WEAPONS / INCORPOREAL / FLIES against what the party can actually do; "
-              "a creature the party provably cannot hurt comes off the table before the roll.")
+              "if the party provably cannot hurt one, rerun with --no-magic (no magic weapons) or --no-ranged "
+              "(nothing that reaches a flier); never edit the line by hand.")
     return 0
 
 

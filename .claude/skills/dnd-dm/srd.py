@@ -3,7 +3,7 @@
 
 Read-only. It never rolls a die. It finds and prints exact SRD text, so no
 rule, spell, or item is recalled from memory, and it lists what legally fits
-a loot or hazard roll and prints a ready weighted `pick[...]` for the dice
+a loot or hazard roll and prints a ready flat `pick[...]` for the dice
 engine, which does the rolling and keeps the record.
 
 The library lives in srd/ beside this file (built from the SRD 5.2.1 PDF by
@@ -246,13 +246,11 @@ def recent_picks(prefix, limit=30):
     return [norm(n) for n in reversed(names)][:limit]
 
 
-def weight(name, recent):
-    n = norm(name)
-    if n in recent[:10]:
-        return 1
-    if n in recent:
-        return 2
-    return 3
+def flat_rows(rows, name_of, recent):
+    """THE FAIR DICE LADDER (§1-sexies rule 3): no weights. A candidate met in the last 10
+    picks of this kind is left out, as long as two or more others remain."""
+    fresh = [r for r in rows if norm(name_of(r)) not in recent[:10]]
+    return fresh if len(fresh) >= 2 else rows
 
 
 def find_item(name):
@@ -288,7 +286,7 @@ def cmd_loot(a):
         if m:
             want.append(m)
     if not want:
-        return fail("--rarity is required (a loaded world roll picks it first, §7-bis LOOT PROCEDURE)")
+        return fail("--rarity is required (rolled first on the DMG Magic Item Rarities table, §7-bis LOOT PROCEDURE)")
     cats = {c.strip().lower() for c in (a.category or "").split(",") if c.strip()}
     recent = recent_picks("loot")
     rows = []
@@ -318,8 +316,11 @@ def cmd_loot(a):
                                          "consumable" if it["consumable"] else ""] if t)
             print(f"  {rar:<9} {name}  ({tags})")
     if len(rows) >= 2:
-        pick = "|".join(f"{token(n)}={weight(n, recent)}" for n, _, _ in rows)
-        print(f"{len(rows)} candidates. Roll it through the engine (weights may be loaded to fit the fiction, §1-sexies):")
+        drawn = flat_rows(rows, lambda r: r[0], recent)
+        pick = "|".join(token(n) for n, _, _ in drawn)
+        left = len(rows) - len(drawn)
+        print(f"{len(drawn)} candidates" + (f" ({left} met recently left out)" if left else "") +
+              ". Paste it whole into the engine call: flat, never edited (§1-sexies rule 3):")
         print(f"loot:pick[{pick}]")
         print("Then `srd.py item <result>` for the exact text. A weapon or armor result names the base "
               "item in the fiction (a +1 Longsword); a Spell Scroll result rolls its spell from `srd.py spells --level N`.")
@@ -414,8 +415,11 @@ def cmd_hazards(a):
         for kind, h, note in rows:
             print(f"  {kind:<11} {h['name']}" + (f"  ({note})" if note else ""))
     if len(rows) >= 2:
-        pick = "|".join(f"{token(h['name'])}={weight(h['name'], recent)}" for _, h, _ in rows)
-        print(f"{len(rows)} candidates. Roll it through the engine (weights may be loaded to fit the fiction, §1-sexies):")
+        drawn = flat_rows(rows, lambda r: r[1]["name"], recent)
+        pick = "|".join(token(h["name"]) for _, h, _ in drawn)
+        left = len(rows) - len(drawn)
+        print(f"{len(drawn)} candidates" + (f" ({left} met recently left out)" if left else "") +
+              ". Paste it whole into the engine call: flat, never edited (§1-sexies rule 3):")
         print(f"hazard:pick[{pick}]")
         print("Then `srd.py hazard <result>` for the exact text. Environment tags on hazards are hand tags.")
     elif len(rows) == 1:

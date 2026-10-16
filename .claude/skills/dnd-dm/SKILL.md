@@ -65,6 +65,7 @@ LAYERS: master=<filename> · charter=<filename|absent> · mechanics=<filename|ab
 ENGINE: <path to roll.py> · <verbatim SESSION START line> · test → <verbatim output of one real roll, with its [R####] ID>
 LORE: <verbatim `lore.py verify` line> · region=<where the party is> · <`lore.py budget` line>
 HOLDINGS: <verbatim `inv.py verify` line>
+MAP: <verbatim `map.py verify` line | no module/ (not a published-module campaign)>
 ```
 
 A missing layer is named as `absent`, never quietly skipped. If the save
@@ -243,9 +244,11 @@ entry exists is a real roll. The `DM ROLLS` line you print is a copy; the
 - **Boot, before any roll:** `python3 <skill-base-dir>/roll.py session start <campaign repo>`.
   The engine refuses to roll without an open session.
 - **Every world result carries its ID**, pasted from the engine output.
-- **Want a say in a world fact? Load the dice, in the call:**
-  `mood:pick[wary=3|friendly=1|hostile=1]`. At least two outcomes, weight 1+
-  each, none above 90%. The engine refuses anything else.
+- **You never set odds (THE FAIR DICE LADDER, master prompt §1-sexies rule 3).**
+  A printed table first; then a tool's flat list, pasted whole; then the Oracle
+  d6; last, and never in a fight, a flat list of 4 or 6 outcomes balanced in
+  pairs, tagged `PICK (no table)`. A weighted pick (`a=3|b=1`) or a repeated outcome is malformed, and the
+  engine refuses it.
 - **Rerolls only by RAW or a player-invoked feature:**
   `--reroll-of R0042 --reason "Lucky feat"`. Never at your discretion.
 - **Reading:** `roll.py show 10`, `roll.py cite R0042`, `roll.py session status`
@@ -300,7 +303,7 @@ python3 <skill-base-dir>/roll.py attack:d20+5 damage:2d6+3
 
 `bestiary.py`, beside `roll.py`, holds all 331 SRD 5.2 stat blocks with
 environment tags (`bestiary.json`). It never rolls; it lists what legally fits
-a spawn and prints a ready `spawn-...:pick[...]` for the engine. The DM never
+a spawn and prints a ready flat `spawn-...:pick[...]` for the engine, pasted whole. The DM never
 picks a creature and never recalls a stat block from memory.
 
 ```bash
@@ -341,10 +344,11 @@ python3 <skill-base-dir>/srd.py loot --rarity uncommon --category potion  # LOOT
 
 - **Hazards:** `hazards` lists traps, environmental effects, and contagions
   (add `--kind poison` for poisons) that fit the environment and the party's
-  level, and prints a ready `hazard:pick[...]`; `hazard <name>` prints the text.
+  level, and prints a ready flat `hazard:pick[...]`; `hazard <name>` prints the text.
   Environment tags on hazards are hand tags.
-- **Loot:** rarity is a loaded world roll first; then `loot --rarity <r>`
-  prints a ready `loot:pick[...]`; `item <name>` prints the text.
+- **Loot:** rarity is rolled first on the DMG Magic Item Rarities table (master
+  prompt §7-bis LOOT PROCEDURE); then `loot --rarity <r>` prints a ready flat
+  `loot:pick[...]`; `item <name>` prints the text.
 - **Spells:** `spell <name>`; `spells --class Wizard --level 3` lists.
 - **Navigation:** `toc`, `toc <chapter>`, `read <file> --from <line>`.
 - The library is rebuilt from `sources/SRD_CC_v5.2.1.pdf` by
@@ -358,9 +362,9 @@ python3 <skill-base-dir>/srd.py loot --rarity uncommon --category potion  # LOOT
   from `docs/CUSTOM_TABLE_TEMPLATE.md`: four bands (Confrontation, Aid, Fight,
   Wild) of 10 entries, specific to this campaign and these characters. Rewrite
   a spent entry before the next roll.
-- **The deck:** at an ambient content firing, one engine call picks the table
-  (`deck:pick[...]`, equal weights, loadable) and rolls the content d100 with
-  the rest of the chain. **The d100's last digit always sets the band**, so
+- **The deck:** the nature d6 rolls alone first; at an ambient result, one engine
+  call picks the table (`deck:pick[...]`, flat, never loaded) and rolls the
+  content d100 with the rest of the chain. **The d100's last digit always sets the band**, so
   every table runs 30% fights. No table and no campaign ruling changes that.
 - **Reference tables** outside the deck (for example Waterdeep's solo downtime
   table) are rolled through the engine when their scene fits, or mined for
@@ -375,7 +379,9 @@ last save remembered to list.
 - **`lore.py`** keeps `lore/` (one markdown file per person, place, item, faction and
   thread, plus `INDEX.md` and `events/`). Look up with `find <name or role>` (always
   search by role too), `show`, `candidates`. Roll with `who`, `beat`, `cast-beat`,
-  `callbacks`: each prints the `pick[...]` line to paste into the one `roll.py` call.
+  `callbacks`, `fill`: each prints a printed die (`who:d12`, `beat:d12`, `act:d10`,
+  `via:d10`, `want:d12`, `race:d20`) or a flat `pick[...]` line, pasted whole into the
+  one `roll.py` call.
   Record with `add`, `touch`, `name`, `tie`, `set`, `status`, `event`. Check with
   `budget`, `audit <session log>`, `check`, `verify`. `conventions` prints the twelve
   placeholder conventions. `session <n>` and `region <where>` run at boot. `add`
@@ -388,7 +394,7 @@ last save remembered to list.
   `weight <name>` look up; `add-item`, `drop-item`, `move`, `move-item` and `set-lb`
   record; `verify` stamps. It refuses to put more than Strength x 15 lb on a person,
   and refuses a move between two places until the haul has been played (`--haul`).
-- **Neither tool rolls dice.** They print the weights; the dice go through the engine
+- **Neither tool rolls dice.** They print the lists and the counts; the dice go through the engine
   as always. Neither is guard-protected, so the rule is yours to keep: do not edit
   `lore/` or `holdings/` files by hand when a command does it.
 - **A campaign with no `lore/` yet:** run `lore.py init`, then seed it from the newest
@@ -397,6 +403,25 @@ last save remembered to list.
   the newest save lists only "by reference". Write `unrecorded` where the sources are
   silent and never guess a field. Run `lore.py check`.
 - **Waterdeep is the model:** its `lore/` and `holdings/` are seeded and checked.
+
+### A published module: the map and the book (master prompt §6-septies)
+
+Only for a campaign whose repo has a `module/` folder (a published module turned into
+data). Everywhere else both tools say so and do nothing.
+
+- **`map.py`** keeps `module/progress.json` and `module/coverage.jsonl`: the plan's
+  current stage, where the party is, and which keyed areas and events they have
+  actually experienced. `here <place>` on arrival (it marks nothing: visiting is not
+  experiencing); `mark <ID> seen|played|done|closed --evidence "..."` the moment it
+  happens; `check <words>` before you assume the party did or knows anything from the
+  module (no record means they have not); `advance` only when the stage's required
+  units are done; `table` for a quest-linked firing or when the card shows `DRIFT`;
+  `card` at boot; `verify` for the save's `MAP:` stamp. It refuses dormant content, a
+  stage the plan has not authored, and closing a required unit without Joe's word.
+- **`book.py`** prints the module's own text: `unit <ID>`, `page N`, `find <words>`,
+  `around <words>`. Run module content from this, never from recall. The book text is
+  the campaign's private copy, named in `module/module.json`, and never committed.
+- **Dragon Heist (`dragon-heist` repo) is the model.**
 
 ### No engine available? Stop and tell Joe. Never switch tiers yourself.
 
@@ -432,9 +457,10 @@ Load in role order: **master prompt → charter → mechanics reference Part 1 �
 save state.** That is strictly most-stable to least-stable, and the order is a
 caching contract, not a preference. After the save, open the ledgers (master prompt
 §11, step 0-bis): `lore.py session <n>`, `lore.py region <where the party is>`,
-`lore.py verify --expect <the save's LORE stamp>`, `inv.py verify`. Read the ledgers
-through their tools on demand, never whole; only `lore/INDEX.md` is worth reading at
-boot, and only on a small campaign.
+`lore.py verify --expect <the save's LORE stamp>`, `inv.py verify`; under a published
+module also `map.py session <n>`, `map.py verify --expect <the save's MAP stamp>` and
+`map.py card` (step 0-ter). Read the ledgers through their tools on demand, never whole;
+only `lore/INDEX.md` is worth reading at boot, and only on a small campaign.
 
 - The boot layers are the **cached prefix** of every request in the session.
   Prompt caching invalidates from the first changed byte forward, so static
@@ -545,7 +571,13 @@ checkpoint actually produces a save state:
    (every speaker has a file), `lore.py check` and `lore.py verify`, and
    `inv.py verify`; stamp the `LORE:` and `HOLDINGS:` lines in the save and
    commit `lore/` and `holdings/` with it. A name with no file is filed before
-   the session closes.
+   the session closes. Under a published module, `map.py verify` gives the `MAP:`
+   stamp, and `module/` is committed with the save.
+5-bis. **Compile the save from the records, not from memory** (master prompt §10
+   RECORD AS YOU GO): this session's journal (`lore/events/S<nn>.md`, one line per
+   driving fact, logged with `lore.py event` as it happened), the stamps, and under a
+   module `map.py log 30`. Something in no record does not go in on memory alone: ask
+   the table first.
 6. **Offer to commit it**, and do not commit without being asked. A save is
    the user's record of their own campaign.
 

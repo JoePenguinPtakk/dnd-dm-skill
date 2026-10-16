@@ -1,146 +1,76 @@
-# SUPPLEMENT — §6-septies · CHARTERED-MODULE CONTENT BRIDGE
+# SUPPLEMENT: §6-septies · CHARTERED-MODULE CONTENT BRIDGE (design notes)
 
-*Drop-in addition to the v5 master prompts. Campaign-agnostic. Active only when the
-campaign is chartered on a published module that ships the four generated artifacts
-(manifest, spine, coverage ledger, hooks) from the module-to-charter generator. When those
-are absent, this supplement is inert and the §5/§6 content engine runs exactly as written.*
-
----
-
-## 0. WHAT THIS IS, AND WHAT IT DOES NOT CHANGE
-
-The §5/§6 content engine already decides **when** content fires (automatic per-phase cadence,
-§5 — no gate roll, guaranteed) and **what kind** of beat it is (interleaved d100 → band →
-environment cast → intersection). This supplement changes **one thing**: where the
-**quest-linked** result draws its content from.
-
-Without a chartered module, a quest-linked firing routes into "an active quest's Stage
-beat" (§5) that the DM frames. That works, but it surfaces nothing from a published module's
-unplayed content on its own; a hand-built campaign table can only hold what has already been
-played. This bridge makes a quest-linked firing roll onto the module's **live** content,
-in story order, so playing the ordinary phase cadence introduces the module itself.
-
-Everything else is untouched. The content cadence, the ambient branch, the interleaved-d100
-bands, Law 3 dice ownership, the intersection tables, the loop gates: all as written.
+*Design notes for the v5 master prompts' §6-septies, rewritten 2026-10-16 (build 20261016c). The binding rules
+are in §6-septies itself. This file explains why they exist and how the data is shaped, for whoever builds the
+next module campaign. Nothing here is loaded at boot.*
 
 ---
 
-## 1. THE HORIZON (what "live" means)
+## 0. The problem it solves
 
-Four artifacts sit in the campaign layer, loaded at boot alongside the charter:
+The first attempt to run *Waterdeep: Dragon Heist* under AI DMs failed in ways no single rule fixed:
 
-- **manifest** — every keyed area and named NPC of the module, each with a scope tag; what
-  exists.
-- **spine** — the module's main quest as ordered, gated stages; exactly one is live at a time.
-- **coverage ledger** — per in-scope area, a status: untouched / glimpsed / rendered /
-  resolved / skipped; what the party has experienced.
-- **hooks** — natural entry paths per area, plus each stage's spine_hooks; how content enters.
+- **A free-play campaign was steered into the module partway.** The module was never the spine.
+- **A DM read the save, saw the party had been somewhere, and assumed they had experienced it.** Box text,
+  occupants, clues and set pieces were treated as done because the location appeared in a summary.
+- **The party reached the vault in a few sessions,** because nothing mechanical gated the Stone or the keys.
+- **Module content was run from memory,** paraphrased, rescaled and reordered by the DM.
+- **Each new DM instance knew only what the last one remembered to write at the end.**
 
-The **horizon** is the live stage's `live_content` intersected with the in-scope, not-yet-
-rendered manifest. It is the only content this bridge will surface. Content outside the live
-stage stays dormant until its gate opens, so the party is never handed a beat the story has
-not reached.
+## 1. The two tools
 
----
+- **`map.py`** (skill) keeps where the party is in the module and what of it they have actually experienced. A
+  unit (a keyed area such as `G8`, or an event such as `ch3-fireball`) is untouched until a `mark` with evidence
+  says otherwise. Statuses only move forward: seen, played, done, or closed with a reason.
+- **`book.py`** (skill) prints a unit's own text from the campaign's private book extract, so the DM reads before
+  it runs. A whole module costs ~250,000 tokens; a unit costs a few hundred.
 
-## 2. THE BRIDGE (three fire points)
+Both are inert in a campaign without a `module/` folder.
 
-**A. Quest-linked content firing (§5).** When a content firing occurs and the nature roll (d6)
-reads **quest-linked**, roll the **live content table** for the current stage instead of
-free-framing a beat. The table is regenerated per stage from the horizon (`content_table.py`),
-banded to match the engine's intent:
+## 2. The data (`<campaign>/module/`)
 
-- **advance the arc** — a stage spine_hook; the story-moving result.
-- **flesh out the beat** — an untouched in-scope area's content hook.
-- **someone surfaces** — a live stage NPC the party has not met.
-- **wild card** — defer to the generic §6 wildcard intersection.
+| File | Written by | What it holds |
+|---|---|---|
+| `module.json` | hand, once | name, the book text's path (private, never committed), the drift threshold |
+| `manifest.json` | a build script, then corrected by hand | groups (places), areas (keyed rooms), events (unkeyed set pieces), each with pages and, for events, the heading the text starts at |
+| `spine.json` | hand: the campaign plan | ordered stages (live, opens, required, needs, milestone, ready) and branches that open after a stage |
+| `progress.json` | `map.py` only | current stage, location, coverage, the drift clock |
+| `coverage.jsonl` | `map.py` only | every write, appended: the audit trail |
 
-The **ambient** branch is unchanged: it runs the generic §6 content roll for world texture, no
-module obligation. For a **city** setting, its source is the campaign-agnostic Urban Beats
-supplement (§6-octies, if loaded — otherwise §6-nonies's generic Urban table); a campaign may
-also carry its **own** city cast table in its module material (names, factions, threads), which
-supersedes the generic one for that campaign only — the same more-specific-beats-generic
-principle §6-nonies's charter-overlay precedence rule already runs for any environment tag, not
-a special case, just applied here to a module-supplied table instead of a charter-supplied one.
-So a day still yields the three-way mix (arc beats, ambient color, quiet-leaning bands): the arc
-beats drawn from real module content, the ambient color from Urban Beats or the campaign-specific
-table. **Three table tiers, kept separate:** the generic live-tables module and the generic
-§6-octies Urban Beats table are campaign-agnostic (public engine); a campaign's own
-city cast table and its quest-linked live content table are campaign-specific (private module
-material, or charter-layer per PROJECT_ORIENTATION.md's tone/mechanics split).
+**Live vs dormant.** A stage's `live` units are in play only while it is current. Its `opens` units are in play
+from then on, for good (a home base, a recurring neighbor). A branch's units are live from the moment its
+`opens_after` stage completes until its own required units are done. Everything else is dormant: the place
+exists, its module content does not happen yet.
 
-**B. Location arrival (occupancy chain).** The occupancy chain's **hook d6** (campaign
-mechanics-reference: 5-6 connects to a live thread) reads against the **horizon** when a
-chartered module is active. On a 5 or 6, the location's scene ties to the live stage's
-content or spine_hooks, not an invented thread. On 1-4 it connects to nothing, as before.
+**Unauthored stages.** A stage with `ready: false` cannot be entered. This is how a plan admits it isn't finished
+without letting the DM fill the gap at the table (Dragon Heist's merged Grand Chain steps).
 
-**C. Explicit pull.** When the DM needs to move the story and the dice have been quiet (§5's
-anti-lull rule), the DM may consult the horizon directly and reach for a spine_hook. This is
-the sanctioned, non-random path to advance a stalled arc, distinct from the random fire points
-above.
+## 3. Drift
 
----
+The card measures play minutes since a live unit was last played or done, carried across sessions (the tail of
+the last session is added to the next one at `session`). At the threshold (60 minutes by default), the next
+content firing goes straight to the live table. This keeps the module moving without railroading: the table
+offers a way in, and the players still choose.
 
-## 3. TWO NEW ENGINE WRITES (state, not memory)
+## 4. The live table
 
-Like every number in this engine, coverage and progression are **written**, never trusted to
-recall (§2 anti-fabrication; the same discipline that routes dice through code):
+`map.py table` prints a fixed band die and flat picks: 1–8 advance the arc (the stage's required units not yet
+done); 9–16 flesh out the stage (its live events, and its places with unexperienced areas); 17–19 an open
+branch; 20 the generic wildcard. An empty band reads as 1–8, and if that is empty too, as 20. Keyed areas
+are folded into their place, so a firing surfaces somewhere to go or something happening, never a single room.
 
-- **Render.** When an area's box text is read or paraphrased at the table (the book's own
-  definition of a visited room), mark that area `rendered` in the ledger. A resolved objective
-  marks `resolved`. A deliberate pass marks `skipped`. Nothing is left silently `untouched`
-  after the party was there.
-- **Advance.** When a stage's `exit_condition` resolves, advance the spine's current-stage
-  pointer. This opens the next stage's gate and regenerates the live content table. Advancing
-  is a deliberate write, surfaced on the turn's `DM ROLLS THIS RESPONSE` line, never an
-  ambient drift.
+## 5. Saves
 
-Both ride the §5 save-write, so they survive compression the way QUESTS and NPC REGISTRY do.
+The save carries the `MAP:` stamp (`map.py verify`) and commits `module/` with it. Boot checks the stamp, and a
+mismatch stops play. The save does not copy the coverage into prose: the record is the files, and the save
+points at them.
 
----
+## 6. Building the next module
 
-## 4. BOOT (tier 2)
-
-At boot, after the master prompt and charter, read three things — all single-location reads,
-which is what keeps a cross-document contradiction from hiding:
-
-1. The **live spine stage** (the current-stage pointer) and its objective.
-2. The **coverage ledger rollup** (rendered/total per location group in the live horizon).
-3. The **charter's locked-facts block**, reconciled against the save. Each locked fact names
-   the save field it must match; a mismatch is surfaced on the boot receipt, never silently
-   carried. (This is the guard against the locked-fact drift that ran unchecked for ten
-   sessions in the prior campaign.)
-
----
-
-## 5. THE TWO ANTI-FABRICATION GUARANTEES
-
-- **The DM never invents module content.** Areas, NPCs, and their entries come from the
-  manifest and hooks, surfaced by the dice; the DM does not free-invent a room the book keyed.
-  This is §2 applied to a published module: the content already exists, so reach for it, do
-  not fabricate a parallel one.
-- **The DM never invents metaplot beyond the spine.** The spine is authored canon — the
-  publisher's throughline, not a DM invention — and is the **one sanctioned exception** to the
-  charter's no-metaplot rule. Nothing beyond it may be promoted into a hidden master plan. The
-  charter's emergent-continuity rule still governs everything the spine does not: consequences
-  of play, logged as they happen, never a secret connection revealed after the fact.
-
----
-
-## 6. COMPLETION GUARD
-
-The signal is **stage-gated then proximity-gated, never a global completion meter.** There is
-no "you are N% through the module, push harder." Surfacing is optional; a stage may exit with
-in-scope content left untouched, logged `skipped`. The spine sets the pace; the ledger keeps
-the honest record of what that pace cost. This directs the sandbox without railroading it and
-without turning coverage into a checklist.
-
----
-
-## 7. ONE-LINE SUMMARY FOR THE DM
-
-> On a quest-linked content firing under a chartered module, roll the live content table for the
-> current stage — real module content, in story order — instead of inventing a beat. Render
-> what the party experiences, advance the spine when a stage resolves, and never invent content
-> the manifest already holds or metaplot the spine does not. Ambient stays generic; the guard
-> stays no-completion-meter.
+1. Get a page-marked text extract of the book (`=== PAGE n ===`).
+2. Build the manifest from it: keyed-area headings, plus a hand list of the unkeyed set pieces, with pages and
+   headings. Dragon Heist's builder is `dragon-heist/module/build_module.py`. Check every unit with `book.py
+   unit`, and fix the OCR misses by hand.
+3. Write the spine from the campaign's plan. Mark any stage the plan leaves vague as `ready: false`.
+4. Write a charter that names the plan's amendments and the module's "DM decides" points as rolls.
+5. `map.py init`.
