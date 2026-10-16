@@ -1,0 +1,26 @@
+# dnd-dm live-table bot dependencies (campaign-agnostic; ships with the skill).
+# Install:  bot/.venv/bin/pip install -r bot/requirements.txt
+# Verify:   bot/start_session.sh --check
+
+# --- Discord ----------------------------------------------------------------
+discord.py>=2.3
+python-dotenv>=1.0
+
+# Voice support. discord.py does NOT pull these in, and it does not fail at
+# login: it connects to the gateway happily and only raises when the bot tries
+# to actually join the voice channel, which looks like everything working right
+# up until nobody can hear anything. Both are required on discord.py 2.7+.
+#   pynacl -> voice encryption
+#   davey  -> Discord's DAVE end-to-end-encrypted voice protocol
+pynacl>=1.5
+davey>=0.1.6
+
+# --- Text to speech ---------------------------------------------------------
+kokoro-onnx        # default engine, better prose
+piper-tts          # fast, flatter fallback (--engine piper)
+soundfile
+numpy
+
+# Audio streaming. Prefers a system ffmpeg if one is on PATH; this is the
+# no-admin-rights fallback for when `brew install ffmpeg` will not cooperate.
+imageio-ffmpeg

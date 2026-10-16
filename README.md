@@ -15,7 +15,14 @@ same relative path alongside it — `SKILL.md` reads them by relative path.
 runs the first time — deciding what to play (a published module or an emergent
 campaign), building or picking a charter, setting house rules, choosing a tier,
 and creating the campaign — before `SKILL.md` boots the master prompt and play
-begins. To build a charter from a published module, see `charter-generator/`.
+begins. To turn a published module into a campaign, use the skill's `module_build.py`, `map.py` and
+`book.py` (master prompt §6-septies; design notes in
+`docs/MASTER_PROMPT_supplement_chartered-module.md`). `charter-generator/` is the superseded
+first attempt, kept for reference.
+
+**Every tool is campaign-agnostic.** The dice engine, the lore, holdings, module and book tools, and the
+live-table Discord bot (`.claude/skills/dnd-dm/bot/`) carry no campaign's data. A campaign keeps its own
+data (its `lore/`, `holdings/`, `module/`, saves, and its bot's `.env` and voices) in its own repo.
 
 **This repo is a mirror, not the source of truth.** Design lineage, the
 CHANGELOG, the full engineering history, and all in-progress work happen in

@@ -91,6 +91,7 @@ never holds live campaign state.
 |---|---|---|
 | Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Documents/GitHub/Fallen-Titans-Campaign` | flat: layers and saves at the repo root, carries a stale master-prompt copy (overwrite it, §2) |
 | Waterdeep: Dragon Heist (Rhogast / Oliver / Roy / Moss) | `~/Documents/GitHub/WaterDeepCamapaign` | foldered: `saves/`, `tables/`, plus its own play material |
+| Dragon Heist, fresh run (the same party from level 1; a separate campaign) | `~/Documents/GitHub/dragon-heist` | foldered: `CHARTER.md`, `module/` (a published module, §6-septies), `plan/`, `saves/`; the book text in `books/` is private |
 
 **Layouts differ between campaigns, and that is expected.** Do not assume one
 campaign's filenames apply to another, and do not copy a campaign's directory
@@ -421,6 +422,9 @@ data). Everywhere else both tools say so and do nothing.
 - **`book.py`** prints the module's own text: `unit <ID>`, `page N`, `find <words>`,
   `around <words>`. Run module content from this, never from recall. The book text is
   the campaign's private copy, named in `module/module.json`, and never committed.
+- **`module_build.py`** (between sessions, never at the table) builds `module/manifest.json`
+  from the book text and a hand-written `module/source.json`; the plan's `spine.json`
+  is written by hand. It is how a new published module becomes a campaign.
 - **Dragon Heist (`dragon-heist` repo) is the model.**
 
 ### No engine available? Stop and tell Joe. Never switch tiers yourself.
@@ -496,11 +500,15 @@ common shape is a process that logs in cleanly and only fails minutes later
 when it tries to join voice, so the first symptom is players waiting in a
 channel nobody is speaking to.
 
-**The campaign owns those details, not this file.** Read that repo's
-`README.md` and run the preflight or start script it ships. Its dependency
-checks, channel configuration, cursor handling, and health checks live there,
-next to the code they describe, where they can be fixed and tested. Nothing
-campaign-specific about voices, channels, or startup belongs in this file.
+**The code ships with this skill; the campaign owns its data.** The bot
+(`bot/` in this folder: relay, dice-room feed, `%roll`, the voice bridge,
+voice casting, `start_session.sh`) is campaign-agnostic, and every live
+campaign's `bot/` folder carries a copy of it. Fix it here and sync it out;
+never patch one campaign's copy. The campaign keeps its own `bot/.env`
+(token, channels, cast, narrator), voice models, mailbox and logs, and
+nothing campaign-specific about voices, channels, or startup belongs in this
+file. Read `bot/README.md` (here) for setup, and run the campaign's
+`bot/start_session.sh` (`--check` first).
 
 Two rules that do belong here, because they are about your behavior:
 

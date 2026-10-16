@@ -69,7 +69,7 @@ points at them.
 
 1. Get a page-marked text extract of the book (`=== PAGE n ===`).
 2. Build the manifest from it: keyed-area headings, plus a hand list of the unkeyed set pieces, with pages and
-   headings. Dragon Heist's builder is `dragon-heist/module/build_module.py`. Check every unit with `book.py
+   headings. The builder is the skill's `module_build.py` (Dragon Heist's input: `dragon-heist/module/source.json`). Check every unit with `book.py
    unit`, and fix the OCR misses by hand.
 3. Write the spine from the campaign's plan. Mark any stage the plan leaves vague as `ready: false`.
 4. Write a charter that names the plan's amendments and the module's "DM decides" points as rolls.

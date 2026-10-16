@@ -22,8 +22,8 @@ USAGE
     roll.py LABEL:SPEC [LABEL:SPEC ...]    one call per chain; all logged
       The output IS the response's DM ROLLS section. Paste it verbatim.
       SPEC dice:  d20  d20+5  2d6+3  d20adv+7  d20dis  d100
-      SPEC pick:  pick[a|b|c]              uniform pick, declared before draw
-                  pick[a=3|b=1|c=1]        weighted ("loaded") pick
+      SPEC pick:  pick[a|b|c]              flat pick, declared before draw
+                                           (weights are refused: Joe, 2026-10-15)
     Optional flags (apply to every die in the call):
       --reroll-of R0042 --reason "Lucky feat"   a RAW or player-invoked reroll
 
@@ -34,9 +34,11 @@ USAGE
     roll.py audit FILE                     check every [R####] cited in a text
 
 PICK RULES (enforced here, not by trust)
-  A pick needs at least 2 outcomes, every weight a whole number >= 1, and no
-  single outcome above 90% of the total weight. The DM may load the dice; the
-  dice must still be able to say no. Weights are recorded before the draw.
+  A pick needs at least 2 outcomes, each listed once, and no weights: every
+  outcome has the same chance. The DM never sets odds (master prompt
+  §1-sexies rule 3, THE FAIR DICE LADDER); designed odds live in printed die
+  tables, rolled as plain dice. Two outcomes that differ only in capitals,
+  hyphens or underscores count as the same outcome and are refused.
 
 Randomness: every die and pick is drawn from the OS entropy pool via
 `secrets`, not `random`. See `die()` for why.
@@ -55,7 +57,6 @@ from pathlib import Path
 HOME = Path.home() / ".dnd-dice"
 KEY = HOME / "key"
 ACTIVE = HOME / "active.json"
-MAX_SHARE = 0.90
 
 SPEC = re.compile(r"^(\d*)d(\d+)(adv|dis)?([+-]\d+)?$", re.I)
 PICK = re.compile(r"^pick\[(.+)\]$", re.I | re.S)
@@ -182,27 +183,25 @@ def roll_dice(spec):
 def parse_pick(body):
     opts = []
     for part in body.split("|"):
-        name, eq, w = part.rpartition("=") if "=" in part else (part, "", "1")
-        name = name.strip()
+        if "=" in part:
+            raise ValueError(f"weighted pick refused: {part.strip()!r}. Picks are flat; the DM never sets odds "
+                             "(master prompt §1-sexies rule 3). Use a printed die table for designed odds.")
+        name = part.strip()
         if not name:
             raise ValueError(f"empty outcome in pick[{body}]")
         if re.search(r"\s", name):
             raise ValueError(f"outcome {name!r} has a space; use hyphens (old-man) so citations stay checkable")
-        if not re.fullmatch(r"\d+", w.strip()):
-            raise ValueError(f"weight must be a whole number: {part!r}")
-        opts.append((name, int(w)))
+        opts.append((name, 1))
     if len(opts) < 2:
         raise ValueError("a pick needs at least 2 outcomes; one outcome is a decision, not a roll")
-    if any(w < 1 for _, w in opts):
-        raise ValueError("every weight must be >= 1; an outcome the dice cannot reach is not on the table")
-    if len({n for n, _ in opts}) != len(opts):
-        raise ValueError("duplicate outcome names; merge them into one weight")
-    total = sum(w for _, w in opts)
-    top = max(w for _, w in opts)
-    if top / total > MAX_SHARE:
-        raise ValueError(f"loaded past the limit: one outcome holds {top}/{total} "
-                         f"({top/total:.0%}); max is {MAX_SHARE:.0%}. The dice must be able to say no.")
-    return opts, total
+    seen = {}
+    for name, _ in opts:
+        key = re.sub(r"[-_]", "", name.lower())
+        if key in seen:
+            raise ValueError(f"repeated outcome: {seen[key]!r} and {name!r}. Each outcome is listed once; "
+                             "a repeat is a weight in disguise.")
+        seen[key] = name
+    return opts, len(opts)
 
 
 def roll_pick(spec):

@@ -1,0 +1,12 @@
+# The campaign's private and generated files. Code is shared; these never leave the machine.
+.env
+.venv/
+__pycache__/
+*.log
+*.jsonl
+mailbox/*.jsonl
+.*-cursor
+mailbox/.*-cursor
+voices/*.onnx
+voices/*.onnx.json
+voices/kokoro/

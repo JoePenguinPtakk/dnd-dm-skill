@@ -1,3 +1,6 @@
+> **Superseded 2026-10-16** by the skill's `module_build.py`, `map.py` and `book.py` (master prompt
+> §6-septies). Kept for reference; nothing here is used any more.
+
 # Charter generator (campaign-agnostic tooling)
 
 Tools for building a campaign charter and its content artifacts from a **published module**, so a
