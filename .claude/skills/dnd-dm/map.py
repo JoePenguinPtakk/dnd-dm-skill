@@ -22,8 +22,9 @@ Files, in <campaign repo>/module/ :
   module.json     name, book text path, drift threshold          (authored once)
   manifest.json   every unit: keyed areas and events, by group   (generated, then corrected by hand)
   spine.json      stages in order, plus branches that open        (authored: the campaign plan)
-  progress.json   current stage, location, coverage, clock       (this tool writes it; never by hand)
+  progress.json   current stage, location, coverage, clock, day   (this tool writes it; never by hand)
   coverage.jsonl  every write, appended                           (this tool writes it)
+  calendar.json   optional: the campaign's calendar and start     (`map.py day init` writes it)
 
 A stage (spine.json "stages", in order) has: id, title, objective, live (groups or unit ids live while it is
 current), opens (groups or unit ids live from then on, for good), required (unit ids that must be done or
@@ -49,6 +50,23 @@ next content firing straight to `map.py table`.
   map.py drift                               the drift clock
   map.py log [N]                             the last N coverage writes
   map.py verify [--expect STAMP]             the MAP stamp for the save
+  map.py settings                            the charter's settings (master prompt §6-septies rule 7), read from
+                                             the fenced block under the charter's SETTINGS heading
+  map.py day                                 the campaign date (needs module/calendar.json)
+  map.py day init --calendar harptos|gregorian [--start "Kythorn 1"] [--day N]
+  map.py day add N --why TEXT                the calendar moves N days (also `day +N --why TEXT`)
+  map.py day set N --why TEXT [--correct]    set the day number (backwards only with --correct)
+  map.py day on N                            the date of Day N (changes nothing)
+  map.py day when "Midsummer"                the next Day that date falls on, and how far off it is
+
+CHARTER SETTINGS (rule 7). The charter holds a heading containing SETTINGS and, under it, one fenced block of
+exact `key: value` lines. Only these keys and values count; anything else prints as IGNORED:
+  time: pinned|off   leveling: milestone|xp   weather: module|roll   absent: queued|off
+A setting the charter does not name is off. No charter file, or no block, means every setting is off.
+
+THE CALENDAR. `day` keeps one number, the campaign day (Day 1 is the start date), and turns it into a date from
+calendar.json, so month arithmetic is never done by hand. It moves only when told, with a reason: the running
+clock, a TIME SKIP, or downtime the players declared (master prompt §6-septies rule 8). Real time never moves it.
 """
 import argparse
 import datetime
@@ -203,6 +221,177 @@ def find(M, query):
     return hits
 
 
+
+# ---------------------------------------------------------------- charter settings
+
+SETTING_VALUES = {"time": ("pinned", "off"), "leveling": ("milestone", "xp"), "weather": ("module", "roll"),
+                  "absent": ("queued", "off")}
+SETTING_DEFAULTS = {"time": "off", "leveling": "xp", "weather": "roll", "absent": "off"}
+
+
+def charter_file(M):
+    """The campaign charter: module.json "charter" (a path from the repo root), else the one *.md at the repo root
+    whose name has 'charter' in it (CHARTER.md wins a tie)."""
+    repo = M.root.resolve().parent
+    named = M.cfg.get("charter")
+    if named:
+        p = repo / named
+        return (p if p.exists() else None), (None if p.exists() else f"module.json names charter '{named}': not found")
+    c = sorted(f for f in repo.glob("*.md") if "charter" in f.name.lower())
+    if len(c) == 1:
+        return c[0], None
+    exact = [f for f in c if f.name.upper() == "CHARTER.MD"]
+    if exact:
+        return exact[0], None
+    if not c:
+        return None, None
+    return None, f"{len(c)} charter files at the repo root; name one in module.json \"charter\""
+
+
+def read_settings(M):
+    """-> (settings dict, ignored list, source note)."""
+    got = dict(SETTING_DEFAULTS)
+    ignored = []
+    path, err = charter_file(M)
+    if err:
+        return got, ignored, err + ": all settings off"
+    if path is None:
+        return got, ignored, "no charter file found: all settings off"
+    lines = path.read_text().splitlines()
+    head = next((i for i, ln in enumerate(lines) if ln.lstrip().startswith("#") and "settings" in ln.lower()), None)
+    if head is None:
+        return got, ignored, f"{path.name} has no SETTINGS heading: all settings off"
+    i = head + 1
+    while i < len(lines) and not lines[i].lstrip().startswith(("```", "#")):
+        i += 1
+    if i >= len(lines) or lines[i].lstrip().startswith("#"):
+        return got, ignored, f"{path.name} SETTINGS heading has no fenced block: all settings off"
+    i += 1
+    while i < len(lines) and not lines[i].lstrip().startswith("```"):
+        ln = lines[i].strip()
+        i += 1
+        if not ln or ln.startswith("#"):
+            continue
+        m = re.fullmatch(r"([A-Za-z_-]+)\s*:\s*([A-Za-z_-]+)", ln)
+        if not m:
+            ignored.append(ln)
+            continue
+        k, v = m.group(1), m.group(2)
+        if k in SETTING_VALUES and v in SETTING_VALUES[k]:
+            got[k] = v
+        else:
+            ignored.append(f"{k}: {v}")
+    return got, ignored, path.name
+
+
+def settings_line(M):
+    got, ignored, src = read_settings(M)
+    line = "SETTINGS: " + " · ".join(f"{k}={got[k]}" for k in SETTING_DEFAULTS)
+    if ignored:
+        line += " · IGNORED: " + "; ".join(ignored)
+    return line + f" ({src})"
+
+
+# ---------------------------------------------------------------- the module calendar
+
+CALENDARS = {
+    "harptos": {"name": "Calendar of Harptos", "segments": [
+        {"name": "Hammer", "days": 30, "season": "winter"},
+        {"name": "Midwinter", "days": 1, "season": "winter", "holiday": True},
+        {"name": "Alturiak", "days": 30, "season": "winter"},
+        {"name": "Ches", "days": 30, "season": "spring"},
+        {"name": "Tarsakh", "days": 30, "season": "spring"},
+        {"name": "Greengrass", "days": 1, "season": "spring", "holiday": True},
+        {"name": "Mirtul", "days": 30, "season": "spring"},
+        {"name": "Kythorn", "days": 30, "season": "summer"},
+        {"name": "Flamerule", "days": 30, "season": "summer"},
+        {"name": "Midsummer", "days": 1, "season": "summer", "holiday": True},
+        {"name": "Eleasis", "days": 30, "season": "summer"},
+        {"name": "Eleint", "days": 30, "season": "autumn"},
+        {"name": "Highharvestide", "days": 1, "season": "autumn", "holiday": True},
+        {"name": "Marpenoth", "days": 30, "season": "autumn"},
+        {"name": "Uktar", "days": 30, "season": "autumn"},
+        {"name": "Feast of the Moon", "days": 1, "season": "autumn", "holiday": True},
+        {"name": "Nightal", "days": 30, "season": "winter"}]},
+    "gregorian": {"name": "Gregorian calendar (no leap day)", "segments": [
+        {"name": n, "days": d, "season": s} for n, d, s in [
+            ("January", 31, "winter"), ("February", 28, "winter"), ("March", 31, "spring"), ("April", 30, "spring"),
+            ("May", 31, "spring"), ("June", 30, "summer"), ("July", 31, "summer"), ("August", 31, "summer"),
+            ("September", 30, "autumn"), ("October", 31, "autumn"), ("November", 30, "autumn"),
+            ("December", 31, "winter")]]},
+}
+
+
+class Calendar:
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.seg = cfg["segments"]
+        self.year = sum(g["days"] for g in self.seg)
+        self.start = self.index(cfg["start"])
+
+    def index(self, text):
+        """'Kythorn 1' or 'Midsummer' -> 0-based day of the year."""
+        m = re.fullmatch(r"\s*(.+?)\s*(\d+)?\s*", text)
+        name, d = m.group(1), int(m.group(2) or 1)
+        base = 0
+        for g in self.seg:
+            if g["name"].lower() == name.lower():
+                if not 1 <= d <= g["days"]:
+                    raise ValueError(f"'{text}': {g['name']} has {g['days']} day(s)")
+                return base + d - 1
+            base += g["days"]
+        raise ValueError(f"'{text}': no month or holiday named '{name}'")
+
+    def date(self, day):
+        """Day N (1 = start) -> (year offset, segment, day in segment)."""
+        off = self.start + day - 1
+        y, pos = divmod(off, self.year)
+        for g in self.seg:
+            if pos < g["days"]:
+                return y, g, pos + 1
+            pos -= g["days"]
+        raise AssertionError
+
+    def text(self, day):
+        y, g, d = self.date(day)
+        name = g["name"] if g["days"] == 1 else f"{g['name']} {d}"
+        return name + (f" (year +{y})" if y else "")
+
+    def line(self, day):
+        y, g, d = self.date(day)
+        out = f"DAY {day} · {self.text(day)} · {g['season']}"
+        if g.get("holiday"):
+            out += " · a holiday, in no month"
+        elif g["days"] == 30:
+            ten, k = divmod(d - 1, 10)
+            out += f" · tenday {ten + 1} of 3, day {k + 1} of 10" + (" (first day)" if k == 0 else
+                                                                      " (last day)" if k == 9 else "")
+        return out
+
+    def when(self, day, text):
+        """The first Day >= `day` that falls on `text`."""
+        target = self.index(text)
+        cur = (self.start + day - 1) % self.year
+        return day + (target - cur) % self.year
+
+
+def get_calendar(M):
+    p = M.root / "calendar.json"
+    if not p.exists():
+        return None
+    return Calendar(json.loads(p.read_text()))
+
+
+def need_cal(M):
+    need_prog(M)
+    cal = get_calendar(M)
+    if cal is None:
+        sys.exit("DAY: this campaign has no module/calendar.json. `map.py day init --calendar harptos|gregorian "
+                 "--start \"<date>\"` creates it; until then the date is the DM's to keep, as before.")
+    if "day" not in M.prog:
+        sys.exit("DAY: calendar.json exists but no day is set. `map.py day init --force` sets Day 1 (or --day N).")
+    return cal
+
 # ---------------------------------------------------------------- commands
 
 def cmd_init(M, a):
@@ -283,6 +472,10 @@ def cmd_card(M, a):
     cov = M.prog["coverage"]
     n = {k: sum(1 for v in cov.values() if v["status"] == k) for k in STATUSES}
     print(f"COVERAGE {len(cov)}/{len(M.units)} touched: " + " · ".join(f"{k} {v}" for k, v in n.items()))
+    cal = get_calendar(M)
+    if cal is not None and "day" in M.prog:
+        print(cal.line(M.prog["day"]))
+    print(settings_line(M))
     print(M.drift_line())
     M.save()
     return 0
@@ -519,14 +712,120 @@ def cmd_log(M, a):
     for ln in lines[-a.n:]:
         r = json.loads(ln)
         print(f"  {r.get('at', '')[:16]} {r.get('op')} " + " ".join(
-            f"{k}={r[k]}" for k in ("unit", "previous", "status", "from", "to", "location", "session", "evidence")
+            f"{k}={r[k]}" for k in ("unit", "previous", "status", "from", "to", "frm", "date", "location", "session", "evidence", "why")
             if k in r))
     return 0
 
 
+def cmd_settings(M, a):
+    got, ignored, src = read_settings(M)
+    print(settings_line(M))
+    for k, vals in SETTING_VALUES.items():
+        print(f"  {k}: {got[k]}" + ("" if got[k] != SETTING_DEFAULTS[k] else "  (default)") + f"   [allowed: {', '.join(vals)}]")
+    if ignored:
+        print("  IGNORED (not a setting or not an allowed value; they change nothing): " + "; ".join(ignored))
+    return 0
+
+
+def day_log(M, op, **kw):
+    M.append(dict({"at": iso(now()), "op": op, "session": M.prog.get("session")}, **kw))
+
+
+def cmd_day(M, a):
+    args = list(a.args)
+    if args and re.fullmatch(r"\+\d+", args[0]):
+        args = ["add", args[0][1:]] + args[1:]
+    verb = args[0] if args else "show"
+    rest = args[1:]
+    if verb == "init":
+        need_prog(M)
+        if (M.root / "calendar.json").exists() and not a.force:
+            print("DAY INIT REFUSED: module/calendar.json already exists. --force only to start the count over.")
+            return 1
+        if not (M.root / "calendar.json").exists() or a.calendar:
+            if a.calendar not in CALENDARS:
+                print(f"DAY INIT REFUSED: --calendar {sorted(CALENDARS)} (or write module/calendar.json by hand).")
+                return 1
+            base = CALENDARS[a.calendar]
+            cfg = {"kind": a.calendar, "name": base["name"], "start": a.start or base["segments"][0]["name"] + " 1",
+                   "segments": base["segments"]}
+            try:
+                Calendar(cfg)
+            except ValueError as e:
+                print(f"DAY INIT REFUSED: {e}")
+                return 1
+            (M.root / "calendar.json").write_text(json.dumps(cfg, indent=1) + "\n")
+        cal = get_calendar(M)
+        M.prog["day"] = a.day or 1
+        M.save()
+        day_log(M, "day-init", day=M.prog["day"], date=cal.text(M.prog["day"]))
+        print(f"DAY INIT: {cal.cfg.get('name', 'calendar')}, start {cal.cfg['start']}. {cal.line(M.prog['day'])}")
+        return 0
+    cal = need_cal(M)
+    cur = M.prog["day"]
+    if verb == "show":
+        print(cal.line(cur))
+    elif verb == "add":
+        if not rest or not rest[0].isdigit() or int(rest[0]) < 1:
+            print("DAY ADD REFUSED: give a whole number of days, 1 or more (`map.py day add 1 --why \"...\"`).")
+            return 1
+        if not a.why or len(a.why.strip()) < 4:
+            print("DAY ADD REFUSED: --why must name what moved the calendar (the running clock, a TIME SKIP, or a "
+                  "downtime the players declared). Real time never does.")
+            return 1
+        n = int(rest[0])
+        M.prog["day"] = cur + n
+        M.save()
+        day_log(M, "day", frm=cur, to=cur + n, why=a.why.strip(), date=cal.text(cur + n))
+        print(cal.line(cur + n) + f" (+{n} from Day {cur}: {a.why.strip()})")
+        if n > 14:
+            print("NOTE: more than 14 days in one move. Only a TIME SKIP block (§5) or Fast Travel (§5-ter) carries "
+                  "that, and each has its own cap.")
+    elif verb == "set":
+        if not rest or not rest[0].isdigit() or int(rest[0]) < 1:
+            print("DAY SET REFUSED: give a day number, 1 or more.")
+            return 1
+        n = int(rest[0])
+        if not a.why or len(a.why.strip()) < 4:
+            print("DAY SET REFUSED: --why must say why the number changes.")
+            return 1
+        if n < cur and not a.correct:
+            print(f"DAY SET REFUSED: Day {n} is before Day {cur}. The calendar only moves forward; a real mistake "
+                  f"needs --correct.")
+            return 1
+        M.prog["day"] = n
+        M.save()
+        day_log(M, "day", frm=cur, to=n, why=a.why.strip(), date=cal.text(n), corrected=bool(a.correct))
+        print(cal.line(n) + f" (set from Day {cur}: {a.why.strip()})")
+    elif verb == "on":
+        if not rest or not rest[0].isdigit() or int(rest[0]) < 1:
+            print("DAY ON: give a day number.")
+            return 1
+        print(cal.line(int(rest[0])))
+    elif verb == "when":
+        if not rest:
+            print("DAY WHEN: give a date, for example \"Midsummer\" or \"Eleasis 10\".")
+            return 1
+        try:
+            d = cal.when(cur, " ".join(rest))
+        except ValueError as e:
+            print(f"DAY WHEN: {e}")
+            return 1
+        print(f"{' '.join(rest)}: " + cal.line(d) + (" (today)" if d == cur else f" (in {d - cur} days)"))
+    else:
+        print(f"DAY: unknown verb '{verb}' (init, add, set, on, when; none shows the date).")
+        return 1
+    return 0
+
+
 def stamp(M):
-    blob = json.dumps({"stage": M.prog["stage"], "coverage": M.prog["coverage"]}, sort_keys=True)
-    return f"stage={M.prog['stage']} units={len(M.prog['coverage'])} hash={hashlib.sha256(blob.encode()).hexdigest()[:12]}"
+    body = {"stage": M.prog["stage"], "coverage": M.prog["coverage"]}
+    if "day" in M.prog:
+        body["day"] = M.prog["day"]
+    blob = json.dumps(body, sort_keys=True)
+    day = f" day={M.prog['day']}" if "day" in M.prog else ""
+    return (f"stage={M.prog['stage']} units={len(M.prog['coverage'])}{day} "
+            f"hash={hashlib.sha256(blob.encode()).hexdigest()[:12]}")
 
 
 def cmd_verify(M, a):
@@ -562,6 +861,11 @@ def main():
     sub.add_parser("drift").set_defaults(f=cmd_drift)
     p = sub.add_parser("log"); p.add_argument("n", nargs="?", type=int, default=10); p.set_defaults(f=cmd_log)
     p = sub.add_parser("verify"); p.add_argument("--expect"); p.set_defaults(f=cmd_verify)
+    sub.add_parser("settings").set_defaults(f=cmd_settings)
+    p = sub.add_parser("day"); p.add_argument("args", nargs="*"); p.add_argument("--why")
+    p.add_argument("--calendar"); p.add_argument("--start"); p.add_argument("--day", type=int)
+    p.add_argument("--force", action="store_true"); p.add_argument("--correct", action="store_true")
+    p.set_defaults(f=cmd_day)
     a = ap.parse_args()
     M = Module(a.dir)
     sys.exit(a.f(M, a) or 0)
