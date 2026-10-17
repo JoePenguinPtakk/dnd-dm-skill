@@ -74,3 +74,27 @@ points at them.
 3. Write the spine from the campaign's plan. Mark any stage the plan leaves vague as `ready: false`.
 4. Write a charter that names the plan's amendments and the module's "DM decides" points as rolls.
 5. `map.py init`.
+
+## 7. Charter settings and the calendar (build 20261017a)
+
+A charter is tone and a plan; the prompt's core outranks it, and prompt §11 step 2 says a house ruling never overrides
+core unless the prompt names the door. Rule 7 is that door, for four things a published module genuinely needs and
+nothing else. Joe's doctrine of fixed mechanisms over discretion shaped it: a setting is an exact `key: value` line in a
+fenced block under a SETTINGS heading, read by `map.py settings`, never inferred from prose, and a key or value the
+list does not know is shown as IGNORED and does nothing.
+
+| Setting | Default | Why a module needs it | What it leaves alone |
+|---|---|---|---|
+| `time: pinned` | off | Irregular sessions: §5-sexies would turn each real gap into game days (1 per day, cap 14), so deadlines burn off-screen. | The running clock, TIME SKIP, downtime, `SESSION CLOSE` (still written; resume in place). |
+| `leveling: milestone` | xp | A module's printed fights award XP the plan never meant to count. Encounter XP stays in the `XP AWARD:` audit line; only a `MILESTONE:` line levels the party. | The `LEVEL UP:` block's content, `XP AWARD:` being mandatory after a fight. |
+| `weather: module` | roll | A module may print a standing weather for a duration or an event ("until the chain is complete"). | The daily roll, which still runs and still sets everything else. |
+| `absent: queued` | off | An absent player cannot answer an ASI, subclass or spell choice, and a module levels the party several times. | Death saves, massive damage, who can die (§4.5-ter states that no setting reaches it). |
+
+`absent: protected` was proposed (an absent PC that cannot die) and refused by Joe: Vessels can die. The reason it is
+a poor setting anyway: a PC that cannot die tanks every fight for free, a lever the present players can use.
+
+**Rule 8, the module calendar.** `module/calendar.json` (written by `map.py day init`) holds a segment list and a start
+date; `progress.json` holds one number, the campaign day. `map.py day add N --why` is the only thing that moves it, and
+the reason (running clock, TIME SKIP, declared downtime) goes in `coverage.jsonl`. Month arithmetic is the same
+estimation reflex §2 bans for dice and stats. Built-in calendars: `harptos` (12 months of 30 days, 5 holidays, 365) and
+`gregorian`. A campaign without `calendar.json` keeps its date by hand, as before.
