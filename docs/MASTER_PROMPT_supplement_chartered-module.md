@@ -98,3 +98,21 @@ date; `progress.json` holds one number, the campaign day. `map.py day add N --wh
 the reason (running clock, TIME SKIP, declared downtime) goes in `coverage.jsonl`. Month arithmetic is the same
 estimation reflex §2 bans for dice and stats. Built-in calendars: `harptos` (12 months of 30 days, 5 holidays, 365) and
 `gregorian`. A campaign without `calendar.json` keeps its date by hand, as before.
+
+## 8. The fit: `encounters: budgeted` (build 20261017c)
+
+A published module prints its fights for a DM who adjusts them by hand; Joe bans hand-scaling, so by default a printed fight
+runs as printed (§4.1 PUBLISHED-MODULE EXCEPTION). For a small party that is a real cost: every printed fight lands at full
+strength on three PCs. The setting `encounters: budgeted` fits a module's non-boss fights to the party by one fixed
+procedure instead of a judgement.
+
+| Piece | Rule | Why |
+|---|---|---|
+| Removal only | Never add a creature, never change a block, HP, tactics or retreat. | The module stays the module; only how many of its creatures are in the room changes. |
+| Bosses | A `boss:` line in the charter names a creature that is never budgeted or removed and leaves by its written exit. Matched by whole name. | Villains are written to flee, not die; a substring match would exempt their guards. |
+| Budget | The §4.1 budget for the party: the §4.0 d6, one rung down under 4 PCs, Low on the first fight; CR RULES off. | The same dial organic fights use, so a table has one idea of difficulty. |
+| Pick | Flat over removable kinds, one creature per pick, read back from the dice record. | No lever: the DM cannot choose who is cut, or edit the roster between runs. |
+| Named NPCs | Never removed; if they alone exceed the budget they run as printed and withdraw at the first ally falling or a Bloodied named NPC. | The module's own "cut their losses" idea (Dragon Heist p62), fixed as a trigger. |
+| Removed creatures | ELSEWHERE, recorded, fitted again on a return. | Not dead and not hidden, so nothing is invented and nothing is lost. |
+
+The tool `bestiary.py fit` carries the arithmetic and the gate. Under `leveling: milestone` the fit changes no XP rule.

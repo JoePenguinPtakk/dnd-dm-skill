@@ -66,7 +66,7 @@ ENGINE: <path to roll.py> · <verbatim SESSION START line> · test → <verbatim
 LORE: <verbatim `lore.py verify` line> · region=<where the party is> · <`lore.py budget` line>
 HOLDINGS: <verbatim `inv.py verify` line>
 MAP: <verbatim `map.py verify` line | no module/ (not a published-module campaign)>
-SETTINGS: <verbatim `settings` line of `map.py card`: time=<pinned|off> · leveling=<milestone|xp> · weather=<module|roll> · absent=<queued|off>, with any IGNORED keys | no module/>
+SETTINGS: <verbatim `settings` line of `map.py card`: time=<pinned|off> · leveling=<milestone|xp> · weather=<module|roll> · absent=<queued|off> · encounters=<budgeted|printed>, with BOSSES and any IGNORED keys | no module/>
 DAY: <the `DAY` line of `map.py card` | no module/calendar.json>
 ```
 
@@ -423,11 +423,19 @@ data). Everywhere else both tools say so and do nothing.
   stage the plan has not authored, and closing a required unit without Joe's word.
   - **Charter settings (master prompt §6-septies rule 7).** `map.py settings` reads the charter's
     fenced `key: value` block under its SETTINGS heading: `time: pinned|off`, `leveling:
-    milestone|xp`, `weather: module|roll`, `absent: queued|off`. Anything else prints as
-    IGNORED. A setting the charter does not name is off. `module.json` may name the charter file
+    milestone|xp`, `weather: module|roll`, `absent: queued|off`, `encounters: budgeted|printed`,
+    plus one `boss: <creature name>` line per boss (read only under `encounters: budgeted`).
+    Anything else prints as IGNORED. A setting the charter does not name is off. `module.json` may name the charter file
     (`"charter": "CHARTER.md"`); otherwise the one `*charter*.md` at the repo root is used.
     Copy the `SETTINGS:` line onto the boot receipt. Under `time: pinned` skip the §5-sexies
     reconciliation at boot (no gap question).
+  - **The fit (master prompt §4.1 THE FIT, `encounters: budgeted`).** Before a module's printed fight, run
+    `bestiary.py fit --levels <PC levels> --die <the §4.0 d6> --fight <E-number> --area <unit> "Name xN" "Named!" ...`
+    with the book's full roster. It prints the budget, sets bosses aside, and prints one flat `fit-<fight>:pick[...]`
+    when the roster is over budget: roll it, then run `fit` again with the SAME roster and `--fight` (it reads the picks
+    itself). Never edit the roster by hand. A name ending in `!` is a named NPC (the book gives it a personal name).
+    `FIT INERT` means the charter does not set the setting: run the fight as printed. A creature the tool does not
+    know needs `--xp "Name=N"` with the book's printed XP.
   - **The module calendar (rule 8).** `map.py day init --calendar harptos|gregorian --start
     "Kythorn 1"` writes `module/calendar.json` and sets Day 1. After that `map.py day add N --why
     "<what moved it>"` is the only way the date moves (running clock, TIME SKIP, declared

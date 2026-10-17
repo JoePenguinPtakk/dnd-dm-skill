@@ -61,8 +61,9 @@ next content firing straight to `map.py table`.
 
 CHARTER SETTINGS (rule 7). The charter holds a heading containing SETTINGS and, under it, one fenced block of
 exact `key: value` lines. Only these keys and values count; anything else prints as IGNORED:
-  time: pinned|off   leveling: milestone|xp   weather: module|roll   absent: queued|off
-A setting the charter does not name is off. No charter file, or no block, means every setting is off.
+  time: pinned|off   leveling: milestone|xp   weather: module|roll   absent: queued|off   encounters: budgeted|printed
+plus, under `encounters: budgeted`, one `boss: <creature name>` line per boss (repeatable; any name; `bestiary.py fit`
+reads them). A setting the charter does not name is off. No charter file, or no block, means every setting is off.
 
 THE CALENDAR. `day` keeps one number, the campaign day (Day 1 is the start date), and turns it into a date from
 calendar.json, so month arithmetic is never done by hand. It moves only when told, with a reason: the running
@@ -225,8 +226,8 @@ def find(M, query):
 # ---------------------------------------------------------------- charter settings
 
 SETTING_VALUES = {"time": ("pinned", "off"), "leveling": ("milestone", "xp"), "weather": ("module", "roll"),
-                  "absent": ("queued", "off")}
-SETTING_DEFAULTS = {"time": "off", "leveling": "xp", "weather": "roll", "absent": "off"}
+                  "absent": ("queued", "off"), "encounters": ("budgeted", "printed")}
+SETTING_DEFAULTS = {"time": "off", "leveling": "xp", "weather": "roll", "absent": "off", "encounters": "printed"}
 
 
 def charter_file(M):
@@ -251,6 +252,7 @@ def charter_file(M):
 def read_settings(M):
     """-> (settings dict, ignored list, source note)."""
     got = dict(SETTING_DEFAULTS)
+    got["bosses"] = []
     ignored = []
     path, err = charter_file(M)
     if err:
@@ -272,6 +274,10 @@ def read_settings(M):
         i += 1
         if not ln or ln.startswith("#"):
             continue
+        b = re.fullmatch(r"boss\s*:\s*(\S.*)", ln)
+        if b:
+            got["bosses"].append(b.group(1).strip())
+            continue
         m = re.fullmatch(r"([A-Za-z_-]+)\s*:\s*([A-Za-z_-]+)", ln)
         if not m:
             ignored.append(ln)
@@ -287,6 +293,8 @@ def read_settings(M):
 def settings_line(M):
     got, ignored, src = read_settings(M)
     line = "SETTINGS: " + " · ".join(f"{k}={got[k]}" for k in SETTING_DEFAULTS)
+    if got["encounters"] == "budgeted":
+        line += " · BOSSES: " + ("; ".join(got["bosses"]) or "none named")
     if ignored:
         line += " · IGNORED: " + "; ".join(ignored)
     return line + f" ({src})"
@@ -722,6 +730,9 @@ def cmd_settings(M, a):
     print(settings_line(M))
     for k, vals in SETTING_VALUES.items():
         print(f"  {k}: {got[k]}" + ("" if got[k] != SETTING_DEFAULTS[k] else "  (default)") + f"   [allowed: {', '.join(vals)}]")
+    if got["bosses"]:
+        print("  bosses: " + "; ".join(got["bosses"]) + ("" if got["encounters"] == "budgeted" else
+                                                          "  (inert: encounters is not budgeted)"))
     if ignored:
         print("  IGNORED (not a setting or not an allowed value; they change nothing): " + "; ".join(ignored))
     return 0

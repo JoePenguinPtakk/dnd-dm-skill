@@ -16,10 +16,28 @@ USAGE
                          [--no-magic] [--no-ranged] [--quiet]
   bestiary.py check      --levels 5,5,5 [--npcs 1] --difficulty moderate [--boss] [--first-fight]
                          "Mage" "Spy x2"
+  bestiary.py fit        --levels 1,1,1 [--npcs N] --die D6 [--first-fight] --fight E7 [--area G8]
+                         [--module DIR] [--xp "Name=N" ...] "Thug x4" "Named Lieutenant!" "Xanathar"
+                         THE FIT (§4.1, charter setting `encounters: budgeted`): fits a published module's
+                         printed roster to the budget by removing creatures, never by adding or changing one.
   bestiary.py show NAME            exact stat block (spaces or hyphens both work)
   bestiary.py defaults NAME        default strategy tier and morale disposition
   bestiary.py find TEXT            search creature names
   bestiary.py envs                 environment keys and the prompt's tag mapping
+
+THE FIT (`fit`; only when the module's charter sets `encounters: budgeted`, read by map.py settings)
+  Inert otherwise: it prints FIT INERT and the fight runs as printed. The roster is the module's printed
+  creatures, exactly as the book gives them. A name on a charter `boss:` line is set aside and never
+  budgeted or removed. A name ending in ! is a named NPC: it counts toward the roster's XP and is never
+  removed. The budget is the §4.1 budget for the party: the d6 `--die` (1-2 low, 3-5 moderate, 6 high), read
+  one rung down for a party under 4 character-equivalents, capped at low for `--first-fight`. A PC run as a
+  party NPC for an absent player goes in --levels as a full PC. The CR RULES do not apply: the printed
+  creatures are the roster. Over budget: it prints a flat `fit-<fight>:pick[...]` over the removable KINDS
+  (one creature of the chosen kind comes off per pick; a single removable kind needs no roll). Run the
+  pick through the dice engine, then run `fit` again with the SAME full roster and `--fight`: it reads the
+  picks already recorded under that fight's label and removes them itself, so the roster cannot be edited
+  by hand. It stops at the first fit. If only named NPCs remain and they are still over budget, it says so:
+  they run as printed and withdraw by §4.1 THE FIT step 4.
 
 THE CR RULES (enforced here)
   Ceiling for any one creature: levels 1-4, CR <= average PC level; level 5+,
@@ -346,6 +364,136 @@ def cmd_check(a):
     return 0
 
 
+def module_settings(path):
+    """The charter settings of the campaign module at `path`, via map.py. None = not a chartered module."""
+    import contextlib
+    import importlib.util
+    import io
+    spec = importlib.util.spec_from_file_location("dnd_map", HERE / "map.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    with contextlib.redirect_stdout(io.StringIO()):
+        try:
+            M = mod.Module(path)
+        except SystemExit:
+            return None
+        got, _ignored, _src = mod.read_settings(M)
+    return got
+
+
+def fight_removals(label):
+    """Results of the `label:pick[...]` rolls already recorded for this campaign, oldest first."""
+    try:
+        act = json.loads(ACTIVE.read_text())
+        path = Path(act["campaign"]) / "dice" / "ledger.jsonl"
+        rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    except Exception:
+        return None
+    return [r.get("result") for r in rows if r.get("kind") == "pick" and r.get("label") == label]
+
+
+def cmd_fit(a):
+    cfg = module_settings(a.module)
+    if cfg is None or cfg["encounters"] != "budgeted":
+        print("FIT INERT: this campaign's charter does not set `encounters: budgeted`. Run the module's fight as "
+              "printed (§4.1 PUBLISHED-MODULE EXCEPTION).")
+        return 0
+    creatures = load()
+    if not 1 <= a.die <= 6:
+        return fail("--die is the §4.0 step 2 d6 result, 1 to 6")
+    try:
+        base = "low" if a.die <= 2 else "moderate" if a.die <= 5 else "high"
+        label = base
+        notes = [f"d6 {a.die} reads {base}"]
+        p = party(argparse.Namespace(levels=a.levels, npcs=a.npcs, difficulty="low", boss=False,
+                                     first_fight=a.first_fight))
+        if p["size"] < 4 and label != "low":
+            label = {"high": "moderate", "moderate": "low"}[label]
+            notes.append(f"small party (under 4): one rung down, {label}")
+        if a.first_fight and label != "low":
+            label = "low"
+            notes.append("first fight of the campaign: capped at low")
+        p = party(argparse.Namespace(levels=a.levels, npcs=a.npcs, difficulty=label, boss=False,
+                                     first_fight=a.first_fight))
+    except ValueError as e:
+        return fail(str(e))
+    extra = {}
+    for kv in a.xp or []:
+        k, _, v = kv.partition("=")
+        if not v.strip().isdigit():
+            return fail(f"--xp wants Name=N, got '{kv}'")
+        extra[norm(k)] = int(v)
+    bosses = {norm(b): b for b in cfg["bosses"]}
+    roster, aside = [], []
+    for item in a.roster:
+        m = re.fullmatch(r"(.+?)\s*[x×]\s*(\d+)", item.strip(), re.I)
+        name, count = (m.group(1).strip(), int(m.group(2))) if m else (item.strip(), 1)
+        named = name.endswith("!")
+        name = name.rstrip("!").strip()
+        if norm(name) in bosses:
+            aside.append(f"{name} x{count}" if count > 1 else name)
+            continue
+        c = find_creature(name, creatures)
+        if norm(name) in extra:
+            xp = extra[norm(name)]
+        elif c:
+            xp = c["xp"]
+        else:
+            return fail(f"not in the bestiary: {name} (give its printed XP: --xp \"{name}=N\")")
+        roster.append({"name": c["name"] if c else name, "xp": xp, "count": count, "named": named})
+    tag = f"fit-{a.fight}"
+    removed = fight_removals(tag)
+    if removed is None:
+        return fail("no active dice session: open one (`roll.py session start <campaign dir>`) so the fit can read "
+                    "its picks")
+    taken = []
+    for r in removed:
+        kind = next((x for x in roster if norm(x["name"]) == norm(str(r)) and x["count"] > 0 and not x["named"]), None)
+        if kind is None:
+            return fail(f"a `{tag}` pick '{r}' is on record but matches no removable creature on this roster; "
+                        f"use a new --fight tag for a new fight")
+        kind["count"] -= 1
+        taken.append(kind["name"])
+    while True:
+        total = sum(x["xp"] * x["count"] for x in roster)
+        kinds = [x for x in roster if x["count"] > 0 and not x["named"]]
+        head = (f"FIT · {a.fight}" + (f" · {a.area}" if a.area else "") + f" · {label} budget {p['budget']} XP "
+                f"({'; '.join(notes)}) · roster {total} XP")
+        if total <= p["budget"] or not kinds:
+            break
+        if len(kinds) == 1:
+            kinds[0]["count"] -= 1
+            taken.append(kinds[0]["name"] + " (only removable kind, no roll)")
+            continue
+        print(head)
+        if aside:
+            print(f"  bosses set aside, run as printed with their written exit: {', '.join(aside)}")
+        if taken:
+            print(f"  removed so far: {', '.join(taken)}")
+        print(f"  OVER by {total - p['budget']} XP. Roll one removal, then run `fit` again with the same roster and "
+              f"--fight {a.fight}:")
+        print(f"  ENGINE CALL (paste whole): roll.py {tag}:pick[{'|'.join(token(x['name']) for x in kinds)}]")
+        return 0
+    print(head)
+    if aside:
+        print(f"  bosses set aside, run as printed with their written exit: {', '.join(aside)}")
+    left = ", ".join(f"{x['name']} x{x['count']}" + ("!" if x["named"] else "")
+                     for x in roster if x["count"] > 0) or "none"
+    gone = ", ".join(taken) if taken else "none"
+    if total <= p["budget"]:
+        print(f"  FITS. Run: {left}")
+        print(f"  COMBAT SETUP: BUDGET: {p['budget']} (fitted from module {a.area or a.fight}; removed: {gone})")
+    else:
+        print(f"  ONLY NAMED NPCs REMAIN and they are {total - p['budget']} XP over: run {left} as printed; they "
+              f"withdraw at the first of an ally falling or a named NPC being Bloodied (§4.1 THE FIT step 4).")
+        print(f"  COMBAT SETUP: BUDGET: {p['budget']} (fitted from module {a.area or a.fight}; removed: {gone}; "
+              f"named NPCs over budget, withdrawal rule)")
+    if taken:
+        print("  The removed creatures are ELSEWHERE, not dead and not hidden: record them with `lore.py event`, "
+              "give no reason, and they are still the unit's occupants on a return.")
+    return 0
+
+
 def cmd_show(a):
     c = find_creature(a.name, load())
     if not c:
@@ -466,6 +614,16 @@ def main(argv):
     k = sub.add_parser("check")
     party_args(k)
     k.add_argument("creatures", nargs="+")
+    ft = sub.add_parser("fit")
+    ft.add_argument("--levels", required=True, help="PC levels, comma separated")
+    ft.add_argument("--npcs", type=int, default=0, help="party NPCs (count half)")
+    ft.add_argument("--die", type=int, required=True, help="the §4.0 step 2 d6 result")
+    ft.add_argument("--first-fight", action="store_true")
+    ft.add_argument("--fight", required=True, help="this fight's tag, e.g. its E-number; labels the picks")
+    ft.add_argument("--area", help="the module unit, for the COMBAT SETUP line")
+    ft.add_argument("--module", default="module", help="the campaign's module/ directory")
+    ft.add_argument("--xp", action="append", help='"Name=N": printed XP for a creature not in the bestiary')
+    ft.add_argument("roster", nargs="+", help='"Name xN", "Named!" (never removed)')
     for name in ("show", "defaults"):
         s = sub.add_parser(name)
         s.add_argument("name")
@@ -477,7 +635,7 @@ def main(argv):
         print(__doc__.strip())
         return 2
     return {"candidates": cmd_candidates, "check": cmd_check, "show": cmd_show, "defaults": cmd_defaults,
-            "find": cmd_find, "envs": cmd_envs}[a.cmd](a)
+            "find": cmd_find, "envs": cmd_envs, "fit": cmd_fit}[a.cmd](a)
 
 
 if __name__ == "__main__":
