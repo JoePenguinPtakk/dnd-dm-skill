@@ -551,6 +551,16 @@ the dice room is fed by the relay from the dice record. Nothing in the master pr
 changes. Anything the splitter does not recognise as a players' block goes to the dm
 room. A campaign without a `DM_CHANNEL_ID` posts nothing private: the rows are dropped.
 
+**The HIDDEN gate (build 20261019a).** Every game-room response carries a `HIDDEN:` line (`HIDDEN: none`
+when nothing is hidden; master prompt §2-bis SECRETS). `dm_post.py` sends it and the `PARTY:` line to the dm
+room, then refuses the whole post (exit code 3, `MALFORMED (dm_post gate)` on stderr, nothing written)
+when the game text uses a secret word, gives a count of unseen things, or the `HIDDEN:` line is missing; when
+the response ends combat or awards XP while a `HIDDEN:` note says `hostile`; or when its `Day N · HH:MM` is
+earlier than the last accepted one (`--allow-earlier` for a rewind Joe rules). Fix what it lists and post
+again. OOC posts are checked against the last accepted `HIDDEN:` line. After each accepted post it prints a
+`SPOTLIGHT` line (DM game posts since each player last posted, via `PLAYER_MAP`) for the next `PARTY:` line;
+`dm_post.py --spotlight` prints it alone.
+
 Ops work is permitted pre-boot (§0). Finishing it does not lift the gate.
 
 ---

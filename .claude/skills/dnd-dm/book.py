@@ -48,6 +48,9 @@ SIZE_SQUEEZED = re.compile(r"^\W{0,4}(Tiny|Small|Medium|Large|Huge|Gargantuan)[A
 
 def config(d):
     root = Path(d)
+    # --dir given as the campaign folder instead of its module/ folder: use module/ (a common slip).
+    if not (root / "module.json").exists() and (root / "module" / "module.json").exists():
+        root = root / "module"
     cfg = json.loads((root / "module.json").read_text()) if (root / "module.json").exists() else {}
     books = dict(cfg.get("books", {}))
     if "module" not in books and cfg.get("book"):
