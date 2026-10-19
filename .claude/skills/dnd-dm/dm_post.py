@@ -40,13 +40,13 @@ Two more checks on a game-room post (build 20261019a), refused the same way:
 
 ROLL CALL (master prompt §3-quater), out of combat only (no COMBAT STATE in the response), refused the same way:
   - E1: no PARTY line.  E2: a PLAYER_MAP character missing from it (mark one who is not here `absent` or `Vessel`).
-  - E3: a present PC quiet for 3 or more DM game posts (SPOTLIGHT) is not named in the CHOICE line.
+  - E3: a present PC quiet while the other players posted 3 or more times (SPOTLIGHT) is not named in the CHOICE line.
   - E4: when E3 applies, the numbered options do not name every present PC.
   - E5: `dm_post.py --new-session` (run at boot) starts the counts fresh for the session.
 
 SPOTLIGHT. After every accepted game-room post the tool prints one line, for the PARTY line (master prompt
-§3-quater): how many DM game posts each player's character has gone without posting in the game room, read from
-the mailbox (inbox.jsonl) and PLAYER_MAP in bot/.env. `dm_post.py --spotlight` prints it alone.
+§3-quater): for each player's character, how many game-room posts the OTHER players made since that player last
+posted this session, read from the mailbox (inbox.jsonl) and PLAYER_MAP in bot/.env. `dm_post.py --spotlight` prints it alone.
 
   dm_post.py [--file F] [--outbox PATH] [--room game] [--dm-room dm] [--dry-run] [--raw]
 Reads the response from stdin (or --file). Rooms other than game (ooc, a PC bubble) are posted whole.
@@ -329,9 +329,10 @@ def load_env(outbox):
 
 
 def spotlight_counts(outbox):
-    """({PC: count or None}, mapped PC names, unmapped authors). count = DM game posts since that PC's player last
-    posted in the game room, or since the session started (--new-session) if that is later; None = no post at all
-    and no session start on record."""
+    """({PC: count or None}, mapped PC names, unmapped authors). count = how many game-room posts the OTHER players
+    made since this PC's player last posted (or since the session started, --new-session, if they have not posted
+    since). It counts the other players' turns, not the DM's posts, so a DM who answers one message with several
+    short posts (master prompt §2-ter 7-bis) makes nobody look quiet. None = no post and no session start on record."""
     d = os.path.dirname(os.path.abspath(outbox))
     try:
         start = float(json.load(open(os.path.join(d, ".session.json")))["ts"])
@@ -342,29 +343,24 @@ def spotlight_counts(outbox):
         if ":" in pair:
             k, v = pair.split(":", 1)
             pmap[k.strip().lower()] = v.strip()
-    posts = []
-    try:
-        for line in open(os.path.join(d, "outbox.jsonl")):
-            r = json.loads(line)
-            if r.get("channel") == "game" and r.get("ts"):
-                posts.append(r["ts"])
-    except (OSError, ValueError):
-        pass
-    last = {}
+    posts = []          # (ts, PC) for every game-room player post this session
     try:
         for line in open(os.path.join(d, "inbox.jsonl")):
             r = json.loads(line)
-            if r.get("channel", "game") != "game":
+            if r.get("channel", "game") != "game" or r.get("ts", 0) <= start:
                 continue
             who = pmap.get(str(r.get("author", "")).lower(), str(r.get("author", "")))
-            last[who] = max(last.get(who, 0), r.get("ts", 0))
+            posts.append((r.get("ts", 0), who))
     except (OSError, ValueError):
         pass
+    last = {}
+    for t, who in posts:
+        last[who] = max(last.get(who, 0), t)
     names = list(dict.fromkeys(list(pmap.values()) + list(last)))
     counts = {}
     for n in names:
         since = max(last.get(n, 0), start)
-        counts[n] = sum(1 for t in posts if t > since) if since else None
+        counts[n] = sum(1 for t, who in posts if t > since and who != n) if since else None
     unmapped = [n for n in last if n not in pmap.values()]
     return counts, list(dict.fromkeys(pmap.values())), unmapped
 
@@ -376,7 +372,7 @@ def spotlight(outbox):
         return "SPOTLIGHT: no PLAYER_MAP and no player posts yet"
     parts = [f"{n} {c}" if c is not None else f"{n} no post yet" for n, c in counts.items()]
     note = f" (not in PLAYER_MAP: {', '.join(unmapped)})" if unmapped and mapped else ""
-    return "SPOTLIGHT (DM game posts since each one last posted this session): " + " · ".join(parts) + note
+    return "SPOTLIGHT (other players' posts since each one last posted this session): " + " · ".join(parts) + note
 
 
 def roll_call(text, outbox):
@@ -410,7 +406,7 @@ def roll_call(text, outbox):
     quiet = [pc for pc in mapped if pc not in exempt and (counts.get(pc) or 0) >= 3]
     for pc in quiet:
         if not re.search(r"\b" + re.escape(pc) + r"\b", choice, re.I):
-            bad.append((lines[ci].strip(), f"{pc} has been quiet for {counts[pc]} DM posts; the CHOICE line speaks to "
+            bad.append((lines[ci].strip(), f"{pc} has been quiet while the others posted {counts[pc]} times; the CHOICE line speaks to "
                                            f"{pc} by name (master prompt §3-quater)"))
     if quiet:
         for pc in mapped:
