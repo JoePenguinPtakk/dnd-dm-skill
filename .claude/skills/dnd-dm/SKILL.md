@@ -580,7 +580,10 @@ the response ends combat or awards XP while a `HIDDEN:` note says `hostile`; or 
 earlier than the last accepted one (`--allow-earlier` for a rewind Joe rules). Fix what it lists and post
 again. OOC posts are checked against the last accepted `HIDDEN:` line. After each accepted post it prints a
 `SPOTLIGHT` line (DM game posts since each player last posted, via `PLAYER_MAP`) for the next `PARTY:` line;
-`dm_post.py --spotlight` prints it alone.
+`dm_post.py --spotlight` prints it alone. **At boot, run `dm_post.py --new-session --outbox <the campaign mailbox outbox>`
+once** so the counts start fresh. Out of combat it also refuses a game post with no `PARTY:` line, one that leaves out a
+character in `PLAYER_MAP` (mark one who is not here `absent` or `Vessel`), or, when a PC has been quiet for 3 or more
+posts, a CHOICE line that does not name that PC or options that do not name every present PC (§3-quater).
 
 Ops work is permitted pre-boot (§0). Finishing it does not lift the gate.
 

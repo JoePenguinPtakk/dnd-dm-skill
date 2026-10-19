@@ -38,6 +38,12 @@ Two more checks on a game-room post (build 20261019a), refused the same way:
     showing an earlier day and time is refused (master prompt §3-ter). --allow-earlier lets one post through
     when Joe has ruled a rewind.
 
+ROLL CALL (master prompt §3-quater), out of combat only (no COMBAT STATE in the response), refused the same way:
+  - E1: no PARTY line.  E2: a PLAYER_MAP character missing from it (mark one who is not here `absent` or `Vessel`).
+  - E3: a present PC quiet for 3 or more DM game posts (SPOTLIGHT) is not named in the CHOICE line.
+  - E4: when E3 applies, the numbered options do not name every present PC.
+  - E5: `dm_post.py --new-session` (run at boot) starts the counts fresh for the session.
+
 SPOTLIGHT. After every accepted game-room post the tool prints one line, for the PARTY line (master prompt
 §3-quater): how many DM game posts each player's character has gone without posting in the game room, read from
 the mailbox (inbox.jsonl) and PLAYER_MAP in bot/.env. `dm_post.py --spotlight` prints it alone.
@@ -293,7 +299,8 @@ def refuse(problems):
     for line, why in problems:
         sys.stderr.write(f"  - {why}: {line}\n" if line else f"  - {why}\n")
     sys.stderr.write("Fix exactly what is listed (players read only what their characters have perceived; combat "
-                     "ends only when no hostile can fight; time only moves forward), keep the HIDDEN line, and post "
+                     "ends only when no hostile can fight; time only moves forward; the quiet player gets the scene), keep the "
+                     "HIDDEN line, and post "
                      "again.\n")
     sys.exit(3)
 
@@ -321,9 +328,15 @@ def load_env(outbox):
     return {}
 
 
-def spotlight(outbox):
-    """'Rhogast 0 · Oliver 3 · Roy 1': DM game posts since each mapped player last posted in the game room."""
+def spotlight_counts(outbox):
+    """({PC: count or None}, mapped PC names, unmapped authors). count = DM game posts since that PC's player last
+    posted in the game room, or since the session started (--new-session) if that is later; None = no post at all
+    and no session start on record."""
     d = os.path.dirname(os.path.abspath(outbox))
+    try:
+        start = float(json.load(open(os.path.join(d, ".session.json")))["ts"])
+    except (OSError, ValueError, KeyError, TypeError):
+        start = 0.0
     pmap = {}
     for pair in load_env(outbox).get("PLAYER_MAP", "").split(","):
         if ":" in pair:
@@ -348,17 +361,63 @@ def spotlight(outbox):
     except (OSError, ValueError):
         pass
     names = list(dict.fromkeys(list(pmap.values()) + list(last)))
-    if not names:
-        return "SPOTLIGHT: no PLAYER_MAP and no player posts yet"
-    parts = []
+    counts = {}
     for n in names:
-        if n not in last:
-            parts.append(f"{n} no post yet")
-        else:
-            parts.append(f"{n} {sum(1 for t in posts if t > last[n])}")
+        since = max(last.get(n, 0), start)
+        counts[n] = sum(1 for t in posts if t > since) if since else None
     unmapped = [n for n in last if n not in pmap.values()]
-    note = f" (not in PLAYER_MAP: {', '.join(unmapped)})" if unmapped and pmap else ""
-    return "SPOTLIGHT (DM game posts since each one last posted): " + " · ".join(parts) + note
+    return counts, list(dict.fromkeys(pmap.values())), unmapped
+
+
+def spotlight(outbox):
+    """'Rhogast 0 · Oliver 3 · Roy 1': the SPOTLIGHT line for the PARTY line."""
+    counts, mapped, unmapped = spotlight_counts(outbox)
+    if not counts:
+        return "SPOTLIGHT: no PLAYER_MAP and no player posts yet"
+    parts = [f"{n} {c}" if c is not None else f"{n} no post yet" for n, c in counts.items()]
+    note = f" (not in PLAYER_MAP: {', '.join(unmapped)})" if unmapped and mapped else ""
+    return "SPOTLIGHT (DM game posts since each one last posted this session): " + " · ".join(parts) + note
+
+
+def roll_call(text, outbox):
+    """E1-E4 (master prompt §3-quater): problems with an out-of-combat game post's PARTY line and CHOICE block."""
+    bad = []
+    party = [l for l in text.split("\n") if PARTY_RE.match(l)]
+    if not party:
+        return [("", "no PARTY line in an out-of-combat response (master prompt §3-quater ROLL CALL): one entry per "
+                     "present PC, where they are, what they are doing or waiting on, and the SPOTLIGHT count")]
+    counts, mapped, _ = spotlight_counts(outbox)
+    if not mapped:
+        return bad
+    pline = re.sub(r"[*_`]", "", " ".join(party))
+    body = re.sub(r"^\s*PARTY\s*:", "", pline, flags=re.I)
+    entries = [e.strip() for e in re.split(r"\s+·\s+|\s*\|\s*|;\s*(?=[A-Z][a-z]+\s*\()", body) if e.strip()]
+    exempt = set()
+    for pc in mapped:
+        if not re.search(r"\b" + re.escape(pc) + r"\b", pline, re.I):
+            bad.append((party[0].strip(), f"the PARTY line leaves out {pc} (every PC in PLAYER_MAP is listed; mark one "
+                                           f"who is not here `absent` or `Vessel`)"))
+            continue
+        for e in entries:
+            if re.match(r"\W*" + re.escape(pc) + r"\b", e, re.I) and re.search(r"\b(absent|vessel)\b", e, re.I):
+                exempt.add(pc)
+    lines = text.split("\n")
+    ci = next((i for i, l in enumerate(lines) if re.match(r"^\s*\*{0,2}CHOICE\b", l.strip())), None)
+    if ci is None:
+        return bad
+    choice = re.sub(r"[*_`]", "", lines[ci])
+    opts = " ".join(re.sub(r"[*_`]", "", l) for l in lines[ci + 1:] if re.match(r"^\s*\d+[.)]", l))
+    quiet = [pc for pc in mapped if pc not in exempt and (counts.get(pc) or 0) >= 3]
+    for pc in quiet:
+        if not re.search(r"\b" + re.escape(pc) + r"\b", choice, re.I):
+            bad.append((lines[ci].strip(), f"{pc} has been quiet for {counts[pc]} DM posts; the CHOICE line speaks to "
+                                           f"{pc} by name (master prompt §3-quater)"))
+    if quiet:
+        for pc in mapped:
+            if pc not in exempt and not re.search(r"\b" + re.escape(pc) + r"\b", opts, re.I):
+                bad.append(("", f"a PC is quiet, so the options name every present PC with a suggested action; none "
+                                f"names {pc} (master prompt §3-quater)"))
+    return bad
 
 
 def main():
@@ -371,7 +430,14 @@ def main():
     ap.add_argument("--raw", action="store_true", help="post everything to the room, no split")
     ap.add_argument("--allow-earlier", action="store_true", help="let one post show an earlier clock (a rewind Joe ruled)")
     ap.add_argument("--spotlight", action="store_true", help="print the spotlight counts and exit")
+    ap.add_argument("--new-session", action="store_true", help="start the session's spotlight counts (run at boot)")
     a = ap.parse_args()
+    if a.new_session:
+        path = os.path.join(os.path.dirname(os.path.abspath(a.outbox)), ".session.json")
+        with open(path, "w") as f:
+            json.dump({"ts": time.time()}, f)
+        print("SESSION STARTED for the spotlight counts. " + spotlight(a.outbox))
+        return
     if a.spotlight:
         print(spotlight(a.outbox))
         return
@@ -425,10 +491,10 @@ def main():
                 bad.append(("", f"the clock runs backward: Day {new_clock[0]} {new_clock[1] // 60:02d}:{new_clock[1] % 60:02d} "
                                 f"is earlier than the last time shown, Day {old[0]} {old[1] // 60:02d}:{old[1] % 60:02d} "
                                 "(master prompt §3-ter: time only moves forward)"))
+        if not re.search(r"(?m)^\s*\*{0,2}COMBAT STATE", text):
+            bad += roll_call(text, a.outbox)
         if bad:
             refuse(bad)
-        if not any(PARTY_RE.match(l) for l in text.split("\n")) and not re.search(r"(?m)^\s*\*{0,2}COMBAT STATE", text):
-            sys.stderr.write("WARNING: no PARTY line in an out-of-combat response (master prompt §3-quater ROLL CALL).\n")
         new_hidden = {"entries": entries, "terms": terms}
         now = time.time()
         if game:
