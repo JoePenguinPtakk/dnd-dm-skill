@@ -59,7 +59,7 @@ When boot completes, before the opening scene, emit one compact block:
 
 ```
 BOOT · <campaign name>
-TIER/BUILD: v5-<X> <build stamp, copied from the header you actually read>
+TIER/BUILD: v5-<X> <build stamp, copied from the header you actually read> (model: <your model name> | Joe named it | README, not a Claude model)
 SOURCE: engine HEAD · <stale campaign copy overwritten: <filename> | no stale copy found>
 LAYERS: master=<filename> · charter=<filename|absent> · mechanics=<filename|absent> · save=<filename|absent>
 ENGINE: <path to roll.py> · <verbatim SESSION START line> · test → <verbatim output of one real roll, with its [R####] ID>
@@ -132,14 +132,36 @@ loading it. A different family targets a different runtime and its boot
 contract is not the one written here, so booting it from these instructions
 would be guessing at a machine you have not read.
 
-### Tier menu (offer it only when the tier is unknown, or when asked)
+### The tier follows the model (Joe, 2026-10-19)
 
-Tier is normally not a choice: a campaign records which tier letter it runs,
-and you load the engine HEAD for that letter. Present the menu in exactly two
-cases, and in no others:
+Joe picks the tier by picking the model when he starts the session. Read your own
+model name from your system prompt (the line that names the model you are
+powered by) and load that tier's engine HEAD. Do not ask.
 
-1. The campaign's tier is not recorded anywhere you can read (a new campaign,
-   or one whose README never named it).
+| You are | Tier |
+|---|---|
+| Claude Opus or Claude Fable | `v5-O` |
+| Claude Sonnet | `v5-S` |
+| Claude Haiku | `v5-H` |
+
+- IF Joe names a tier in the session ("boot v5-S"), THEN that tier wins for this
+  session.
+- ELSE IF you are a Claude model in the table, THEN its tier. The campaign
+  README's tier letter does not override this; it applies only to the next case.
+- ELSE (not a Claude model, or your model name is not in your context) the tier
+  letter the campaign README records; if it records none, the menu below.
+- `v5-U` is never picked by model. It is Joe's choice alone (see below).
+
+Put the reason on the boot receipt's `TIER/BUILD` line, for example
+`TIER/BUILD: v5-H 20261019a (model: Claude Haiku)`. A save stamped with another
+tier is a tier switch: the master prompt's §11 step 1 says how it loads.
+
+### Tier menu (only when the tier is still unknown, or when asked)
+
+Present the menu in exactly two cases, and in no others:
+
+1. You are not a Claude model and the campaign's tier is not recorded anywhere
+   you can read (a new campaign, or one whose README never named it).
 2. The user explicitly asks to pick, switch, or compare tiers.
 
 When it applies, list the engine repo HEADs and stop for an answer. Do not
@@ -165,10 +187,9 @@ Two constraints on what you are allowed to offer:
   switch to v5-U to get around it. Do not push a user onto v5-U because they are
   on a small model either; that is what v5-H is for.
 
-Once the user picks, record the **tier letter** in that campaign's `README.md`,
-not a copy of the file, so the next boot loads that tier's engine HEAD and never
-sees this menu again. A tier change on an existing campaign is a migration, not
-a menu (§11).
+Once the user picks from the menu, record the **tier letter** in that campaign's
+`README.md`, not a copy of the file. It is the fallback for a non-Claude model;
+a Claude model still boots by the table above.
 
 **The engine HEAD always wins. A campaign-local copy has no authority.** If a
 campaign repo carries its own master prompt, that copy is stale by definition:
