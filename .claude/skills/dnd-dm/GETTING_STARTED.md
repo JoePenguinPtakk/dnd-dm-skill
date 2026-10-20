@@ -18,8 +18,8 @@ Walk the user through the steps below in order. Each step is a decision that nar
 
 Ask, or check the machine:
 
-- **A campaign already exists here** (a folder with a save state, a charter, a README naming a
-  tier). → You do not need this document. Go straight to `SKILL.md` and boot it.
+- **A campaign already exists here** (a folder with a save state, a charter, a README naming the
+  campaign). → You do not need this document. Go straight to `SKILL.md` and boot it.
 - **Nothing is set up yet** (fresh install, no campaign). → Continue here. You are building the
   first one.
 
@@ -36,11 +36,11 @@ Can you execute code here? Test the dice engine now, before anything depends on 
 python3 <skill-dir>/roll.py d20
 ```
 
-- **It runs** → you have a code engine. Tiers **v5-O / v5-S / v5-H** are available (the choice among
-  them is enforcement weight, decided in Step 6).
-- **It cannot run** (no shell, plain chat window, a phone) → you must use **v5-U**, where the players
-  roll every die. This is not a downgrade and skips no dice; it is the correct build with no engine.
-  Record this now: Step 6's tier choice is already made.
+- **It runs** → you have a code engine. Tiers **v5-O / v5-S / v5-H** are available. The tier follows
+  your model (Step 6); you do not pick it from this list.
+- **It cannot run** (no shell, plain chat window, a phone) → the build for this runtime is **v5-U**,
+  where the players roll every die. It skips no world dice. Choosing it is Joe's call: ask him, and do
+  not switch yourself. If `roll.py` fails inside Claude Code, say so and stop.
 
 Do not improvise a third path where you write dice numbers yourself. Engine or players, never the DM.
 
@@ -127,21 +127,35 @@ file (Step 7). Do not enable anything unasked:
 
 ---
 
-## Step 6 — Choose the tier (the master prompt build)
+## Step 6 — The tier follows the model (the master prompt build)
 
-If Step 2 found no engine, the tier is **v5-U** and this step is already done. Otherwise present the
-menu (this is `SKILL.md §2`'s tier menu) and let the user pick — do not pick for them:
+Normal use does not involve a menu. Read the model name from your system prompt and load that tier's HEAD:
+
+| Your model | Tier | File |
+|---|---|---|
+| Claude Opus or Claude Fable | v5-O | `docs/MASTER_PROMPT_v5-O_HEAD.md` |
+| Claude Sonnet | v5-S | `docs/MASTER_PROMPT_v5-S_HEAD.md` |
+| Claude Haiku | v5-H | `docs/MASTER_PROMPT_v5-H_HEAD.md` |
+
+- **Joe names a tier** for the session ("boot v5-S"): that tier wins.
+- **A non-Claude model**, or a model name you cannot find in your context: use the tier letter the
+  campaign README records. If the README records none, show the menu below and stop for Joe's answer.
+- **v5-U is never picked by model.** It is for a runtime that cannot run code, and choosing it is Joe's
+  call alone.
+- **Show the menu** (the four files, with what each runs best on) only when the campaign README records
+  no tier and you are not a Claude model, or when the user asks to pick, switch, or compare. Do not pick
+  for them.
 
 | Pick | File | Best on | Difference |
 |---|---|---|---|
-| v5-O | `docs/MASTER_PROMPT_v5-O_HEAD.md` | Opus tier | Lightest enforcement surface. |
-| v5-S | `docs/MASTER_PROMPT_v5-S_HEAD.md` | Sonnet tier | Canonical middle build; the default with no preference. |
+| v5-O | `docs/MASTER_PROMPT_v5-O_HEAD.md` | Opus, Fable | Lightest enforcement surface. |
+| v5-S | `docs/MASTER_PROMPT_v5-S_HEAD.md` | Sonnet | Canonical middle build. |
 | v5-H | `docs/MASTER_PROMPT_v5-H_HEAD.md` | Haiku and smaller | Heaviest enforcement; redundancy is the feature. |
-| v5-U | `docs/MASTER_PROMPT_v5-U_HEAD.md` | Models that cannot call tools | Fires like v5-H; players throw every die, world dice included. **Joe's choice only**; never picked by the DM, and not used where the dice engine can run. |
+| v5-U | `docs/MASTER_PROMPT_v5-U_HEAD.md` | No code execution | Fires like v5-H; players throw every die, world dice included. **Joe's choice only.** |
 
 The mechanics are identical across all four; only enforcement weight, the self-check, and the boot
-sequence differ. Never describe a tier as having more or fewer rules. Record the chosen **tier letter**
-in the campaign's README so a later boot never sees this menu again.
+sequence differ. Never describe a tier as having more or fewer rules. Record the fallback tier letter in
+the campaign's README (Step 7). The boot receipt records the tier actually loaded.never sees this menu again.
 
 ---
 
@@ -149,7 +163,7 @@ in the campaign's README so a later boot never sees this menu again.
 
 - **Make the campaign its own folder or repo.** It holds the charter, the mechanics/house-rules file,
   the module artifacts (manifest, spine, ledger, hooks — module campaigns only), an empty/initial save
-  state, and a `README.md` that names the tier letter and lists the layer files. Keep it separate from
+  state, and a `README.md` that names the campaign, its fallback tier letter (used only for a non-Claude model), and the layer files. Keep it separate from
   the skill; the skill never holds live campaign state. (A private git repo per campaign is the durable
   choice — it is the campaign's memory across machines.)
 - **Start the two ledgers.** In the campaign folder run `lore.py init` (creates `lore/`, the cast
@@ -166,7 +180,7 @@ in the campaign's README so a later boot never sees this menu again.
 
 The stage is set when all of these exist and the user has confirmed them:
 
-- [ ] Capability known, tier chosen (Steps 2, 6)
+- [ ] Capability known; tier follows the model (Steps 2, 6)
 - [ ] Module-or-emergent decided, and the charter written (Steps 3, 4A/4B)
 - [ ] House rules and flavor recorded (Step 5)
 - [ ] Module artifacts generated, if a module (Step 4A)

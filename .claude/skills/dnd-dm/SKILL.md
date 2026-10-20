@@ -91,9 +91,10 @@ never holds live campaign state.
 
 | Campaign | Local path | Shape |
 |---|---|---|
-| Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Documents/GitHub/Fallen-Titans-Campaign` | flat: layers and saves at the repo root, carries a stale master-prompt copy (overwrite it, §2) |
-| Waterdeep: Dragon Heist (Rhogast / Oliver / Roy / Moss) | `~/Documents/GitHub/WaterDeepCamapaign` | foldered: `saves/`, `tables/`, plus its own play material |
-| Dragon Heist, fresh run (the same party from level 1; a separate campaign) | `~/Documents/GitHub/dragon-heist` | foldered: `CHARTER.md`, `module/` (a published module, §6-septies), `plan/`, `saves/`; the book text in `books/` is private |
+| Fallen Titans (Damas / Rheos / Helior / Mnemosyne) | `~/Projects/Fallen-Titans-Campaign` | flat: layers and saves at the repo root; carries a master-prompt cache (refresh it to the tier's HEAD, §2) |
+| Waterdeep: Dragon Heist (Rhogast / Oliver / Roy / Moss) | `~/Projects/WaterDeepCamapaign` | foldered: `saves/`, `tables/`, plus its own play material; boots HEAD directly |
+| Tavern Catastrophe (Charlemagne / Renji) | `~/Projects/Tavern-Catastrophe` | root `CHARTER.md` and `MECHANICS.md`, `saves/`, `characters/`; live through `bot/`; boots HEAD directly |
+| Dragon Heist, fresh run (the same party from level 1; a separate campaign) | `~/Projects/dragon-heist` (not under `~/Projects` on 2026-10-19; set the path when it is cloned) | foldered: `CHARTER.md`, `module/` (a published module, §6-septies), `plan/`, `saves/`; the book text in `books/` is private |
 
 **Layouts differ between campaigns, and that is expected.** Do not assume one
 campaign's filenames apply to another, and do not copy a campaign's directory
