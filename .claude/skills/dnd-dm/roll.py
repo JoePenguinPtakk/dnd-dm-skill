@@ -60,7 +60,7 @@ ACTIVE = HOME / "active.json"
 
 SPEC = re.compile(r"^(\d*)d(\d+)(adv|dis)?([+-]\d+)?$", re.I)
 PICK = re.compile(r"^pick\[(.+)\]$", re.I | re.S)
-CITE = re.compile(r"\[(R\d{4,})\]\s*(\S+)\s+(pick\[[^\]]*\]|[^\s=]+)=([^\s(·]+)")
+CITE = re.compile(r"\[(R\d{4,})\]\s*(\S+)\s+(pick\[[^\]]*\]|[^\s=]+)=([^\s(\[·]+)")
 
 
 def die(sides):
