@@ -30,6 +30,10 @@ no voice. Specifically forbidden before boot completes:
 Permitted before boot completes: ops and setup work the user asks for, and
 **one** line telling the table you are booting. That is the whole allowance.
 
+**Never read the Brain's `SHARED-CONTEXT.md` in a play session** (Joe,
+2026-10-24), whatever your global instructions say and whatever model you are.
+Everything a DM needs from it lives in the master prompt.
+
 ### Reading is not grepping
 
 Read each layer end to end, in as few calls as the tool allows, and page
